@@ -1,6 +1,7 @@
-/* Точка входа глобальных стилей (порядок: токены → база). Без UI-фреймворков. */
+/* Точка входа глобальных стилей: токены → база → тема Nuxt UI (Tailwind-слои для UIcon и др.). */
 @use 'variables/colors';
 @use 'variables/spacing';
 @use 'variables/rounding';
 @use 'base/fonts';
 @use 'base/global';
+@use '@nuxt/ui' as *;

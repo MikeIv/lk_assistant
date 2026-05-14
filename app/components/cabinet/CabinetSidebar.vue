@@ -10,8 +10,17 @@ function toggleCollapsed() {
 <template>
   <aside :class="[$style.root, { [$style.collapsed]: collapsed }]">
     <div :class="$style.brand">
-      <span :class="$style.brandMark" aria-hidden="true" />
-      <span v-if="!collapsed" :class="$style.brandText">Олимпийский</span>
+      <NuxtLink
+        to="/"
+        :class="$style.brandLink"
+        aria-label="ТРЦ Олимпийский — на главную"
+      >
+        <span v-if="!collapsed" :class="$style.brandRow">
+          <UIcon name="i-local-logo" :class="$style.logo" aria-hidden="true" />
+          <span :class="$style.brandWord">Олимпийский</span>
+        </span>
+        <UIcon v-else name="i-local-logo" :class="$style.logoMark" aria-hidden="true" />
+      </NuxtLink>
     </div>
 
     <nav id="cabinet-sidebar-nav" :class="$style.nav" aria-label="Разделы личного кабинета">
@@ -63,36 +72,67 @@ function toggleCollapsed() {
 }
 
 .brand {
-  display: flex;
-  align-items: center;
-  gap: var(--fs-space-2);
   margin-bottom: var(--fs-space-4);
   min-height: rem(40);
 }
 
-.brandMark {
-  flex-shrink: 0;
-  width: rem(32);
-  height: rem(32);
-  border-radius: rem(6);
-  background: linear-gradient(135deg, var(--fs-color-primary) 0%, var(--fs-color-primary-strong) 100%);
+.brandLink {
+  display: block;
+  line-height: 0;
+  outline: none;
+  color: var(--fs-color-on-cabinet-sidebar);
+
+  &:focus-visible {
+    border-radius: rem(6);
+    box-shadow: 0 0 0 2px var(--fs-color-on-cabinet-sidebar);
+  }
 }
 
-.brandText {
+.brandRow {
+  display: flex;
+  align-items: center;
+  gap: var(--fs-space-1);
+  line-height: 1.2;
+  min-width: 0;
+}
+
+.brandWord {
   font-weight: 700;
   font-size: rem(15);
   letter-spacing: 0.02em;
   white-space: nowrap;
-  overflow: hidden;
+  min-width: 0;
+}
+
+/* SVG viewBox 64×30 — единый компактный блок (строка бренда и марка в свёрнутом сайдбаре). */
+.logo,
+.logoMark {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: rem(40);
+  height: rem(19);
+
+  :deep(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.logoMark {
+  margin: 0 auto;
 }
 
 .collapsed .brand {
-  flex-direction: column;
   margin-bottom: var(--fs-space-3);
 }
 
-.collapsed .brandText {
-  display: none;
+.collapsed .brandLink {
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
 .nav {
