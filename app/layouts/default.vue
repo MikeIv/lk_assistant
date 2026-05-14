@@ -32,6 +32,7 @@
 .sidebarWrap {
   grid-area: sidebar;
   min-height: 0;
+  min-width: 0;
   overflow: hidden;
 }
 

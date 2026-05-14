@@ -2,6 +2,15 @@
 const collapsed = useState('cabinet-sidebar-collapsed', () => false)
 const { items, isNavActive } = useCabinetNav()
 
+const collapseTriggerId = 'cabinet-sidebar-collapse-trigger'
+
+const arrowToggleBind = {
+  type: 'button' as const,
+  variant: 'primary' as const,
+  size: 'arrow' as const,
+  iconSize: 20,
+}
+
 function toggleCollapsed() {
   collapsed.value = !collapsed.value
 }
@@ -37,15 +46,30 @@ function toggleCollapsed() {
       </ul>
     </nav>
 
-    <button
-      type="button"
-      :class="$style.toggle"
-      :aria-expanded="!collapsed"
-      aria-controls="cabinet-sidebar-nav"
-      @click="toggleCollapsed"
-    >
-      {{ collapsed ? 'Развернуть' : 'Свернуть' }}
-    </button>
+    <div :class="[$style.toggleHost, { [$style.toggleHostCollapsed]: collapsed }]">
+      <UiButton
+        v-if="collapsed"
+        v-bind="arrowToggleBind"
+        icon="i-heroicons-arrow-right"
+        aria-label="Развернуть панель навигации"
+        :aria-expanded="false"
+        aria-controls="cabinet-sidebar-nav"
+        @click="toggleCollapsed"
+      />
+      <div v-else :class="$style.toggleExpandRow">
+        <UiButton
+          :id="collapseTriggerId"
+          v-bind="arrowToggleBind"
+          icon="i-heroicons-arrow-left"
+          :aria-expanded="true"
+          aria-controls="cabinet-sidebar-nav"
+          @click="toggleCollapsed"
+        />
+        <label :class="$style.toggleCaption" :for="collapseTriggerId">
+          Свернуть
+        </label>
+      </div>
+    </div>
   </aside>
 </template>
 
@@ -57,11 +81,13 @@ function toggleCollapsed() {
   flex-direction: column;
   height: 100%;
   min-height: 0;
+  min-width: 0;
   padding: var(--fs-space-3) var(--fs-space-2) var(--fs-space-3) var(--fs-space-3);
   background: var(--fs-color-cabinet-sidebar);
   color: var(--fs-color-on-cabinet-sidebar);
   width: rem(260);
   transition: width 0.2s ease;
+  overflow-x: hidden;
 }
 
 .collapsed {
@@ -136,15 +162,22 @@ function toggleCollapsed() {
 }
 
 .nav {
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
-  overflow: auto;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-x: none;
 }
 
 .list {
   list-style: none;
   margin: 0;
   padding: 0;
+  min-width: 0;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
   gap: var(--fs-space-1);
@@ -152,6 +185,8 @@ function toggleCollapsed() {
 
 .link {
   display: block;
+  min-width: 0;
+  max-width: 100%;
   padding: var(--fs-space-2) var(--fs-space-2);
   border-radius: rem(8);
   font-weight: 600;
@@ -177,25 +212,40 @@ function toggleCollapsed() {
   background: var(--fs-color-cabinet-sidebar-active);
 }
 
-.toggle {
+.toggleHost {
+  display: flex;
+  align-items: center;
   margin-top: auto;
-  align-self: stretch;
-  padding: var(--fs-space-2);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: rem(8);
-  background: transparent;
-  color: inherit;
-  font-size: rem(13);
-  font-weight: 600;
-  cursor: pointer;
-
-  &:hover {
-    background: var(--fs-color-cabinet-sidebar-hover);
-  }
+  flex-shrink: 0;
+  width: 100%;
+  min-width: 0;
 }
 
-.collapsed .toggle {
-  font-size: rem(11);
-  padding: var(--fs-space-1);
+.toggleHostCollapsed {
+  justify-content: center;
+}
+
+.toggleExpandRow {
+  display: flex;
+  align-items: center;
+  gap: var(--fs-space-2);
+  width: 100%;
+  min-width: 0;
+}
+
+.toggleCaption {
+  flex-shrink: 0;
+  font-weight: 600;
+  font-size: rem(15);
+  line-height: 1.2;
+  color: var(--fs-color-on-cabinet-sidebar);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    text-decoration: underline;
+    text-underline-offset: rem(3);
+  }
 }
 </style>

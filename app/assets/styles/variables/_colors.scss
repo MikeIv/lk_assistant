@@ -61,6 +61,11 @@
   --fs-color-success: var(--fs-figma-system-success);
   --fs-color-button-on-light: var(--fs-figma-system-button-gray);
 
+  /* Кнопки UI Kit (Figma: node 153:50 — Button/Desktop, Primary & Secondary) */
+  --fs-color-ui-button-border: rgb(234 234 235 / 0.32);
+  --fs-color-ui-button-outline-hover: var(--fs-figma-metallic-gradient-grey-2);
+  --fs-color-ui-button-inverse-pressed-text: rgb(255 255 255 / 0.7);
+
   /* Каркас ЛК */
   --fs-color-cabinet-sidebar: var(--fs-figma-vertical-shop);
   --fs-color-cabinet-sidebar-hover: rgb(255 255 255 / 0.08);

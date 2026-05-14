@@ -12,12 +12,12 @@ const { isAdmin } = useCabinetRole()
     <div :class="$style.actions">
       <span v-if="isAdmin" :class="$style.badge">Администратор</span>
       <span v-else :class="$style.badgeMuted">Пользователь</span>
-      <button type="button" :class="$style.btnGhost" disabled title="Позже: профиль">
+      <UiButton type="button" variant="outline" size="sm" disabled title="Позже: профиль">
         Профиль
-      </button>
-      <button type="button" :class="$style.btn" disabled title="Позже: выход">
+      </UiButton>
+      <UiButton type="button" variant="accent" size="sm" disabled title="Позже: выход">
         Выйти
-      </button>
+      </UiButton>
     </div>
   </header>
 </template>
@@ -88,25 +88,4 @@ const { isAdmin } = useCabinetRole()
   border: 1px solid var(--fs-color-border);
 }
 
-.btn,
-.btnGhost {
-  padding: rem(8) rem(14);
-  border-radius: rem(8);
-  font-size: rem(13);
-  font-weight: 600;
-  cursor: not-allowed;
-  opacity: 0.65;
-}
-
-.btn {
-  border: none;
-  color: #fff;
-  background: var(--fs-color-primary);
-}
-
-.btnGhost {
-  border: 1px solid var(--fs-color-border);
-  color: var(--fs-color-text);
-  background: #fff;
-}
 </style>
