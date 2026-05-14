@@ -1,14 +1,14 @@
 <script setup lang="ts">
 useHead({
-  title: 'На главную',
+  title: 'Мои заявки',
 })
 </script>
 
 <template>
   <section :class="$style.root">
-    <h2 :class="$style.title">На главную</h2>
+    <h2 :class="$style.title">Мои заявки</h2>
     <p :class="$style.text">
-      Раздел под новости и обзорную информацию — наполнение по согласованию (ТЗ).
+      Раздел создан по ТЗ; наполнение согласуется отдельно.
     </p>
   </section>
 </template>

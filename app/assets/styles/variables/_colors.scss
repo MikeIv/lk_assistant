@@ -1,13 +1,77 @@
-/* Минимальная палитра — расширять под FoodSity / макеты */
+/**
+ * Цвета UI Kit «Олимпийский» (переменные Figma).
+ * Источник: https://www.figma.com/design/Op9IbTgc66eLejvhLqlZAF/?node-id=413-1457
+ * fileKey: Op9IbTgc66eLejvhLqlZAF, nodeId: 413:1457
+ *
+ * В Figma для градиентов и «прозрачных» токенов значения могут быть не hex —
+ * такие пропущены; оверлеи в CSS задавайте через rgba(). Opacity-токены из Figma
+ * не дублируются здесь (в выгрузке совпадают с базовыми цветами).
+ */
 :root {
-  --fs-color-bg: #fff;
-  --fs-color-surface: #f6f6f6;
-  --fs-color-text: #1a1a1a;
-  --fs-color-text-muted: #666;
-  --fs-color-border: #e0e0e0;
-  --fs-color-primary: #2a6ebb;
-  --fs-color-primary-strong: #1e5390;
-  --fs-color-error: #c62828;
+  /* --- Achromatic --- */
+  --fs-figma-achromatic-black: #171720;
+  --fs-figma-achromatic-dark-gray: #425466;
+  --fs-figma-achromatic-middle-gray: #7b8c9d;
+  --fs-figma-achromatic-light-gray: #f4f5f5;
+  --fs-figma-achromatic-white: #ffffff;
 
-  --fs-font-sans: system-ui, -apple-system, 'Segoe UI', roboto, 'Helvetica Neue', arial, sans-serif;
+  /* --- Stroke --- */
+  --fs-figma-stroke-gray: #d9d9d9;
+  --fs-figma-stroke-light-gray: #efeff0;
+
+  /* --- Main building --- */
+  --fs-figma-main-building-main: #eb9914;
+  --fs-figma-main-building-sport-complex: #ea5037;
+  --fs-figma-main-building-whater-complex: #00adea;
+  --fs-figma-main-building-concert-hall: #831dd3;
+
+  /* --- Vertical --- */
+  --fs-figma-vertical-sport: #d9412a;
+  --fs-figma-vertical-entertainments: #ee7d00;
+  --fs-figma-vertical-shop: #173557;
+  --fs-figma-vertical-food: #009640;
+  --fs-figma-vertical-events: #c97f62;
+  --fs-figma-vertical-gold-gallery: #c79860;
+  --fs-figma-vertical-aqua-park: #01b6ed;
+  --fs-figma-vertical-surfing: #00aec3;
+  --fs-figma-vertical-fitness: #6d2077;
+  --fs-figma-vertical-terms: #5d302d;
+  --fs-figma-vertical-children: #ea5b0c;
+
+  /* --- System --- */
+  --fs-figma-system-gray: #eaeaeb;
+  --fs-figma-system-button-gray: #333343;
+  --fs-figma-system-counter-error: #ee2e22;
+  --fs-figma-system-success: #33ae27;
+
+  /* --- Metallic (сплошные из макета) --- */
+  --fs-figma-metallic-gradient-grey-1: #f9f9f9;
+  --fs-figma-metallic-gradient-grey-2: #dadada;
+  --fs-figma-metallic-gradient-grey-3: #797979;
+
+  /* --- Семантика приложения (верстка ЛК и страниц) --- */
+  --fs-color-bg: var(--fs-figma-achromatic-white);
+  --fs-color-surface: var(--fs-figma-achromatic-light-gray);
+  --fs-color-text: var(--fs-figma-achromatic-black);
+  --fs-color-text-muted: var(--fs-figma-achromatic-middle-gray);
+  --fs-color-border: var(--fs-figma-stroke-gray);
+  --fs-color-primary: var(--fs-figma-main-building-main);
+  --fs-color-primary-strong: var(--fs-figma-vertical-shop);
+  --fs-color-error: var(--fs-figma-system-counter-error);
+  --fs-color-success: var(--fs-figma-system-success);
+  --fs-color-button-on-light: var(--fs-figma-system-button-gray);
+
+  /* Каркас ЛК */
+  --fs-color-cabinet-sidebar: var(--fs-figma-vertical-shop);
+  --fs-color-cabinet-sidebar-hover: rgb(255 255 255 / 0.08);
+  --fs-color-cabinet-sidebar-active: rgb(255 255 255 / 0.14);
+  --fs-color-cabinet-header-bg: var(--fs-figma-achromatic-light-gray);
+  --fs-color-cabinet-header-border: var(--fs-figma-stroke-light-gray);
+  --fs-color-cabinet-footer-bg: var(--fs-figma-system-gray);
+  --fs-color-on-cabinet-sidebar: var(--fs-figma-achromatic-white);
+
+  /* Типографика по умолчанию (из той же страницы токенов: Inter / Gilroy) */
+  --fs-font-sans:
+    inter, system-ui, -apple-system, 'Segoe UI', roboto, 'Helvetica Neue', arial, sans-serif;
+  --fs-font-heading: 'Gilroy', var(--fs-font-sans);
 }

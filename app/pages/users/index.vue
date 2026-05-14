@@ -1,14 +1,14 @@
 <script setup lang="ts">
 useHead({
-  title: 'На главную',
+  title: 'Мои пользователи',
 })
 </script>
 
 <template>
   <section :class="$style.root">
-    <h2 :class="$style.title">На главную</h2>
+    <h2 :class="$style.title">Мои пользователи</h2>
     <p :class="$style.text">
-      Раздел под новости и обзорную информацию — наполнение по согласованию (ТЗ).
+      Роли: администратор и пользователь с ограничением прав (ТЗ). Список и действия — на этапе интеграции с API.
     </p>
   </section>
 </template>
