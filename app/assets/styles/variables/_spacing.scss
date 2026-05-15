@@ -1,4 +1,4 @@
-/* Шкала отступов по образцу ds-space в Booking_ukr */
+/* Универсальная шкала для padding/gap (кратно 8px). Семантические margin — _margin.scss */
 :root {
   --fs-space-0: 0;
   --fs-space-1: 8px;

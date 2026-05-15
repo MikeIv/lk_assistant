@@ -1,0 +1,62 @@
+/**
+ * Margins UI Kit «Олимпийский».
+ * Источник: https://www.figma.com/design/Op9IbTgc66eLejvhLqlZAF/?node-id=889-1956
+ * fileKey: Op9IbTgc66eLejvhLqlZAF — страница ✅ Margins (Desktop / Tablet / Mobile).
+ *
+ * Mobile-first: базовые значения — Mobile, затем Tablet (768px), Desktop (1024px).
+ * Для padding/gap без семантики — шкала --fs-space-* (_spacing.scss).
+ */
+@use '../tools/functions' as fn;
+@use 'resolutions' as bp;
+
+@mixin margin-token($name, $mobile-px, $tablet-px, $desktop-px) {
+  --fs-margin-#{$name}: #{fn.rem($mobile-px)};
+
+  @media (min-width: bp.$tablet) {
+    --fs-margin-#{$name}: #{fn.rem($tablet-px)};
+  }
+
+  @media (min-width: bp.$desktopMin) {
+    --fs-margin-#{$name}: #{fn.rem($desktop-px)};
+  }
+}
+
+@mixin margin-token-static($name, $px) {
+  --fs-margin-#{$name}: #{fn.rem($px)};
+}
+
+:root {
+  /* Межблочный отступ на странице */
+  @include margin-token('block', 72, 80, 134);
+
+  /* Отступ от дополнительной навигации по вертикали (моб.: панель снизу, 28px от края) */
+  @include margin-token('nav-vertical', 28, 40, 90);
+
+  /* Между блоком заголовка/подзаголовка и контентом */
+  @include margin-token('title-content', 32, 32, 56);
+
+  /* Раскрытое бургер-меню и футер */
+  @include margin-token('menu-footer', 24, 32, 48);
+
+  /* Между заголовком и подзаголовком (block / inline) */
+  @include margin-token('title-subtitle-block', 16, 16, 40);
+  @include margin-token('title-subtitle-inline', 12, 12, 40);
+
+  /* Между контентными блоками */
+  @include margin-token('content-block', 24, 24, 32);
+
+  /* Внутри карточек */
+  @include margin-token('card', 16, 16, 24);
+
+  /* Внутри карточек и между фильтрами */
+  @include margin-token('card-sm', 8, 12, 16);
+
+  /* Компактный отступ внутри карточек (одинаков на всех брейкпоинтах) */
+  @include margin-token-static('card-xs', 12);
+
+  /* Между тегами */
+  @include margin-token-static('tag', 8);
+
+  /* Минимальный отступ */
+  @include margin-token-static('min', 4);
+}

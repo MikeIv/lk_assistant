@@ -35,7 +35,7 @@ alwaysApply: true
 ## Стили
 
 - Для всех SFC в `app/` действуют правила блока **«SFC: порядок блоков и стили»** выше.
-- Токены и база: `app/assets/styles/` (`main.scss`, `variables/*`, `tools/*`). Использовать `--fs-*`. Без `!important`, кроме переопределения сторонних виджетов. Отступы: `--fs-space-*`, шаг по умолчанию кратен 8px.
+- Токены и база: `app/assets/styles/` (`main.scss`, `variables/*`, `tools/*`). Использовать `--fs-*`. Без `!important`, кроме переопределения сторонних виджетов. **Margin** (UI Kit «Олимпийский», [Figma Margins](https://www.figma.com/design/Op9IbTgc66eLejvhLqlZAF/?node-id=889-1956)): `--fs-margin-*` из `variables/_margin.scss`, миксины `tools/_margin.scss` (`@include margin.fs-margin-title-content`, `fs-margin-end('card')` и т.д.). **Padding/gap** без семантики: `--fs-space-*` (кратно 8px).
 
 ## Разметка и доступность
 

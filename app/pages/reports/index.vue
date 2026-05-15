@@ -29,12 +29,12 @@ useHead({
 .header {
   display: flex;
   flex-direction: column;
-  gap: var(--fs-space-2);
-  margin-bottom: var(--fs-space-3);
+  margin-block-end: var(--fs-margin-title-content);
 }
 
 .title {
   margin: 0;
+  margin-block-end: var(--fs-margin-title-subtitle-block);
 
   @include typo.fs-text-h3;
 }

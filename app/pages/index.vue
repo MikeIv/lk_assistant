@@ -22,7 +22,8 @@ useHead({
 }
 
 .title {
-  margin: 0 0 var(--fs-space-2);
+  margin: 0;
+  margin-block-end: var(--fs-margin-title-content);
 
   @include typo.fs-text-h3;
 }

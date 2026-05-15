@@ -22,7 +22,8 @@ const year = new Date().getFullYear()
 }
 
 .line {
-  margin: 0 0 0.25rem;
+  margin: 0;
+  margin-block-end: var(--fs-margin-min);
   color: var(--fs-color-text);
 
   @include typo.fs-text-tag;

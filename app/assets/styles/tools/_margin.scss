@@ -1,0 +1,47 @@
+@mixin fs-margin-end($token) {
+  margin-block-end: var(--fs-margin-#{$token});
+}
+
+@mixin fs-margin-block {
+  margin: var(--fs-margin-block);
+}
+
+@mixin fs-margin-nav-vertical {
+  margin: var(--fs-margin-nav-vertical);
+}
+
+@mixin fs-margin-title-content {
+  @include fs-margin-end('title-content');
+}
+
+@mixin fs-margin-title-subtitle {
+  @include fs-margin-end('title-subtitle-block');
+}
+
+@mixin fs-margin-menu-footer {
+  margin: var(--fs-margin-menu-footer);
+}
+
+@mixin fs-margin-content-block {
+  @include fs-margin-end('content-block');
+}
+
+@mixin fs-margin-card {
+  margin: var(--fs-margin-card);
+}
+
+@mixin fs-margin-card-sm {
+  margin: var(--fs-margin-card-sm);
+}
+
+@mixin fs-margin-card-xs {
+  margin: var(--fs-margin-card-xs);
+}
+
+@mixin fs-margin-tag {
+  margin: var(--fs-margin-tag);
+}
+
+@mixin fs-margin-min {
+  @include fs-margin-end('min');
+}

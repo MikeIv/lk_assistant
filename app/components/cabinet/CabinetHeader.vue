@@ -41,15 +41,16 @@ const { isAdmin } = useCabinetRole()
 .lead {
   display: flex;
   flex-direction: column;
-  gap: rem(2);
   min-width: 0;
 }
 
 .title {
   margin: 0;
+  margin-block-end: var(--fs-margin-min);
   color: var(--fs-color-text);
 
   @include typo.fs-text-h4;
+  line-height: 1;
 }
 
 .subtitle {
