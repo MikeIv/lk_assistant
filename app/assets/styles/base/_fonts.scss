@@ -9,9 +9,7 @@ $inter-latin-range:
     font-style: normal;
     font-weight: $weight;
     font-display: swap;
-    src:
-      url('../../fonts/Gilroy-#{$file}.woff2') format('woff2'),
-      url('../../fonts/Gilroy-#{$file}.woff') format('woff');
+    src: url('../../fonts/Gilroy-#{$file}.woff') format('woff');
   }
 }
 
