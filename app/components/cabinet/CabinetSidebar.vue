@@ -50,7 +50,7 @@ function toggleCollapsed() {
       <UiButton
         v-if="collapsed"
         v-bind="arrowToggleBind"
-        icon="i-heroicons-arrow-right"
+        icon="i-arrow-chevron-right"
         aria-label="Развернуть панель навигации"
         :aria-expanded="false"
         aria-controls="cabinet-sidebar-nav"
@@ -60,7 +60,7 @@ function toggleCollapsed() {
         <UiButton
           :id="collapseTriggerId"
           v-bind="arrowToggleBind"
-          icon="i-heroicons-arrow-left"
+          icon="i-arrow-chevron-left"
           :aria-expanded="true"
           aria-controls="cabinet-sidebar-nav"
           @click="toggleCollapsed"

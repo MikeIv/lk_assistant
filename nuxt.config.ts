@@ -21,13 +21,18 @@ export default defineNuxtConfig({
 
   /**
    * Локальные SVG: префикс коллекции обязателен для SSR (см. Nuxt UI — Custom local collections).
-   * `logo.svg` → `<UIcon name="i-local-logo" />`. Пустой prefix (`Booking_ukr`) + SSR даёт warn «failed to load icon logo».
+   * `logo.svg` → `<UIcon name="i-local-logo" />`.
+   * Стрелки UI Kit (Figma Arrow/Icon): `app/assets/icons/arrows/*.svg` → `i-arrow-{name}`.
    */
   icon: {
     customCollections: [
       {
         prefix: 'local',
         dir: join(projectRoot, 'app', 'assets', 'icons'),
+      },
+      {
+        prefix: 'arrow',
+        dir: join(projectRoot, 'app', 'assets', 'icons', 'arrows'),
       },
     ],
   },

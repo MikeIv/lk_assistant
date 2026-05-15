@@ -36,6 +36,7 @@ alwaysApply: true
 
 - Для всех SFC в `app/` действуют правила блока **«SFC: порядок блоков и стили»** выше.
 - Токены и база: `app/assets/styles/` (`main.scss`, `variables/*`, `tools/*`). Использовать `--fs-*`. Без `!important`, кроме переопределения сторонних виджетов. **Margin** (UI Kit «Олимпийский», [Figma Margins](https://www.figma.com/design/Op9IbTgc66eLejvhLqlZAF/?node-id=889-1956)): `--fs-margin-*` из `variables/_margin.scss`, миксины `tools/_margin.scss` (`@include margin.fs-margin-title-content`, `fs-margin-end('card')` и т.д.). **Padding/gap** без семантики: `--fs-space-*` (кратно 8px).
+- **SVG-иконки** — только в `app/assets/icons/` (корень: `logo.svg` → `i-local-*`; стрелки UI Kit: `app/assets/icons/arrows/*.svg` → `i-arrow-*`, коллекция в `nuxt.config.ts`).
 
 ## Разметка и доступность
 
@@ -45,6 +46,7 @@ alwaysApply: true
 
 - ESLint + Prettier; `*.vue` не в Prettier (`.prettierignore`). Stylelint для стилей в SFC. Pre-commit: Husky + lint-staged; если `.git` появился после первого `pnpm install` — один раз `pnpm exec husky`.
 - Порядок блоков SFC (`script` → `template` → `style`) проверяется правилом **`vue/block-order`** в [`eslint.config.mjs`](eslint.config.mjs) для всех `*.vue`.
+- **Запрос «сделай коммит»:** сначала проверить все внесённые изменения (`git status`, `git diff`), убрать лишнее (временные файлы, нерелевантные артефакты), оптимизировать по смыслу задачи, прогнать проверки (`nuxi prepare`, линты при необходимости), затем коммит. Не коммитить файлы вне scope запроса без явного согласия пользователя.
 
 ## Миграция с React (при необходимости)
 
