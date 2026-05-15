@@ -21,14 +21,13 @@ function toggleCollapsed() {
     <div :class="$style.brand">
       <NuxtLink
         to="/"
-        :class="$style.brandLink"
+        :class="[$style.brandLink, { [$style.brandLinkCollapsed]: collapsed }]"
         aria-label="ТРЦ Олимпийский — на главную"
       >
-        <span v-if="!collapsed" :class="$style.brandRow">
+        <span :class="$style.brandRow">
           <UIcon name="i-local-logo" :class="$style.logo" aria-hidden="true" />
-          <span :class="$style.brandWord">Олимпийский</span>
+          <span :class="$style.brandWord" :aria-hidden="collapsed">Олимпийский</span>
         </span>
-        <UIcon v-else name="i-local-logo" :class="$style.logoMark" aria-hidden="true" />
       </NuxtLink>
     </div>
 
@@ -39,33 +38,31 @@ function toggleCollapsed() {
             :to="item.to"
             :class="[$style.link, { [$style.active]: isNavActive(item.to) }]"
             :title="collapsed ? item.label : undefined"
+            :aria-label="collapsed ? item.label : undefined"
           >
-            <span :class="$style.linkLabel">{{ item.label }}</span>
+            <UIcon :name="item.icon" :class="$style.linkIcon" aria-hidden="true" />
+            <span :class="$style.linkLabel" :aria-hidden="collapsed">{{ item.label }}</span>
           </NuxtLink>
         </li>
       </ul>
     </nav>
 
     <div :class="[$style.toggleHost, { [$style.toggleHostCollapsed]: collapsed }]">
-      <UiButton
-        v-if="collapsed"
-        v-bind="arrowToggleBind"
-        icon="i-arrow-chevron-right"
-        aria-label="Развернуть панель навигации"
-        :aria-expanded="false"
-        aria-controls="cabinet-sidebar-nav"
-        @click="toggleCollapsed"
-      />
-      <div v-else :class="$style.toggleExpandRow">
+      <div :class="$style.toggleExpandRow">
         <UiButton
           :id="collapseTriggerId"
           v-bind="arrowToggleBind"
-          icon="i-arrow-chevron-left"
-          :aria-expanded="true"
+          :class="$style.collapseBtn"
+          :icon="collapsed ? 'i-arrow-chevron-right' : 'i-arrow-chevron-left'"
+          :aria-label="collapsed ? 'Развернуть панель навигации' : 'Свернуть панель навигации'"
+          :aria-expanded="!collapsed"
           aria-controls="cabinet-sidebar-nav"
           @click="toggleCollapsed"
         />
-        <label :class="$style.toggleCaption" :for="collapseTriggerId">
+        <label
+          :class="[$style.toggleCaption, { [$style.toggleCaptionHidden]: collapsed }]"
+          :for="collapseTriggerId"
+        >
           Свернуть
         </label>
       </div>
@@ -77,37 +74,68 @@ function toggleCollapsed() {
 @use '~/assets/styles/tools/functions' as *;
 @use '~/assets/styles/tools/typography' as typo;
 
+$sidebar-transition-duration: 0.28s;
+$sidebar-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+
+@mixin sidebar-transition($properties...) {
+  transition-duration: $sidebar-transition-duration;
+  transition-timing-function: $sidebar-transition-easing;
+
+  @if length($properties) > 0 {
+    transition-property: $properties;
+  }
+}
+
 .root {
+  --sidebar-pad-end: var(--fs-space-2);
+  --sidebar-nav-inset: var(--fs-space-3);
+  --sidebar-link-pad-inline: var(--fs-space-2);
+
   display: flex;
   flex-direction: column;
   height: 100%;
   min-height: 0;
   min-width: 0;
-  padding: var(--fs-space-3) var(--fs-space-2) var(--fs-space-3) var(--fs-space-3);
-  background: var(--fs-color-cabinet-sidebar);
-  color: var(--fs-color-on-cabinet-sidebar);
+  padding: 0 var(--sidebar-pad-end) var(--fs-space-3) 0;
+  background: var(--fs-color-cabinet-sidebar-nav);
+  color: var(--fs-color-on-cabinet-sidebar-nav);
   width: rem(260);
-  transition: width 0.2s ease;
   overflow-x: hidden;
+
+  @include sidebar-transition(width, padding);
 }
 
 .collapsed {
   width: rem(72);
-  align-items: center;
-  padding-left: var(--fs-space-2);
-  padding-right: var(--fs-space-2);
+  align-items: stretch;
+  --sidebar-pad-end: 0;
+  padding-right: 0;
 }
 
 .brand {
-  margin-bottom: var(--fs-space-4);
-  min-height: rem(40);
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  box-sizing: border-box;
+  width: calc(100% + var(--sidebar-pad-end));
+  height: var(--fs-cabinet-chrome-height);
+  min-height: var(--fs-cabinet-chrome-height);
+  padding-inline: calc(var(--sidebar-nav-inset) + var(--sidebar-link-pad-inline))
+    var(--sidebar-nav-inset);
+  background: var(--fs-color-cabinet-sidebar);
+  border-bottom: 1px solid rgb(255 255 255 / 0.12);
+
+  @include sidebar-transition(width, padding);
 }
 
 .brandLink {
-  display: block;
+  display: flex;
+  align-items: center;
+  min-width: 0;
   line-height: 0;
   outline: none;
   color: var(--fs-color-on-cabinet-sidebar);
+  text-decoration: none;
 
   &:focus-visible {
     border-radius: rem(6);
@@ -124,17 +152,21 @@ function toggleCollapsed() {
 }
 
 .brandWord {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
   letter-spacing: 0.02em;
   white-space: nowrap;
-  min-width: 0;
+  opacity: 1;
+  max-width: rem(160);
 
   @include typo.fs-text-header;
   font-weight: 600;
+  @include sidebar-transition(max-width, opacity, margin);
 }
 
-/* SVG viewBox 64×30 — единый компактный блок (строка бренда и марка в свёрнутом сайдбаре). */
-.logo,
-.logoMark {
+/* SVG viewBox 64×30 — логотип в строке бренда и в свёрнутом сайдбаре. */
+.logo {
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
@@ -149,18 +181,23 @@ function toggleCollapsed() {
   }
 }
 
-.logoMark {
-  margin: 0 auto;
+.brandLinkCollapsed {
+  justify-content: center;
+  width: 100%;
 }
 
 .collapsed .brand {
-  margin-bottom: var(--fs-space-3);
+  width: 100%;
+  margin-inline: 0;
+  padding-inline: 0;
+  justify-content: center;
 }
 
-.collapsed .brandLink {
-  display: flex;
-  justify-content: center;
-  width: 100%;
+.collapsed .brandWord {
+  flex: 0 0 auto;
+  max-width: 0;
+  opacity: 0;
+  margin: 0;
 }
 
 .nav {
@@ -169,9 +206,17 @@ function toggleCollapsed() {
   min-width: 0;
   width: 100%;
   max-width: 100%;
+  margin-top: var(--fs-space-3);
+  padding-left: var(--sidebar-nav-inset);
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior-x: none;
+
+  @include sidebar-transition(padding);
+}
+
+.collapsed .nav {
+  padding-left: 0;
 }
 
 .list {
@@ -186,33 +231,72 @@ function toggleCollapsed() {
 }
 
 .link {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: var(--fs-space-2);
   min-width: 0;
   max-width: 100%;
-  padding: var(--fs-space-2) var(--fs-space-2);
+  padding: var(--fs-space-2) var(--sidebar-link-pad-inline);
   border-radius: rem(8);
   color: inherit;
+  text-decoration: none;
 
   @include typo.fs-text-body;
   font-weight: 600;
-  transition: background-color 0.15s ease;
+  @include sidebar-transition(gap, padding, background-color);
 
   &:hover {
-    background: var(--fs-color-cabinet-sidebar-hover);
+    background: var(--fs-color-cabinet-sidebar-nav-hover);
   }
 }
 
+.linkLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  opacity: 1;
+  max-width: rem(200);
+
+  @include sidebar-transition(max-width, opacity, margin, padding);
+}
+
 .collapsed .link {
+  gap: 0;
+  justify-content: center;
   padding: var(--fs-space-2);
-  text-align: center;
 }
 
 .collapsed .linkLabel {
-  display: none;
+  flex: 0 0 auto;
+  max-width: 0;
+  opacity: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.linkIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: rem(24);
+  height: rem(24);
+
+  :deep(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
 }
 
 .active {
-  background: var(--fs-color-cabinet-sidebar-active);
+  background: var(--fs-color-cabinet-sidebar-nav-active);
+}
+
+.collapseBtn {
+  flex-shrink: 0;
+  --ui-btn-arrow-color: var(--fs-color-cabinet-sidebar);
 }
 
 .toggleHost {
@@ -222,10 +306,20 @@ function toggleCollapsed() {
   flex-shrink: 0;
   width: 100%;
   min-width: 0;
+  padding-left: var(--sidebar-nav-inset);
+  box-sizing: border-box;
+
+  @include sidebar-transition(padding);
 }
 
-.toggleHostCollapsed {
+.collapsed .toggleHost.toggleHostCollapsed {
   justify-content: center;
+  padding-inline: 0;
+}
+
+.collapsed .toggleHost.toggleHostCollapsed .toggleExpandRow {
+  justify-content: center;
+  gap: 0;
 }
 
 .toggleExpandRow {
@@ -234,21 +328,48 @@ function toggleCollapsed() {
   gap: var(--fs-space-2);
   width: 100%;
   min-width: 0;
+
+  @include sidebar-transition(gap);
 }
 
 .toggleCaption {
   flex-shrink: 0;
-  color: var(--fs-color-on-cabinet-sidebar);
+  overflow: hidden;
+  color: inherit;
+  white-space: nowrap;
+  opacity: 1;
+  max-width: rem(120);
+  cursor: pointer;
+  user-select: none;
 
   @include typo.fs-text-header;
   font-weight: 600;
-  white-space: nowrap;
-  cursor: pointer;
-  user-select: none;
+  @include sidebar-transition(max-width, opacity);
 
   &:hover {
     text-decoration: underline;
     text-underline-offset: rem(3);
+  }
+}
+
+.toggleCaptionHidden {
+  flex: 0 0 0;
+  max-width: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root,
+  .brand,
+  .nav,
+  .link,
+  .linkLabel,
+  .brandWord,
+  .toggleHost,
+  .toggleExpandRow,
+  .toggleCaption {
+    transition: none;
   }
 }
 </style>

@@ -10,7 +10,11 @@
 @use 'resolutions' as bp;
 
 @mixin text-token($name, $size-px, $line-height-percent, $weight, $family: 'sans') {
-  $family-var: if($family == 'heading', --fs-font-heading, --fs-font-sans);
+  $family-var: --fs-font-sans;
+
+  @if $family == 'heading' {
+    $family-var: --fs-font-heading;
+  }
 
   --fs-text-#{$name}-size: #{fn.rem($size-px)};
   --fs-text-#{$name}-line-height: #{$line-height-percent * 0.01};

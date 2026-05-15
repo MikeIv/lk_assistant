@@ -67,9 +67,14 @@
   --fs-color-ui-button-inverse-pressed-text: rgb(255 255 255 / 0.7);
 
   /* Каркас ЛК */
+  --fs-cabinet-chrome-height: 4.75rem; /* 76px — шапка и блок логотипа в сайдбаре */
   --fs-color-cabinet-sidebar: var(--fs-figma-vertical-shop);
   --fs-color-cabinet-sidebar-hover: rgb(255 255 255 / 0.08);
   --fs-color-cabinet-sidebar-active: rgb(255 255 255 / 0.14);
+  --fs-color-cabinet-sidebar-nav: var(--fs-figma-achromatic-dark-gray);
+  --fs-color-cabinet-sidebar-nav-hover: var(--fs-color-cabinet-sidebar-hover);
+  --fs-color-cabinet-sidebar-nav-active: var(--fs-color-cabinet-sidebar-active);
+  --fs-color-on-cabinet-sidebar-nav: var(--fs-color-on-cabinet-sidebar);
   --fs-color-cabinet-header-bg: var(--fs-figma-achromatic-light-gray);
   --fs-color-cabinet-header-border: var(--fs-figma-stroke-light-gray);
   --fs-color-cabinet-footer-bg: var(--fs-figma-system-gray);
@@ -78,6 +83,5 @@
   /* Шрифты UI Kit: Gilroy и Inter — app/assets/fonts */
   --fs-font-heading:
     'Gilroy', system-ui, -apple-system, 'Segoe UI', roboto, 'Helvetica Neue', arial, sans-serif;
-  --fs-font-sans:
-    'Inter', var(--fs-font-heading);
+  --fs-font-sans: 'Inter', var(--fs-font-heading);
 }

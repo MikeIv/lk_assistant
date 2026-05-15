@@ -32,7 +32,8 @@ const { isAdmin } = useCabinetRole()
   align-items: center;
   justify-content: space-between;
   gap: var(--fs-space-2) var(--fs-space-3);
-  min-height: rem(56);
+  box-sizing: border-box;
+  min-height: var(--fs-cabinet-chrome-height);
   padding: var(--fs-space-2) var(--fs-space-3);
   background: var(--fs-color-cabinet-header-bg);
   border-bottom: 1px solid var(--fs-color-cabinet-header-border);

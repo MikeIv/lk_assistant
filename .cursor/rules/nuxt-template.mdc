@@ -38,6 +38,13 @@ alwaysApply: true
 - Токены и база: `app/assets/styles/` (`main.scss`, `variables/*`, `tools/*`). Использовать `--fs-*`. Без `!important`, кроме переопределения сторонних виджетов. **Margin** (UI Kit «Олимпийский», [Figma Margins](https://www.figma.com/design/Op9IbTgc66eLejvhLqlZAF/?node-id=889-1956)): `--fs-margin-*` из `variables/_margin.scss`, миксины `tools/_margin.scss` (`@include margin.fs-margin-title-content`, `fs-margin-end('card')` и т.д.). **Padding/gap** без семантики: `--fs-space-*` (кратно 8px).
 - **SVG-иконки** — только в `app/assets/icons/` (корень: `logo.svg` → `i-local-*`; стрелки UI Kit: `app/assets/icons/arrows/*.svg` → `i-arrow-*`, коллекция в `nuxt.config.ts`).
 
+### Sass / SCSS (актуальный синтаксис)
+
+- Модульная система: **`@use` / `@forward`**, не `@import`. В SFC и partials — `@use '~/assets/styles/...' as *` или с namespace, как в существующих файлах.
+- **Не использовать устаревший Sass-`if()`** (`if($cond, $a, $b)`): в консоли даёт `[if-function] Deprecation Warning`. Для ветвления по переменным — **`@if` / `@else`**; для значений в миксинах — присвоение с `@if` (см. `variables/_typography.scss`).
+- Предпочитать современные возможности Sass/CSS там, где они уже приняты в проекте: `sass:math`, `sass:meta`, `sass:color`; нативные **`calc()`**, **`min()` / `max()` / `clamp()`** вместо устаревших обёрток, если эквивалентен результат.
+- При сомнениях или новых deprecation в логе dev/build — сверяться с [документацией Sass](https://sass-lang.com/documentation) и [breaking changes](https://sass-lang.com/documentation/breaking-changes); не копировать устаревшие примеры из старых статей.
+
 ## Разметка и доступность
 
 - Семантика (`header`, `nav`, `main`, `section`, `article`, `footer`), логичная иерархия заголовков, `button` / `a` по назначению; при необходимости `aria-*`.

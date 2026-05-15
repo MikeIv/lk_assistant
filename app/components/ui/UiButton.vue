@@ -306,6 +306,10 @@ const spinnerWrapClass = computed(() => {
   }
 }
 
+.primary.arrow.iconOnly {
+  color: var(--ui-btn-arrow-color, var(--fs-figma-achromatic-black));
+}
+
 .primary.arrow:hover:not(:disabled),
 .primary.arrow:active:not(:disabled) {
   background-color: var(--fs-figma-achromatic-light-gray);
