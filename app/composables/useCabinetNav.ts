@@ -8,7 +8,7 @@ export interface CabinetNavItem {
 }
 
 const navItems: CabinetNavItem[] = [
-  { to: '/', label: 'На главную', icon: 'i-local-nav-home' },
+  { to: '/', label: 'Новости', icon: 'i-local-nav-home' },
   { to: '/reports', label: 'Мои отчёты', icon: 'i-local-nav-report' },
   { to: '/applications', label: 'Мои заявки', icon: 'i-local-nav-applications' },
   { to: '/users', label: 'Мои пользователи', icon: 'i-local-nav-users', adminOnly: true },

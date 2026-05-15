@@ -1,0 +1,15 @@
+@use 'functions' as *;
+@use 'typography' as typo;
+
+@mixin cabinet-section-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-margin-title-content);
+  max-width: rem(960);
+}
+
+@mixin cabinet-section-title {
+  margin: 0;
+
+  @include typo.fs-text-h3;
+}

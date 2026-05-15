@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { SECTION_UNDER_DEVELOPMENT_BANNER } from '#shared/constants/sectionUnderDevelopment'
+
 useHead({
   title: 'Мои заявки',
 })
@@ -6,32 +8,26 @@ useHead({
 
 <template>
   <section :class="$style.root">
-    <h2 :class="$style.title">Мои заявки</h2>
-    <p :class="$style.text">
-      Раздел создан по ТЗ; наполнение согласуется отдельно.
-    </p>
+    <header :class="$style.header">
+      <h2 :class="$style.title">Мои заявки</h2>
+    </header>
+
+    <UiPromoBanner v-bind="SECTION_UNDER_DEVELOPMENT_BANNER" preset="aqua" />
   </section>
 </template>
 
 <style module lang="scss">
-@use '~/assets/styles/tools/functions' as *;
-@use '~/assets/styles/tools/typography' as typo;
+@use '~/assets/styles/tools/cabinet-page' as cabinet;
 
 .root {
-  max-width: rem(720);
+  @include cabinet.cabinet-section-layout;
+}
+
+.header {
+  margin: 0;
 }
 
 .title {
-  margin: 0;
-  margin-block-end: var(--fs-margin-title-content);
-
-  @include typo.fs-text-h3;
-}
-
-.text {
-  margin: 0;
-  color: var(--fs-color-text-muted);
-
-  @include typo.fs-text-body;
+  @include cabinet.cabinet-section-title;
 }
 </style>
