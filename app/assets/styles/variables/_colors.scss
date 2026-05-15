@@ -75,8 +75,9 @@
   --fs-color-cabinet-footer-bg: var(--fs-figma-system-gray);
   --fs-color-on-cabinet-sidebar: var(--fs-figma-achromatic-white);
 
-  /* Типографика по умолчанию (из той же страницы токенов: Inter / Gilroy) */
+  /* Шрифты UI Kit: Gilroy и Inter — app/assets/fonts */
+  --fs-font-heading:
+    'Gilroy', system-ui, -apple-system, 'Segoe UI', roboto, 'Helvetica Neue', arial, sans-serif;
   --fs-font-sans:
-    inter, system-ui, -apple-system, 'Segoe UI', roboto, 'Helvetica Neue', arial, sans-serif;
-  --fs-font-heading: 'Gilroy', var(--fs-font-sans);
+    'Inter', var(--fs-font-heading);
 }

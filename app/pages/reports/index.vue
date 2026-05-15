@@ -20,6 +20,7 @@ useHead({
 
 <style module lang="scss">
 @use '~/assets/styles/tools/functions' as *;
+@use '~/assets/styles/tools/typography' as typo;
 
 .root {
   max-width: rem(960);
@@ -34,21 +35,22 @@ useHead({
 
 .title {
   margin: 0;
-  font-size: rem(22);
-  font-weight: 700;
+
+  @include typo.fs-text-h3;
 }
 
 .hint {
   margin: 0;
-  font-size: rem(13);
   color: var(--fs-color-text-muted);
   max-width: rem(520);
+
+  @include typo.fs-text-tag;
 }
 
 .text {
   margin: 0;
-  font-size: rem(15);
-  line-height: 1.5;
   color: var(--fs-color-text-muted);
+
+  @include typo.fs-text-body;
 }
 </style>

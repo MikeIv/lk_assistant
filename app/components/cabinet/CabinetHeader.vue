@@ -24,6 +24,7 @@ const { isAdmin } = useCabinetRole()
 
 <style module lang="scss">
 @use '~/assets/styles/tools/functions' as *;
+@use '~/assets/styles/tools/typography' as typo;
 
 .root {
   display: flex;
@@ -46,18 +47,16 @@ const { isAdmin } = useCabinetRole()
 
 .title {
   margin: 0;
-  font-family: var(--fs-font-heading);
-  font-size: rem(18);
-  font-weight: 700;
-  line-height: 1.2;
   color: var(--fs-color-text);
+
+  @include typo.fs-text-h4;
 }
 
 .subtitle {
   margin: 0;
-  font-size: rem(13);
-  font-weight: 500;
   color: var(--fs-color-text-muted);
+
+  @include typo.fs-text-tag;
 }
 
 .actions {
@@ -68,24 +67,25 @@ const { isAdmin } = useCabinetRole()
 }
 
 .badge {
-  padding: rem(4) rem(10);
-  border-radius: rem(999);
-  font-size: rem(12);
-  font-weight: 700;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--fs-color-on-cabinet-sidebar);
   background: var(--fs-color-cabinet-sidebar);
+
+  @include typo.fs-text-tag;
+  font-weight: 600;
 }
 
 .badgeMuted {
-  padding: rem(4) rem(10);
-  border-radius: rem(999);
-  font-size: rem(12);
-  font-weight: 600;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
   color: var(--fs-color-text-muted);
   background: var(--fs-color-surface);
   border: 1px solid var(--fs-color-border);
+
+  @include typo.fs-text-tag;
 }
 
 </style>

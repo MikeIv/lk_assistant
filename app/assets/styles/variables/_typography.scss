@@ -1,0 +1,94 @@
+/**
+ * Типографика UI Kit «Олимпийский».
+ * Источник: https://www.figma.com/design/Op9IbTgc66eLejvhLqlZAF/?node-id=0-1
+ * fileKey: Op9IbTgc66eLejvhLqlZAF — страница ✅ Text (Desktop / Tablet / Mobile).
+ *
+ * Mobile-first: базовые значения — Mobile, затем Tablet (768px), Desktop (1024px).
+ * Gilroy — заголовки; Inter — наборный текст и UI (app/assets/fonts).
+ */
+@use '../tools/functions' as fn;
+@use 'resolutions' as bp;
+
+@mixin text-token($name, $size-px, $line-height-percent, $weight, $family: 'sans') {
+  $family-var: if($family == 'heading', --fs-font-heading, --fs-font-sans);
+
+  --fs-text-#{$name}-size: #{fn.rem($size-px)};
+  --fs-text-#{$name}-line-height: #{$line-height-percent * 0.01};
+  --fs-text-#{$name}-weight: #{$weight};
+  --fs-text-#{$name}-family: var(#{$family-var});
+}
+
+:root {
+  /* --- Заголовки (Gilroy) --- */
+  @include text-token('h1', 34, 100, 600, 'heading');
+  @include text-token('h2', 22, 115, 500, 'heading');
+  @include text-token('h3', 20, 115, 600, 'heading');
+  @include text-token('h4', 18, 115, 500, 'heading');
+  @include text-token('banner-title-1', 20, 115, 600, 'heading');
+  @include text-token('promo-title-2', 24, 100, 400, 'heading');
+  @include text-token('promo-title-3', 20, 100, 600, 'heading');
+  @include text-token('card-promo-title', 24, 115, 500, 'heading');
+  @include text-token('slider-number', 16, 108, 600, 'heading');
+  @include text-token('footer-number', 27, 110, 600, 'heading');
+
+  /* --- Наборный и UI (Inter) --- */
+  @include text-token('h5-subtitle', 16, 108, 400);
+  @include text-token('text', 13, 140, 500);
+  @include text-token('text-quote', 16, 130, 400);
+  @include text-token('footer-number-text', 14, 115, 400);
+  @include text-token('header-text', 14, 110, 500);
+  @include text-token('button-text', 16, 100, 600);
+  @include text-token('tag', 11, 140, 500);
+  @include text-token('bot-r-text', 11, 140, 400);
+  @include text-token('bot-m-text', 11, 140, 500);
+}
+
+@media (min-width: bp.$tablet) {
+  :root {
+    @include text-token('h1', 42, 100, 600, 'heading');
+    @include text-token('h2', 22, 115, 500, 'heading');
+    @include text-token('h3', 20, 115, 600, 'heading');
+    @include text-token('h4', 18, 115, 500, 'heading');
+    @include text-token('banner-title-1', 42, 100, 600, 'heading');
+    @include text-token('promo-title-2', 32, 100, 400, 'heading');
+    @include text-token('promo-title-3', 24, 100, 600, 'heading');
+    @include text-token('card-promo-title', 32, 115, 500, 'heading');
+    @include text-token('slider-number', 16, 108, 600, 'heading');
+    @include text-token('footer-number', 24, 100, 600, 'heading');
+
+    @include text-token('h5-subtitle', 16, 108, 400);
+    @include text-token('text', 13, 140, 500);
+    @include text-token('text-quote', 16, 130, 400);
+    @include text-token('footer-number-text', 14, 115, 400);
+    @include text-token('header-text', 14, 110, 500);
+    @include text-token('button-text', 16, 100, 600);
+    @include text-token('tag', 13, 140, 500);
+    @include text-token('bot-r-text', 12, 140, 400);
+    @include text-token('bot-m-text', 12, 140, 500);
+  }
+}
+
+@media (min-width: bp.$desktopMin) {
+  :root {
+    @include text-token('h1', 70, 100, 600, 'heading');
+    @include text-token('h2', 27, 115, 400, 'heading');
+    @include text-token('h3', 24, 115, 600, 'heading');
+    @include text-token('h4', 21, 115, 500, 'heading');
+    @include text-token('banner-title-1', 70, 100, 600, 'heading');
+    @include text-token('promo-title-2', 47, 110, 400, 'heading');
+    @include text-token('promo-title-3', 34, 100, 600, 'heading');
+    @include text-token('card-promo-title', 48, 115, 500, 'heading');
+    @include text-token('slider-number', 18, 108, 600, 'heading');
+    @include text-token('footer-number', 60, 100, 600, 'heading');
+
+    @include text-token('h5-subtitle', 19, 115, 400);
+    @include text-token('text', 14, 140, 400);
+    @include text-token('text-quote', 19, 135, 400);
+    @include text-token('footer-number-text', 16, 115, 400);
+    @include text-token('header-text', 14, 110, 500);
+    @include text-token('button-text', 16, 100, 600);
+    @include text-token('tag', 13, 140, 500);
+    @include text-token('bot-r-text', 12, 140, 400);
+    @include text-token('bot-m-text', 12, 140, 500);
+  }
+}

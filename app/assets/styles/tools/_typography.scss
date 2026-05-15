@@ -1,0 +1,82 @@
+@mixin text-style($token) {
+  font-family: var(--fs-text-#{$token}-family);
+  font-size: var(--fs-text-#{$token}-size);
+  font-weight: var(--fs-text-#{$token}-weight);
+  line-height: var(--fs-text-#{$token}-line-height);
+}
+
+@mixin fs-text-h1 {
+  @include text-style('h1');
+}
+
+@mixin fs-text-h2 {
+  @include text-style('h2');
+}
+
+@mixin fs-text-h3 {
+  @include text-style('h3');
+}
+
+@mixin fs-text-h4 {
+  @include text-style('h4');
+}
+
+@mixin fs-text-h5-subtitle {
+  @include text-style('h5-subtitle');
+}
+
+@mixin fs-text-banner-title-1 {
+  @include text-style('banner-title-1');
+}
+
+@mixin fs-text-promo-title-2 {
+  @include text-style('promo-title-2');
+}
+
+@mixin fs-text-promo-title-3 {
+  @include text-style('promo-title-3');
+}
+
+@mixin fs-text-card-promo-title {
+  @include text-style('card-promo-title');
+}
+
+@mixin fs-text-slider-number {
+  @include text-style('slider-number');
+}
+
+@mixin fs-text-quote {
+  @include text-style('text-quote');
+}
+
+@mixin fs-text-footer-number-text {
+  @include text-style('footer-number-text');
+}
+
+@mixin fs-text-footer-number {
+  @include text-style('footer-number');
+}
+
+@mixin fs-text-body {
+  @include text-style('text');
+}
+
+@mixin fs-text-header {
+  @include text-style('header-text');
+}
+
+@mixin fs-text-button {
+  @include text-style('button-text');
+}
+
+@mixin fs-text-tag {
+  @include text-style('tag');
+}
+
+@mixin fs-text-bot-r {
+  @include text-style('bot-r-text');
+}
+
+@mixin fs-text-bot-m {
+  @include text-style('bot-m-text');
+}

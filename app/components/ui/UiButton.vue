@@ -120,6 +120,7 @@ const spinnerWrapClass = computed(() => {
 
 <style module lang="scss">
 @use '~/assets/styles/tools/functions' as *;
+@use '~/assets/styles/tools/typography' as typo;
 
 /* Общий disabled (primary / inverse / accent / soft) */
 @mixin disabled-neutral {
@@ -134,10 +135,9 @@ const spinnerWrapClass = computed(() => {
   align-items: center;
   justify-content: center;
   margin: 0;
-  font-family: var(--fs-font-sans);
-  font-weight: 600;
-  line-height: 1;
   text-align: center;
+
+  @include typo.fs-text-button;
   white-space: nowrap;
   cursor: pointer;
   border-style: solid;
@@ -166,7 +166,6 @@ const spinnerWrapClass = computed(() => {
   min-height: rem(44);
   height: rem(44);
   padding: 0 rem(24);
-  font-size: rem(16);
   border-radius: rem(25);
 }
 
@@ -195,8 +194,9 @@ const spinnerWrapClass = computed(() => {
   min-height: rem(32);
   height: rem(32);
   padding: 0 rem(14);
-  font-size: rem(13);
   border-radius: rem(8);
+
+  @include typo.fs-text-tag;
 }
 
 /* Figma «Arrow button» (4587:3511): 64×44, pill — та же высота, что у md */
@@ -207,7 +207,6 @@ const spinnerWrapClass = computed(() => {
   min-height: rem(44);
   height: rem(44);
   padding: 0;
-  font-size: rem(16);
   border-radius: rem(999);
 }
 

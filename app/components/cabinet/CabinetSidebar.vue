@@ -75,6 +75,7 @@ function toggleCollapsed() {
 
 <style module lang="scss">
 @use '~/assets/styles/tools/functions' as *;
+@use '~/assets/styles/tools/typography' as typo;
 
 .root {
   display: flex;
@@ -123,11 +124,12 @@ function toggleCollapsed() {
 }
 
 .brandWord {
-  font-weight: 700;
-  font-size: rem(15);
   letter-spacing: 0.02em;
   white-space: nowrap;
   min-width: 0;
+
+  @include typo.fs-text-header;
+  font-weight: 600;
 }
 
 /* SVG viewBox 64×30 — единый компактный блок (строка бренда и марка в свёрнутом сайдбаре). */
@@ -189,9 +191,10 @@ function toggleCollapsed() {
   max-width: 100%;
   padding: var(--fs-space-2) var(--fs-space-2);
   border-radius: rem(8);
-  font-weight: 600;
-  font-size: rem(14);
   color: inherit;
+
+  @include typo.fs-text-body;
+  font-weight: 600;
   transition: background-color 0.15s ease;
 
   &:hover {
@@ -235,10 +238,10 @@ function toggleCollapsed() {
 
 .toggleCaption {
   flex-shrink: 0;
-  font-weight: 600;
-  font-size: rem(15);
-  line-height: 1.2;
   color: var(--fs-color-on-cabinet-sidebar);
+
+  @include typo.fs-text-header;
+  font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
   user-select: none;

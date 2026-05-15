@@ -12,7 +12,7 @@ const year = new Date().getFullYear()
 </template>
 
 <style module lang="scss">
-@use '~/assets/styles/tools/functions' as *;
+@use '~/assets/styles/tools/typography' as typo;
 
 .root {
   margin-top: auto;
@@ -22,15 +22,17 @@ const year = new Date().getFullYear()
 }
 
 .line {
-  margin: 0 0 rem(4);
-  font-size: rem(13);
-  font-weight: 600;
+  margin: 0 0 0.25rem;
   color: var(--fs-color-text);
+
+  @include typo.fs-text-tag;
+  font-weight: 600;
 }
 
 .muted {
   margin: 0;
-  font-size: rem(12);
   color: var(--fs-color-text-muted);
+
+  @include typo.fs-text-bot-r;
 }
 </style>
