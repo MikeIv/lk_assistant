@@ -49,36 +49,20 @@ alwaysApply: true
 
 - Семантика (`header`, `nav`, `main`, `section`, `article`, `footer`), логичная иерархия заголовков, `button` / `a` по назначению; при необходимости `aria-*`.
 
-## Линтинг и коммиты
+## Линтинг
 
 - ESLint + Prettier; `*.vue` не в Prettier (`.prettierignore`). Stylelint для стилей в SFC. Pre-commit: Husky + lint-staged; если `.git` появился после первого `pnpm install` — один раз `pnpm exec husky`.
 - Порядок блоков SFC (`script` → `template` → `style`) проверяется правилом **`vue/block-order`** в [`eslint.config.mjs`](eslint.config.mjs) для всех `*.vue`.
-- **Запрос «сделай коммит»:** сначала проверить все внесённые изменения (`git status`, `git diff`), убрать лишнее (временные файлы, нерелевантные артефакты), оптимизировать по смыслу задачи, прогнать проверки (`nuxi prepare`, линты при необходимости), затем коммит. Не коммитить файлы вне scope запроса без явного согласия пользователя.
 
 ## Миграция с React (при необходимости)
 
 - Пошагово, без переноса React-стека в Vue. Состояние — composables / `useState`. Серверная логика — `server/api`. Для данных страницы в SFC не использовать сырой `fetch`.
 
-## MCP (локально)
+## MCP
 
-Скопируйте в **`.cursor/mcp.json`** (каталог `.cursor/` в `.gitignore` для секретов и локальных настроек) или объедините с уже настроенными серверами:
-
-```json
-{
-  "$schema": "https://json.schemastore.org/mcp.json",
-  "mcpServers": {
-    "nuxt": {
-      "url": "https://mcp.nuxt.com/mcp"
-    },
-    "context7": {
-      "command": "npx",
-      "args": ["-y", "@context7/mcp-server"]
-    }
-  }
-}
-```
+Конфиг `.cursor/mcp.json` — каталог `.cursor/` (кроме `rules/`) в `.gitignore`. Серверы: `nuxt` (https://mcp.nuxt.com/mcp), `context7` (npx @context7/mcp-server).
 
 ## Поведение агента
 
-- Перед крупными изменениями сверяться со структурой репозитория; не раздувать дифф без запроса.
-- При риске нехватки контекста — предупредить и предложить разбить задачу.
+- Процесс и фазы — `00-workflow-core` … `06-fundamental-principles`; этот файл — только про стек.
+- Перед крупными изменениями сверяться с `app/` и существующими паттернами (`useApi`, `useCabinetRole`, `--fs-*`).

@@ -1,0 +1,69 @@
+---
+description: Контекст проекта LK Arenda Olimp — стек, структура, команды
+alwaysApply: true
+---
+
+# LK Arenda Olimp — контекст проекта
+
+## Продукт
+
+- **Название:** LK_arenda_Olimp (`package.json`)
+- **Назначение:** личный кабинет аренды (Grand / Олимпийский), на базе Nuxt-шаблона Grand
+- **Режим:** SPA (`ssr: false` в `nuxt.config.ts`)
+
+## Стек
+
+| Слой | Технология |
+|------|------------|
+| Framework | Nuxt 4.4, Vue 3.5 |
+| UI | @nuxt/ui, @nuxt/icon (локальные SVG) |
+| Стили | SCSS, CSS Modules в SFC, UI Kit margins (`--fs-margin-*`) |
+| Язык | TypeScript strict |
+| Пакеты | pnpm 11.x |
+| API | `NUXT_PUBLIC_API_BASE` → `useApi` / `useApiFetch` / `serverApi` |
+
+## Структура
+
+```
+app/                    # srcDir: страницы, компоненты, composables, assets
+  pages/                # index, applications, reports, users
+  components/cabinet/   # shell-компоненты ЛК (структура гибкая, меняется по задаче)
+  components/ui/        # UiButton, UiPromoBanner, …
+  composables/          # useApi, useCabinetNav, useCabinetRole
+  assets/styles/        # токены, tools, main.scss
+  assets/icons/         # logo, nav-*, arrows/*
+server/                 # Nitro: api/, utils/serverApi
+shared/types, shared/utils
+types/                  # nuxt-public.d.ts и др.
+docs/                   # продуктовая документация (по мере появления)
+```
+
+## Команды
+
+```bash
+pnpm install
+pnpm dev              # http://localhost:3000
+pnpm build
+pnpm lint:all         # eslint + prettier check + stylelint
+pnpm lint:fix
+pnpm stylelint:fix
+```
+
+## Соглашения
+
+- Правила Nuxt/стилей: **`nuxt-template.mdc`** (приоритет по стеку)
+- Workflow GSD/Superpowers: **`00-workflow-core`** … **`06-fundamental-principles`**
+- `.cursor/` в git — только `rules/`; MCP и секреты локально
+- Коммиты — только по явной просьбе; pre-commit: Husky + lint-staged
+
+## Не трогать без согласования
+
+- Глобальная смена `ssr`, модулей Nuxt, структуры `app/` vs `server/`
+- Массовое переименование иконок/токенов без задачи
+- Архитектура shell ЛК (навигация, layout-компоненты) — только по явному решению
+- `.env` (только `.env.example`)
+
+## Планирование
+
+- Постоянный контекст: [`.planning/PROJECT.md`](../../.planning/PROJECT.md)
+- Активная задача: `.planning/brief.md` (создавать из `brief-template.md`)
