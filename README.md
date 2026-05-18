@@ -90,11 +90,7 @@ pnpm approve-builds --all
 - Сервер: **`serverApi(event?)`** — [`server/utils/serverApi.ts`](server/utils/serverApi.ts); URL — [`shared/utils/normalizeApiBaseUrl.ts`](shared/utils/normalizeApiBaseUrl.ts) (`normalizeApiBaseUrl`, `joinApiUrl`).
 - Типизация `public.apiBase` — [`types/nuxt-public.d.ts`](types/nuxt-public.d.ts). Приватные ключи `runtimeConfig` добавляйте в `nuxt.config` и отдельное расширение `RuntimeConfig` в `types/`.
 
-Правила Cursor:
-
-- **Workflow (GSD + Superpowers):** [`.cursor/rules/00-workflow-core.mdc`](.cursor/rules/00-workflow-core.mdc) … `06-fundamental-principles.mdc`, контекст проекта — [`90-project-context.mdc`](.cursor/rules/90-project-context.mdc)
-- **Стек Nuxt / стили / API:** [`.cursor/rules/nuxt-template.mdc`](.cursor/rules/nuxt-template.mdc)
-- **Планирование:** [`.planning/PROJECT.md`](.planning/PROJECT.md), кратко — [`AGENTS.md`](AGENTS.md)
+Правила Cursor (только локально, в Git не коммитятся): `.cursor/rules/`, `AGENTS.md`. Планирование в репозитории — [`.planning/PROJECT.md`](.planning/PROJECT.md).
 
 ## Документация
 
