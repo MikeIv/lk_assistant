@@ -15,11 +15,8 @@ const year = new Date().getFullYear()
 @use '~/assets/styles/tools/typography' as typo;
 
 .root {
-  margin-top: auto;
-  padding-block: var(--fs-space-2);
-  padding-inline: var(--fs-space-3);
-  background: var(--fs-color-cabinet-footer-bg);
-  border-top: 1px solid var(--fs-color-border);
+  padding: var(--fs-space-2) var(--fs-space-3) var(--fs-space-3);
+  background: transparent;
 }
 
 .line {

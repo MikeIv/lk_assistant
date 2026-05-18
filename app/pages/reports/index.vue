@@ -23,7 +23,7 @@ useHead({
 @use '~/assets/styles/tools/typography' as typo;
 
 .root {
-  max-width: rem(960);
+  width: 100%;
 }
 
 .header {

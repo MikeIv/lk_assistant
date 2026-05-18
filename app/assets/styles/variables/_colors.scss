@@ -49,6 +49,15 @@
   --fs-figma-metallic-gradient-grey-2: #dadada;
   --fs-figma-metallic-gradient-grey-3: #797979;
 
+  /* --- Gradient/Multicolor (Figma: Button/Autorization, node 153:286) --- */
+  --fs-figma-gradient-auth-from: #fb7503;
+  --fs-figma-gradient-auth-to: #fc3a03;
+  --fs-gradient-auth: linear-gradient(
+    90deg,
+    var(--fs-figma-gradient-auth-from) 0%,
+    var(--fs-figma-gradient-auth-to) 100%
+  );
+
   /* --- Семантика приложения (верстка ЛК и страниц) --- */
   --fs-color-bg: var(--fs-figma-achromatic-white);
   --fs-color-surface: var(--fs-figma-achromatic-light-gray);
@@ -67,7 +76,9 @@
   --fs-color-ui-button-inverse-pressed-text: rgb(255 255 255 / 0.7);
 
   /* Каркас ЛК */
-  --fs-cabinet-chrome-height: 4.75rem; /* 76px — шапка и блок логотипа в сайдбаре */
+  --fs-cabinet-chrome-height: 4.375rem; /* 70px — Desktop/Header (Figma node 9:35) */
+  --fs-color-cabinet-header-glass: rgb(255 255 255 / 0.7);
+  --fs-color-cabinet-tag-neutral: rgb(234 234 235 / 0.5);
   --fs-color-cabinet-sidebar: var(--fs-figma-vertical-shop);
   --fs-color-cabinet-sidebar-hover: rgb(255 255 255 / 0.08);
   --fs-color-cabinet-sidebar-active: rgb(255 255 255 / 0.14);

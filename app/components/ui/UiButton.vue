@@ -1,6 +1,6 @@
 <script setup lang="ts">
-export type UiButtonVariant = 'primary' | 'inverse' | 'outline' | 'soft' | 'accent'
-export type UiButtonSize = 'md' | 'sm' | 'arrow'
+export type UiButtonVariant = 'primary' | 'inverse' | 'outline' | 'soft' | 'accent' | 'auth'
+export type UiButtonSize = 'md' | 'sm' | 'chrome' | 'arrow'
 export type UiButtonIconPosition = 'left' | 'right'
 
 const props = withDefaults(
@@ -66,7 +66,7 @@ const iconStyle = computed<Record<string, string> | undefined>(() => {
 const cssm = useCssModule()
 
 const spinnerWrapClass = computed(() => {
-  if (props.size === 'sm') {
+  if (props.size === 'sm' || props.size === 'chrome') {
     return cssm.spinnerWrapSm
   }
   if (props.size === 'arrow') {
@@ -199,6 +199,21 @@ const spinnerWrapClass = computed(() => {
   @include typo.fs-text-tag;
 }
 
+/* Figma Desktop/Button в шапке: 36px, pill 48px (авторизация) / 25px (primary) */
+.chrome {
+  min-width: rem(92);
+  min-height: rem(36);
+  height: rem(36);
+  padding: 0 rem(24);
+  border-radius: rem(25);
+}
+
+.auth.chrome {
+  min-width: 0;
+  padding: 0 rem(18) 0 rem(16);
+  border-radius: rem(48);
+}
+
 /* Figma «Arrow button» (4587:3511): 64×44, pill — та же высота, что у md */
 .arrow {
   min-width: rem(64);
@@ -276,7 +291,8 @@ const spinnerWrapClass = computed(() => {
 }
 
 .inverse .spinner,
-.accent .spinner {
+.accent .spinner,
+.auth .spinner {
   border-color: rgb(255 255 255 / 0.25);
   border-top-color: var(--fs-figma-achromatic-white);
 }
@@ -392,6 +408,31 @@ const spinnerWrapClass = computed(() => {
 
   &:disabled {
     @include disabled-neutral;
+  }
+}
+
+.auth {
+  color: var(--fs-figma-achromatic-white);
+  background-image: var(--fs-gradient-auth);
+  background-color: var(--fs-figma-gradient-auth-from);
+  border-color: var(--fs-color-ui-button-border);
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.04);
+    border-color: rgb(234 234 235 / 0.45);
+  }
+
+  &:active:not(:disabled) {
+    filter: brightness(0.96);
+    color: var(--fs-figma-system-gray);
+  }
+
+  &:disabled {
+    color: var(--fs-figma-achromatic-white);
+    background-color: var(--fs-figma-gradient-auth-from);
+    background-image: var(--fs-gradient-auth);
+    border-color: var(--fs-color-ui-button-border);
+    opacity: 0.55;
   }
 }
 
