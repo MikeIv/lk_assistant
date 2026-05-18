@@ -98,7 +98,7 @@ const { open: footerOpen, close: closeFooter } = useCabinetFooter()
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: var(--fs-space-3);
+  padding: var(--fs-space-3) var(--fs-space-3) 0;
   pointer-events: none;
 }
 
