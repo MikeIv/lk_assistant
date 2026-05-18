@@ -40,6 +40,8 @@
 
   /* --- System --- */
   --fs-figma-system-gray: #eaeaeb;
+  /* Figma Opacity/White/50% (navibar 3953:1606) — rgba от #EAEAEB */
+  --fs-figma-opacity-white-50: rgb(234 234 235 / 0.5);
   --fs-figma-system-button-gray: #333343;
   --fs-figma-system-counter-error: #ee2e22;
   --fs-figma-system-success: #33ae27;
@@ -78,7 +80,7 @@
   /* Каркас ЛК */
   --fs-cabinet-chrome-height: 4.375rem; /* 70px — Desktop/Header (Figma node 9:35) */
   --fs-color-cabinet-header-glass: rgb(255 255 255 / 0.7);
-  --fs-color-cabinet-tag-neutral: rgb(234 234 235 / 0.5);
+  --fs-color-cabinet-tag-neutral: var(--fs-figma-opacity-white-50);
   --fs-color-cabinet-sidebar: var(--fs-figma-vertical-shop);
   --fs-color-cabinet-sidebar-hover: rgb(255 255 255 / 0.08);
   --fs-color-cabinet-sidebar-active: rgb(255 255 255 / 0.14);
@@ -90,6 +92,15 @@
   --fs-color-cabinet-header-border: var(--fs-figma-stroke-light-gray);
   --fs-color-cabinet-footer-bg: var(--fs-figma-system-gray);
   --fs-color-on-cabinet-sidebar: var(--fs-figma-achromatic-white);
+
+  /* Нижняя навигация (Figma navibar 3953:1606, Nav Bar 153:578) */
+  --fs-color-cabinet-nav-shell: var(--fs-figma-opacity-white-50);
+  --fs-color-cabinet-nav-segment-bg: var(--fs-figma-achromatic-white);
+  --fs-color-cabinet-nav-indicator-home: var(--fs-figma-metallic-gradient-grey-2);
+  --fs-cabinet-nav-backdrop-blur: 38px; /* Figma Blur/Navbar */
+  --fs-shadow-cabinet-nav:
+    0 10.5px 10px rgb(0 0 0 / 0.02),
+    0 44px 60px rgb(0 0 0 / 0.05);
 
   /* Шрифты UI Kit: Gilroy и Inter — app/assets/fonts */
   --fs-font-heading:

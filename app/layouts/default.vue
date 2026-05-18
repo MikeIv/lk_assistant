@@ -16,6 +16,8 @@ const { open: footerOpen, close: closeFooter } = useCabinetFooter()
       </div>
     </main>
 
+    <CabinetNavBar />
+
     <Teleport to="body">
       <Transition name="cabinet-footer">
         <div v-if="footerOpen" :class="$style.footerLayer">
@@ -78,7 +80,7 @@ const { open: footerOpen, close: closeFooter } = useCabinetFooter()
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
-  background: var(--fs-color-bg);
+  background: var(--fs-figma-achromatic-light-gray);
 }
 
 .content {
