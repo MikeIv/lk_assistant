@@ -24,10 +24,11 @@ function toggleCollapsed() {
         :class="[$style.brandLink, { [$style.brandLinkCollapsed]: collapsed }]"
         aria-label="ТРЦ Олимпийский — на главную"
       >
-        <span :class="$style.brandRow">
-          <UIcon name="i-local-logo" :class="$style.logo" aria-hidden="true" />
-          <span :class="$style.brandWord" :aria-hidden="collapsed">Олимпийский</span>
-        </span>
+        <UIcon
+          :name="collapsed ? 'i-local-logo' : 'i-local-logo-tablet'"
+          :class="collapsed ? $style.logoMark : $style.logoFull"
+          aria-hidden="true"
+        />
       </NuxtLink>
     </div>
 
@@ -143,36 +144,30 @@ $sidebar-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-.brandRow {
-  display: flex;
-  align-items: center;
-  gap: var(--fs-space-1);
-  line-height: 1.2;
-  min-width: 0;
-}
-
-.brandWord {
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  opacity: 1;
-  max-width: rem(160);
-
-  @include typo.fs-text-header;
-  font-weight: 600;
-  @include sidebar-transition(max-width, opacity, margin);
-}
-
-/* SVG viewBox 64×30 — логотип в строке бренда и в свёрнутом сайдбаре. */
-.logo {
+/* Figma UI Kit Logo: Mobile 64×30 (mark), Tablet 222×22 (mark + ОЛИМПИЙСКИЙ). */
+.logoMark {
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
   width: rem(40);
   height: rem(19);
+
+  :deep(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.logoFull {
+  display: inline-flex;
+  flex-shrink: 1;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  width: rem(222);
+  height: rem(22);
 
   :deep(svg) {
     display: block;
@@ -191,13 +186,6 @@ $sidebar-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
   margin-inline: 0;
   padding-inline: 0;
   justify-content: center;
-}
-
-.collapsed .brandWord {
-  flex: 0 0 auto;
-  max-width: 0;
-  opacity: 0;
-  margin: 0;
 }
 
 .nav {
@@ -365,7 +353,6 @@ $sidebar-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
   .nav,
   .link,
   .linkLabel,
-  .brandWord,
   .toggleHost,
   .toggleExpandRow,
   .toggleCaption {

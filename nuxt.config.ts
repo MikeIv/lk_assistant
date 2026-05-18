@@ -21,7 +21,7 @@ export default defineNuxtConfig({
 
   /**
    * Локальные SVG: префикс коллекции обязателен для SSR (см. Nuxt UI — Custom local collections).
-   * `logo.svg` → `<UIcon name="i-local-logo" />`.
+   * `logo.svg` → `i-local-logo`; `logo-tablet.svg` / `logo-full.svg` → полный знак (Figma Logo).
    * Стрелки UI Kit (Figma Arrow/Icon): `app/assets/icons/arrows/*.svg` → `i-arrow-{name}`.
    */
   icon: {
