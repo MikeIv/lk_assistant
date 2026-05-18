@@ -73,13 +73,9 @@ export default defineNuxtConfig({
     devLogs: isDev,
   },
 
-  /**
-   * appManifest: убирает лишний запрос dev.json в dev.
-   * viteEnvironmentApi: обход Nuxt 4.4.5 — иначе при ssr:false падает dev («No entry found in rollupOptions.input»), см. nuxt/nuxt#35033 / PR #35037.
-   */
+  /** appManifest: убирает лишний запрос dev.json в dev */
   experimental: {
     appManifest: false,
-    viteEnvironmentApi: true,
   },
 
   vite: {
