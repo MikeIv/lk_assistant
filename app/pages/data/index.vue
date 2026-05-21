@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SECTION_UNDER_DEVELOPMENT_BANNER } from '#shared/constants/sectionUnderDevelopment'
+const { bannerProps } = useCabinetSectionBanner('/data')
 
 useHead({
   title: 'Мои данные',
@@ -12,7 +12,7 @@ useHead({
       <h2 :class="$style.title">Мои данные</h2>
     </header>
 
-    <UiPromoBanner v-bind="SECTION_UNDER_DEVELOPMENT_BANNER" preset="aqua" />
+    <UiPromoBanner v-if="bannerProps" v-bind="bannerProps" />
   </section>
 </template>
 

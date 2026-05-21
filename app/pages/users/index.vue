@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const { bannerProps } = useCabinetSectionBanner('/users')
+
 useHead({
   title: 'Мои пользователи',
 })
@@ -6,32 +8,26 @@ useHead({
 
 <template>
   <section :class="$style.root">
-    <h2 :class="$style.title">Мои пользователи</h2>
-    <p :class="$style.text">
-      Роли: администратор и пользователь с ограничением прав (ТЗ). Список и действия — на этапе интеграции с API.
-    </p>
+    <header :class="$style.header">
+      <h2 :class="$style.title">Мои пользователи</h2>
+    </header>
+
+    <UiPromoBanner v-if="bannerProps" v-bind="bannerProps" />
   </section>
 </template>
 
 <style module lang="scss">
-@use '~/assets/styles/tools/functions' as *;
-@use '~/assets/styles/tools/typography' as typo;
+@use '~/assets/styles/tools/cabinet-page' as cabinet;
 
 .root {
-  max-width: rem(720);
+  @include cabinet.cabinet-section-layout;
+}
+
+.header {
+  margin: 0;
 }
 
 .title {
-  margin: 0;
-  margin-block-end: var(--fs-margin-title-content);
-
-  @include typo.fs-text-h3;
-}
-
-.text {
-  margin: 0;
-  color: var(--fs-color-text-muted);
-
-  @include typo.fs-text-body;
+  @include cabinet.cabinet-section-title;
 }
 </style>

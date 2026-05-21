@@ -10,6 +10,8 @@ export interface CabinetNavItem {
    * Figma Vertical/* — node 13:164.
    */
   accent: string
+  /** Второй цвет градиента баннера «раздел в разработке». */
+  bannerGradientTo: string
   /** Пункт «Главная»: active без цветной полоски (node 13:175). */
   home?: boolean
 }
@@ -21,30 +23,35 @@ const navItems: CabinetNavItem[] = [
     icon: 'i-local-nav-home',
     home: true,
     accent: 'var(--fs-color-cabinet-nav-indicator-home)',
+    bannerGradientTo: 'var(--fs-figma-metallic-gradient-grey-3)',
   },
   {
     to: '/reports',
     label: 'Мои отчёты',
     icon: 'i-local-nav-report',
     accent: 'var(--fs-figma-vertical-shop)',
+    bannerGradientTo: 'var(--fs-figma-main-building-concert-hall)',
   },
   {
     to: '/applications',
     label: 'Мои заявки',
     icon: 'i-local-nav-applications',
     accent: 'var(--fs-figma-main-building-main)',
+    bannerGradientTo: 'var(--fs-figma-vertical-entertainments)',
   },
   {
     to: '/passes',
     label: 'Мои пропуска',
     icon: 'i-local-nav-passes',
     accent: 'var(--fs-figma-vertical-aqua-park)',
+    bannerGradientTo: 'var(--fs-figma-vertical-surfing)',
   },
   {
     to: '/data',
     label: 'Мои данные',
     icon: 'i-local-nav-data',
     accent: 'var(--fs-figma-vertical-gold-gallery)',
+    bannerGradientTo: 'var(--fs-figma-vertical-events)',
   },
   {
     to: '/users',
@@ -52,6 +59,7 @@ const navItems: CabinetNavItem[] = [
     icon: 'i-local-nav-users',
     adminOnly: true,
     accent: 'var(--fs-figma-vertical-fitness)',
+    bannerGradientTo: 'var(--fs-figma-main-building-concert-hall)',
   },
 ]
 
