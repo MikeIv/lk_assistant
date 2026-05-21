@@ -2,19 +2,16 @@
 @use 'typography' as typo;
 @use '../variables/resolutions' as bp;
 
-$cabinet-content-max-width: rem(960);
-
-/* Область прокрутки main в layout: отступы от краёв + центрирование страниц */
-@mixin cabinet-main-content {
+/**
+ * Базовая обёртка chrome и main: ширина viewport минус поля UI Kit,
+ * на широких экранах — не шире $desktopMax, по центру.
+ */
+@mixin cabinet-shell {
   box-sizing: border-box;
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
   width: 100%;
-  min-height: 0;
-  overflow: auto;
-  padding: var(--fs-margin-title-content) var(--fs-margin-card) var(--fs-margin-nav-vertical);
+  max-width: bp.$desktopMax;
+  margin-inline: auto;
+  padding-inline: var(--fs-margin-card);
 
   @media (min-width: bp.$tablet) {
     padding-inline: var(--fs-margin-content-block);
@@ -25,11 +22,21 @@ $cabinet-content-max-width: rem(960);
   }
 }
 
-@mixin cabinet-main-content-inner {
+/* Область прокрутки main: вертикальные отступы, горизонталь — в cabinet-shell */
+@mixin cabinet-main-content {
   box-sizing: border-box;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: stretch;
   width: 100%;
-  max-width: $cabinet-content-max-width;
-  margin-inline: auto;
+  min-height: 0;
+  overflow: auto;
+  padding-block: var(--fs-margin-title-content) var(--fs-margin-nav-vertical);
+}
+
+@mixin cabinet-main-content-inner {
+  @include cabinet-shell;
 }
 
 @mixin cabinet-section-layout {

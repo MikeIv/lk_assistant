@@ -15,7 +15,7 @@ const year = new Date().getFullYear()
 @use '~/assets/styles/tools/typography' as typo;
 
 .root {
-  padding: var(--fs-space-2) var(--fs-space-3) var(--fs-space-3);
+  padding-block-end: var(--fs-space-3);
   background: transparent;
 }
 

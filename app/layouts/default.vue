@@ -5,12 +5,14 @@ const { open: footerOpen, close: closeFooter } = useCabinetFooter()
 <template>
   <div :class="$style.layout">
     <header :class="$style.headerWrap">
-      <CabinetHeader />
+      <div :class="$style.shell">
+        <CabinetHeader />
+      </div>
     </header>
 
     <main :class="$style.main">
       <div :class="$style.content">
-        <div :class="$style.contentInner">
+        <div :class="$style.shell">
           <slot />
         </div>
       </div>
@@ -35,18 +37,20 @@ const { open: footerOpen, close: closeFooter } = useCabinetFooter()
             aria-modal="true"
             aria-labelledby="cabinet-footer-title"
           >
-            <div :class="$style.footerPanelHead">
-              <h2 id="cabinet-footer-title" :class="$style.footerPanelTitle">О проекте</h2>
-              <button
-                type="button"
-                :class="$style.footerClose"
-                aria-label="Закрыть"
-                @click="closeFooter"
-              >
-                ×
-              </button>
+            <div :class="$style.shell">
+              <div :class="$style.footerPanelHead">
+                <h2 id="cabinet-footer-title" :class="$style.footerPanelTitle">О проекте</h2>
+                <button
+                  type="button"
+                  :class="$style.footerClose"
+                  aria-label="Закрыть"
+                  @click="closeFooter"
+                >
+                  ×
+                </button>
+              </div>
+              <CabinetFooter />
             </div>
-            <CabinetFooter />
           </aside>
         </div>
       </Transition>
@@ -72,6 +76,13 @@ const { open: footerOpen, close: closeFooter } = useCabinetFooter()
   grid-area: header;
   min-width: 0;
   z-index: 10;
+  background: var(--fs-color-cabinet-header-glass);
+  border-bottom: 1px solid var(--fs-color-cabinet-header-border);
+  backdrop-filter: blur(38px);
+}
+
+.shell {
+  @include cabinet.cabinet-shell;
 }
 
 .main {
@@ -85,10 +96,6 @@ const { open: footerOpen, close: closeFooter } = useCabinetFooter()
 
 .content {
   @include cabinet.cabinet-main-content;
-}
-
-.contentInner {
-  @include cabinet.cabinet-main-content-inner;
 }
 
 .footerLayer {
@@ -123,6 +130,10 @@ const { open: footerOpen, close: closeFooter } = useCabinetFooter()
   background: var(--fs-color-bg);
   box-shadow: 0 rem(-4) rem(24) rgb(23 23 32 / 0.12);
   pointer-events: auto;
+
+  .shell {
+    padding-block-end: var(--fs-space-3);
+  }
 }
 
 .footerPanelHead {
@@ -130,7 +141,7 @@ const { open: footerOpen, close: closeFooter } = useCabinetFooter()
   align-items: center;
   justify-content: space-between;
   gap: var(--fs-space-2);
-  padding: var(--fs-space-3) var(--fs-space-3) 0;
+  padding-block: var(--fs-space-3) 0;
 }
 
 .footerPanelTitle {

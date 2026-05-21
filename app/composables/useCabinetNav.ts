@@ -35,6 +35,18 @@ const navItems: CabinetNavItem[] = [
     accent: 'var(--fs-figma-main-building-main)',
   },
   {
+    to: '/passes',
+    label: 'Мои пропуска',
+    icon: 'i-local-nav-passes',
+    accent: 'var(--fs-figma-vertical-aqua-park)',
+  },
+  {
+    to: '/data',
+    label: 'Мои данные',
+    icon: 'i-local-nav-data',
+    accent: 'var(--fs-figma-vertical-gold-gallery)',
+  },
+  {
     to: '/users',
     label: 'Мои пользователи',
     icon: 'i-local-nav-users',

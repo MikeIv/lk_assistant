@@ -65,10 +65,8 @@ const { open: footerOpen, toggle: toggleFooter } = useCabinetFooter()
   gap: var(--fs-space-2) var(--fs-space-3);
   box-sizing: border-box;
   min-height: var(--fs-cabinet-chrome-height);
-  padding: rem(19) rem(36);
-  background: var(--fs-color-cabinet-header-glass);
-  border-bottom: 1px solid var(--fs-color-cabinet-header-border);
-  backdrop-filter: blur(38px);
+  padding-block: rem(19);
+  background: transparent;
 }
 
 .start {
@@ -250,7 +248,6 @@ const { open: footerOpen, toggle: toggleFooter } = useCabinetFooter()
 
 @media (max-width: #{bp.$tablet - 1px}) {
   .root {
-    padding-inline: var(--fs-space-3);
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-areas:
       'start actions'
