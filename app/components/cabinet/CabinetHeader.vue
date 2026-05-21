@@ -46,7 +46,7 @@ const { open: footerOpen, toggle: toggleFooter } = useCabinetFooter()
         Профиль
       </UiButton>
       <UiButton type="button" variant="auth" size="chrome" title="Позже: авторизация">
-        Войти
+        Выйти
       </UiButton>
     </div>
   </header>
