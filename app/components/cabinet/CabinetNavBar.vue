@@ -135,7 +135,7 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
   padding: var(--fs-space-2) var(--fs-space-1);
   @include nav-shell-surface;
   transform: translateY(-50%);
-  pointer-events: auto;
+  pointer-events: none;
 
   @container cabinet-nav (max-width: rem(960)) {
     top: 0;
@@ -151,6 +151,7 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
   opacity: 1;
   cursor: pointer;
   user-select: none;
+  pointer-events: auto;
 
   @include typo.fs-text-tag;
   font-weight: 600;
@@ -160,6 +161,10 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
     text-decoration: underline;
     text-underline-offset: rem(2);
   }
+}
+
+.toggleRow :global(button) {
+  pointer-events: auto;
 }
 
 .menuHost {

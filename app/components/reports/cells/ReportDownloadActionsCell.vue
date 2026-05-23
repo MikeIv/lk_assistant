@@ -1,15 +1,51 @@
 <script setup lang="ts">
+import ReportTableActionButton from '~/components/reports/cells/ReportTableActionButton.vue'
+import { useReportsTableContext } from '~/composables/reports/reportsTableContext'
 import type { ReportItem } from '#shared/types/reports'
 
-defineProps<{
+const props = defineProps<{
   report: ReportItem
 }>()
+
+const { isMockMode, downloadReport, downloadAttachments, isReportDownloading, isAttachmentsDownloading } =
+  useReportsTableContext()
+
+const isReportBusy = computed(() => isReportDownloading(props.report.id))
+const isAttachmentsBusy = computed(() => isAttachmentsDownloading(props.report.id))
+
+async function onDownloadReport() {
+  if (isMockMode.value || isReportBusy.value) {
+    return
+  }
+
+  await downloadReport(props.report.id)
+}
+
+async function onDownloadAttachments() {
+  if (isMockMode.value || isAttachmentsBusy.value) {
+    return
+  }
+
+  await downloadAttachments(props.report.id)
+}
 </script>
 
 <template>
   <div v-if="report.can_download_documents" :class="$style.root">
-    <UiButton size="sm" variant="outline" label="Отчёт" fit @click.prevent />
-    <UiButton size="sm" variant="outline" label="Вложения" fit @click.prevent />
+    <ReportTableActionButton
+      label="Отчёт"
+      :loading="isReportBusy"
+      :disabled="isMockMode"
+      fixed-width
+      :title="isMockMode ? 'Доступно после подключения API' : undefined"
+      @click="onDownloadReport"
+    />
+    <ReportTableActionButton
+      label="Вложения"
+      :loading="isAttachmentsBusy"
+      :disabled="isMockMode"
+      @click="onDownloadAttachments"
+    />
   </div>
 </template>
 

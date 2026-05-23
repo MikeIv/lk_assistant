@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useReportsMock } from '~/composables/reports/useReportsMock'
+import { useReports } from '~/composables/reports/useReports'
 import type { ReportPeriodFilterValue } from '~/components/reports/ReportsTablePeriodFilter.vue'
 
 const {
@@ -7,17 +7,21 @@ const {
   reports,
   pagination,
   isLoading,
+  isRefreshing,
+  error,
+  isMockMode,
   sortPeriod,
   selectedStatuses,
   periodRange,
   hasActiveFilters,
+  init,
   loadPage,
   handlePerPageChange,
   toggleSortOrder,
   applyStatusFilter,
   applyPeriodFilter,
   resetFilters,
-} = useReportsMock()
+} = useReports()
 
 const activePeriodFilter = computed<ReportPeriodFilterValue | null>(() => {
   if (!periodRange.value) {
@@ -28,6 +32,12 @@ const activePeriodFilter = computed<ReportPeriodFilterValue | null>(() => {
     start: periodRange.value.from,
     end: periodRange.value.to,
   }
+})
+
+const isInitialLoading = computed(() => isLoading.value && reports.value.length === 0 && !error.value)
+
+onMounted(async () => {
+  await init()
 })
 
 useHead({
@@ -48,11 +58,22 @@ useHead({
       />
     </header>
 
+    <p v-if="isMockMode" :class="$style.mockHint">
+      Данные из mock: укажите `NUXT_PUBLIC_API_BASE` для загрузки с сервера.
+    </p>
+
+    <div v-if="isInitialLoading" :class="$style.state">Идёт загрузка…</div>
+
+    <p v-else-if="error" :class="$style.error">{{ error }}</p>
+
     <ReportsTable
+      v-else
       :headers="headers"
       :reports="reports"
       :pagination="pagination"
       :loading="isLoading"
+      :is-refreshing="isRefreshing"
+      :is-mock-mode="isMockMode"
       :sort-period="sortPeriod"
       :active-status-filters="selectedStatuses"
       :active-period-filter="activePeriodFilter"
@@ -67,6 +88,7 @@ useHead({
 
 <style module lang="scss">
 @use '~/assets/styles/tools/cabinet-page' as cabinet;
+@use '~/assets/styles/tools/functions' as *;
 
 .root {
   @include cabinet.cabinet-section-layout;
@@ -83,5 +105,29 @@ useHead({
 
 .title {
   @include cabinet.cabinet-section-title;
+}
+
+.mockHint {
+  margin: 0;
+  font-size: rem(13);
+  color: var(--fs-color-text-muted);
+}
+
+.state,
+.error {
+  margin: 0;
+  padding: var(--fs-space-3);
+  border-radius: rem(12);
+  text-align: center;
+}
+
+.state {
+  color: var(--fs-color-text-muted);
+  background: var(--fs-color-bg);
+}
+
+.error {
+  color: var(--fs-color-error);
+  background: rgb(238 46 34 / 0.08);
 }
 </style>

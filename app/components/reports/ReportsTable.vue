@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { FlexRender, useReportsTable } from '~/composables/reports/useReportsTable'
+import { reportsTableContextKey } from '~/composables/reports/reportsTableContext'
+import { useReportCorrection } from '~/composables/reports/useReportCorrection'
+import { useReportDownloads } from '~/composables/reports/useReportDownloads'
 import type { ReportPeriodFilterValue } from '~/components/reports/ReportsTablePeriodFilter.vue'
 import type {
   ReportHeader,
@@ -14,6 +17,8 @@ const props = defineProps<{
   reports: ReportItem[]
   pagination: ReportsPagination
   loading?: boolean
+  isRefreshing?: boolean
+  isMockMode?: boolean
   sortPeriod: ReportPeriodSort
   activeStatusFilters: ReportStatus[]
   activePeriodFilter: ReportPeriodFilterValue | null
@@ -31,9 +36,36 @@ const emit = defineEmits<{
 const cssm = useCssModule()
 const tableWrapperRef = ref<HTMLElement | null>(null)
 
+const downloads = useReportDownloads()
+const {
+  isOpen: isCorrectionOpen,
+  text: correctionText,
+  isSubmitting: isCorrectionSubmitting,
+  error: correctionError,
+  success: isCorrectionSuccess,
+  open: openCorrection,
+  close: closeCorrection,
+  submit: submitCorrection,
+} = useReportCorrection()
+
+const isMockMode = computed(() => props.isMockMode ?? true)
+
+provide(reportsTableContextKey, {
+  isMockMode,
+  downloadReport: downloads.downloadReport,
+  downloadAttachments: downloads.downloadAttachments,
+  isReportDownloading: downloads.isReportDownloading,
+  isAttachmentsDownloading: downloads.isAttachmentsDownloading,
+  openCorrection,
+})
+
+const isTableBusy = computed(() => Boolean(props.loading || props.isRefreshing))
+
 const selectedReports = ref<Set<number>>(new Set())
 
-const showSelectColumn = computed(() => true)
+const showSelectColumn = computed(
+  () => props.reports.filter((report) => report.status === 'Draft').length > 1,
+)
 
 const hasDraftSelection = computed(() => selectedReports.value.size > 0)
 
@@ -156,6 +188,30 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside, true)
 })
+
+const COLUMN_ALIGN: Partial<Record<string, 'start' | 'center' | 'end'>> = {
+  period: 'start',
+  turnover_amount: 'end',
+  turnover_fee: 'end',
+}
+
+function cellAlignClass(columnId: string): string | undefined {
+  const align = COLUMN_ALIGN[columnId]
+
+  if (align === 'start') {
+    return cssm.tdStart
+  }
+
+  if (align === 'end') {
+    return cssm.tdEnd
+  }
+
+  return undefined
+}
+
+function onCorrectionTextUpdate(value: string) {
+  correctionText.value = value
+}
 </script>
 
 <template>
@@ -238,14 +294,14 @@ onBeforeUnmount(() => {
           </tr>
 
           <tr v-for="row in table.getRowModel().rows" v-else :key="row.id" :class="$style.row">
-            <td v-for="cell in row.getVisibleCells()" :key="cell.id" :class="$style.td">
+            <td v-for="cell in row.getVisibleCells()" :key="cell.id" :class="[$style.td, cellAlignClass(cell.column.id)]">
               <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
             </td>
           </tr>
         </tbody>
       </table>
 
-      <div v-if="loading" :class="$style.loadingOverlay" aria-hidden="true">
+      <div v-if="isTableBusy" :class="$style.loadingOverlay" aria-hidden="true">
         <span :class="$style.spinner" />
       </div>
 
@@ -304,6 +360,17 @@ onBeforeUnmount(() => {
     <p v-if="hasDraftSelection" :class="$style.selectionHint">
       Выбрано черновиков: {{ selectedReports.size }}
     </p>
+
+    <ReportsCorrectionModal
+      :open="isCorrectionOpen"
+      :text="correctionText"
+      :is-submitting="isCorrectionSubmitting"
+      :error="correctionError"
+      :success="isCorrectionSuccess"
+      @update:text="onCorrectionTextUpdate"
+      @close="closeCorrection"
+      @submit="submitCorrection"
+    />
   </div>
 </template>
 
@@ -415,8 +482,20 @@ onBeforeUnmount(() => {
   background-color: var(--fs-color-bg);
 }
 
+.row {
+  transition: background-color 0.16s ease;
+
+  &:hover {
+    background-color: rgb(235 153 20 / 0.06);
+  }
+}
+
 .row:nth-child(even) {
   background-color: rgb(244 245 245 / 0.55);
+
+  &:hover {
+    background-color: rgb(235 153 20 / 0.08);
+  }
 }
 
 .td {
@@ -432,6 +511,15 @@ onBeforeUnmount(() => {
   &:last-child {
     border-right: none;
   }
+}
+
+.tdStart {
+  text-align: start;
+}
+
+.tdEnd {
+  font-variant-numeric: tabular-nums;
+  text-align: end;
 }
 
 .emptyCell {

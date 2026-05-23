@@ -32,7 +32,21 @@
   width: 100%;
   min-height: 0;
   overflow: auto;
-  padding-block: var(--fs-margin-title-content) var(--fs-margin-nav-vertical);
+
+  /* nav-vertical — отступ панели от края; cluster — высота CabinetNavBar */
+  --fs-cabinet-nav-reserve: calc(
+    var(--fs-margin-nav-vertical) + var(--fs-margin-cabinet-nav-cluster-stacked)
+  );
+
+  padding-block: var(--fs-margin-title-content) var(--fs-cabinet-nav-reserve);
+  scroll-padding-bottom: var(--fs-cabinet-nav-reserve);
+
+  /* ~960px контейнер nav + боковые поля shell (48×2) */
+  @media (min-width: 1056px) {
+    --fs-cabinet-nav-reserve: calc(
+      var(--fs-margin-nav-vertical) + var(--fs-margin-cabinet-nav-cluster-compact)
+    );
+  }
 }
 
 @mixin cabinet-main-content-inner {

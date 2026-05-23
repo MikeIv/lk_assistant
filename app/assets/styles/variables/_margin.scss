@@ -59,4 +59,12 @@
 
   /* Минимальный отступ */
   @include margin-token-static('min', 4);
+
+  /*
+   * Запас под fixed CabinetNavBar (см. cabinet-main-content).
+   * stacked — toggle над меню (@container cabinet-nav max-width 960px);
+   * compact — toggle слева от меню в одну линию.
+   */
+  @include margin-token-static('cabinet-nav-cluster-stacked', 156);
+  @include margin-token-static('cabinet-nav-cluster-compact', 100);
 }

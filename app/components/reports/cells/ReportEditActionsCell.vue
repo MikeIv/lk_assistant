@@ -1,21 +1,54 @@
 <script setup lang="ts">
+import ReportTableActionButton from '~/components/reports/cells/ReportTableActionButton.vue'
+import { useReportsTableContext } from '~/composables/reports/reportsTableContext'
 import type { ReportItem } from '#shared/types/reports'
 
-defineProps<{
+const props = defineProps<{
   report: ReportItem
 }>()
+
+const { isMockMode } = useReportsTableContext()
+
+const canEdit = computed(
+  () =>
+    props.report.can_edit &&
+    (props.report.status === 'Draft' ||
+      props.report.status === 'Editable' ||
+      props.report.status === 'Overdue'),
+)
+
+function onEdit() {
+  if (isMockMode.value) {
+    return
+  }
+
+  // TODO: маршрут редактора отчёта появится в отдельной задаче
+}
+
+function onDelete() {
+  if (isMockMode.value) {
+    return
+  }
+
+  // TODO: удаление черновика через API
+}
 </script>
 
 <template>
-  <div v-if="report.can_edit && (report.status === 'Draft' || report.status === 'Editable' || report.status === 'Overdue')" :class="$style.root">
-    <UiButton size="sm" variant="outline" label="Редактировать" fit @click.prevent />
-    <UiButton
+  <div v-if="canEdit" :class="$style.root">
+    <ReportTableActionButton
+      label="Редактировать"
+      :disabled="isMockMode"
+      :title="isMockMode ? 'Доступно после подключения API' : undefined"
+      @click="onEdit"
+    />
+    <ReportTableActionButton
       v-if="report.status === 'Draft'"
-      size="sm"
-      variant="soft"
       label="Удалить"
-      fit
-      @click.prevent
+      variant="soft"
+      :disabled="isMockMode"
+      :title="isMockMode ? 'Доступно после подключения API' : undefined"
+      @click="onDelete"
     />
   </div>
 </template>

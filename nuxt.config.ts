@@ -65,6 +65,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE ?? '',
+      /** Contract-id для API отчётов (временно, до auth/store). */
+      contractId: process.env.NUXT_PUBLIC_CONTRACT_ID ?? '',
     },
   },
 
