@@ -25,13 +25,21 @@ const emit = defineEmits<{
 
 const inputId = computed(() => props.id || undefined)
 
+const hasValue = computed(() => props.modelValue.trim().length > 0)
+
 function onInput(event: Event) {
   emit('update:modelValue', (event.target as HTMLInputElement).value)
 }
 </script>
 
 <template>
-  <div :class="[$style.shell, (disabled || readonly) && $style.isStatic]">
+  <div
+    :class="[
+      $style.shell,
+      (disabled || readonly) && $style.isStatic,
+      hasValue && !disabled && !readonly && $style.isFilled,
+    ]"
+  >
     <input
       :id="inputId"
       :class="$style.input"
@@ -54,7 +62,11 @@ function onInput(event: Event) {
 }
 
 .isStatic {
-  background-color: var(--fs-figma-achromatic-light-gray);
+  border-color: var(--fs-figma-achromatic-light-gray);
+}
+
+.isFilled {
+  @include field.ui-control-shell-filled;
 }
 
 .input {

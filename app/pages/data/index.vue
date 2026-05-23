@@ -1,5 +1,4 @@
 <script setup lang="ts">
-const { bannerProps } = useCabinetSectionBanner('/data')
 const { activeTab, data, isMockMode, apiNotice } = useTenantData()
 
 useHead({
@@ -12,8 +11,6 @@ useHead({
     <header :class="$style.header">
       <h2 :class="$style.title">Мои данные</h2>
     </header>
-
-    <UiPromoBanner v-if="bannerProps" v-bind="bannerProps" />
 
     <p v-if="isMockMode" :class="$style.hint">
       Данные из mock: укажите `NUXT_PUBLIC_API_BASE` для загрузки с сервера (после согласования контракта).

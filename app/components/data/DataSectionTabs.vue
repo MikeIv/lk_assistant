@@ -35,40 +35,55 @@ function selectTab(key: TenantDataTabKey) {
 @use '~/assets/styles/tools/functions' as *;
 @use '~/assets/styles/tools/typography' as typo;
 
+/* Figma Sidebar Segment control (2246:3394) — компактный вариант */
 .root {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: rem(4);
-  padding: rem(4);
-  border-radius: rem(25);
-  background-color: var(--fs-figma-achromatic-light-gray);
+  align-items: center;
+  justify-content: flex-start;
+  gap: rem(2);
+  width: fit-content;
+  max-width: 100%;
+  padding: rem(3);
+  border: 1px solid var(--fs-figma-stroke-light-gray);
+  border-radius: rem(99);
+  background-color: var(--fs-figma-achromatic-white);
 }
 
 .tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: rem(36);
   margin: 0;
-  padding: rem(8) var(--fs-space-3);
+  padding: rem(6) rem(14);
   border: 0;
-  border-radius: rem(25);
+  border-radius: rem(99);
   background: transparent;
   cursor: pointer;
+  white-space: nowrap;
+  text-align: left;
 
   @include typo.fs-text-tag;
-  color: var(--fs-figma-achromatic-black);
+  color: var(--fs-figma-achromatic-dark-gray);
   transition:
     background-color 0.16s ease,
-    color 0.16s ease;
-
-  &:hover:not(.active) {
-    color: var(--fs-figma-achromatic-dark-gray);
-  }
+    color 0.16s ease,
+    box-shadow 0.16s ease;
 
   &:focus-visible {
     outline: rem(2) solid var(--fs-color-primary);
     outline-offset: rem(2);
   }
+
+  &:hover:not(.active) {
+    color: var(--fs-figma-achromatic-black);
+  }
 }
 
 .active {
-  background-color: var(--fs-figma-achromatic-white);
+  color: var(--fs-figma-achromatic-white);
+  background-color: var(--fs-figma-achromatic-dark-gray);
+  box-shadow: 0 0 rem(5) rgb(0 0 0 / 0.18);
 }
 </style>

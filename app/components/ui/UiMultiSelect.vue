@@ -51,27 +51,31 @@ function toggleOption(option: UiSelectOption) {
   <div ref="wrapperRef" :class="$style.root">
     <button
       type="button"
-      :class="$style.shell"
+      :class="[$style.shell, isOpen && $style.shellOpen]"
       :aria-expanded="isOpen"
       @click.stop="toggle"
     >
       <span :class="[displayValue ? $style.value : $style.placeholder]">
         {{ displayValue || placeholder }}
       </span>
-      <UIcon name="i-arrow-chevron-dropdown" :class="$style.icon" aria-hidden="true" />
+      <UIcon
+        :name="isOpen ? 'i-arrow-chevron-dropdown-open' : 'i-arrow-chevron-dropdown'"
+        :class="[$style.icon, isOpen && $style.iconOpen]"
+        aria-hidden="true"
+      />
     </button>
 
     <ul v-if="isOpen" :class="$style.dropdown" role="listbox" aria-multiselectable="true">
       <li
         v-for="option in options"
         :key="option.value"
-        :class="$style.option"
+        :class="[$style.option, isSelected(option) && $style.optionSelected]"
         role="option"
         :aria-selected="isSelected(option)"
         @click="toggleOption(option)"
       >
         <span :class="[$style.checkbox, isSelected(option) && $style.checkboxChecked]" aria-hidden="true" />
-        <span>{{ option.label }}</span>
+        <span :class="$style.optionLabel">{{ option.label }}</span>
       </li>
     </ul>
   </div>
@@ -87,29 +91,35 @@ function toggleOption(option: UiSelectOption) {
 }
 
 .shell {
-  @include field.ui-control-shell;
+  @include field.ui-dropdown-control-shell;
   justify-content: space-between;
-  gap: var(--fs-space-1);
+  gap: rem(8);
   cursor: pointer;
   text-align: left;
+  font: inherit;
+}
+
+.shellOpen {
+  @include field.ui-control-shell-open;
 }
 
 .value {
-  @include field.ui-control-text;
+  @include field.ui-dropdown-control-text;
   flex: 1;
 }
 
 .placeholder {
-  @include field.ui-control-text;
+  @include field.ui-dropdown-control-text;
   flex: 1;
   color: var(--fs-figma-achromatic-middle-gray);
 }
 
 .icon {
-  flex-shrink: 0;
-  width: rem(24);
-  height: rem(24);
-  color: var(--fs-figma-achromatic-middle-gray);
+  @include field.ui-dropdown-chevron;
+}
+
+.iconOpen {
+  @include field.ui-dropdown-chevron-open;
 }
 
 .dropdown {
@@ -118,9 +128,19 @@ function toggleOption(option: UiSelectOption) {
 
 .option {
   @include field.ui-dropdown-option;
-  display: flex;
-  align-items: center;
   gap: var(--fs-space-1);
+}
+
+.optionSelected {
+  @include field.ui-dropdown-option-selected;
+
+  .optionLabel {
+    color: var(--fs-figma-achromatic-black);
+  }
+}
+
+.optionLabel {
+  color: inherit;
 }
 
 .checkbox {

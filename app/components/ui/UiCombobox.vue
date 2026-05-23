@@ -35,6 +35,14 @@ const textValue = computed({
   set: (value: string) => emit('update:modelValue', value.trim() === '' ? null : value),
 })
 
+function isOptionSelected(option: UiSelectOption): boolean {
+  if (option.isCustom) {
+    return isCustomMode.value
+  }
+
+  return textValue.value === option.label
+}
+
 async function selectOption(option: UiSelectOption) {
   isCustomMode.value = Boolean(option.isCustom)
 
@@ -60,10 +68,10 @@ function onInputClick() {
 
 <template>
   <div ref="wrapperRef" :class="$style.root">
-    <div :class="$style.shell">
+    <div :class="[$style.shell, isOpen && $style.shellOpen]">
       <input
         ref="inputRef"
-        :class="[$style.input, isCustomMode && $style.inputEditable]"
+        :class="[$style.input, isCustomMode && $style.inputEditable, textValue && $style.inputFilled]"
         :value="textValue"
         :readonly="!isCustomMode"
         :placeholder="isCustomMode ? customPlaceholder : placeholder"
@@ -71,7 +79,11 @@ function onInputClick() {
         @click.stop="onInputClick"
       />
       <button type="button" :class="$style.toggle" aria-label="Открыть список" @click.stop="toggle">
-        <UIcon name="i-arrow-chevron-dropdown" :class="$style.icon" aria-hidden="true" />
+        <UIcon
+          :name="isOpen ? 'i-arrow-chevron-dropdown-open' : 'i-arrow-chevron-dropdown'"
+          :class="[$style.icon, isOpen && $style.iconOpen]"
+          aria-hidden="true"
+        />
       </button>
     </div>
 
@@ -79,8 +91,9 @@ function onInputClick() {
       <li
         v-for="option in options"
         :key="option.value"
-        :class="$style.option"
+        :class="[$style.option, isOptionSelected(option) && $style.optionSelected]"
         role="option"
+        :aria-selected="isOptionSelected(option)"
         @click="selectOption(option)"
       >
         {{ option.label }}
@@ -90,8 +103,8 @@ function onInputClick() {
 </template>
 
 <style module lang="scss">
-@use '~/assets/styles/tools/form-field' as field;
 @use '~/assets/styles/tools/functions' as *;
+@use '~/assets/styles/tools/form-field' as field;
 
 .root {
   position: relative;
@@ -99,17 +112,23 @@ function onInputClick() {
 }
 
 .shell {
-  @include field.ui-control-shell;
-  gap: var(--fs-space-1);
+  @include field.ui-dropdown-control-shell;
+  gap: rem(8);
+}
+
+.shellOpen {
+  @include field.ui-control-shell-open;
 }
 
 .input {
-  @include field.ui-control-text;
+  @include field.ui-dropdown-control-text;
   flex: 1;
   cursor: pointer;
 }
 
-.inputEditable {
+.inputEditable,
+.inputFilled {
+  color: var(--fs-figma-achromatic-black);
   cursor: text;
 }
 
@@ -118,16 +137,22 @@ function onInputClick() {
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
+  width: rem(20);
+  height: rem(20);
+  margin: 0;
   padding: 0;
   border: 0;
   background: transparent;
   cursor: pointer;
+  font: inherit;
 }
 
 .icon {
-  width: rem(24);
-  height: rem(24);
-  color: var(--fs-figma-achromatic-middle-gray);
+  @include field.ui-dropdown-chevron;
+}
+
+.iconOpen {
+  @include field.ui-dropdown-chevron-open;
 }
 
 .dropdown {
@@ -136,5 +161,9 @@ function onInputClick() {
 
 .option {
   @include field.ui-dropdown-option;
+}
+
+.optionSelected {
+  @include field.ui-dropdown-option-selected;
 }
 </style>

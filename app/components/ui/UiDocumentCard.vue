@@ -92,15 +92,14 @@ function onDownload() {
           <p :class="$style.fileName">{{ file.name }}</p>
           <p :class="$style.fileSize">{{ sizeLabel }}</p>
         </div>
-        <UiButton
-          size="sm"
-          variant="outline"
-          icon="i-arrow-chevron-down"
-          :icon-size="20"
+        <button
+          type="button"
+          :class="$style.downloadButton"
           aria-label="Скачать файл"
-          fit
           @click="onDownload"
-        />
+        >
+          <UIcon name="i-local-download" aria-hidden="true" />
+        </button>
         <UiButton
           v-if="!readonly && !pendingReview"
           size="sm"
@@ -163,6 +162,7 @@ function onDownload() {
 .actions {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: var(--fs-space-1);
 }
 
@@ -172,16 +172,15 @@ function onDownload() {
 
 .card {
   box-sizing: border-box;
-  display: flex;
-  flex-wrap: wrap;
+  display: inline-flex;
   align-items: center;
-  gap: var(--fs-space-2);
-  width: 100%;
-  max-width: rem(520);
-  min-height: rem(68);
-  padding: var(--fs-space-2);
-  border-radius: rem(16);
-  background-color: var(--fs-figma-achromatic-light-gray);
+  gap: rem(12);
+  width: fit-content;
+  max-width: 100%;
+  padding: rem(10) rem(12);
+  border: 1px solid var(--fs-figma-stroke-light-gray);
+  border-radius: rem(12);
+  background-color: var(--fs-figma-achromatic-white);
 }
 
 .fileIcon {
@@ -193,10 +192,9 @@ function onDownload() {
 
 .meta {
   display: flex;
-  flex: 1;
   flex-direction: column;
-  gap: rem(4);
-  min-width: rem(160);
+  gap: rem(2);
+  min-width: 0;
 }
 
 .fileName {
@@ -211,6 +209,37 @@ function onDownload() {
 
   @include typo.fs-text-body;
   color: var(--fs-figma-achromatic-middle-gray);
+}
+
+.downloadButton {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: rem(32);
+  height: rem(32);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--fs-figma-achromatic-black);
+  cursor: pointer;
+  transition: color 0.16s ease;
+
+  &:hover {
+    color: var(--fs-figma-achromatic-middle-gray);
+  }
+
+  &:focus-visible {
+    outline: rem(2) solid var(--fs-color-primary);
+    outline-offset: rem(2);
+  }
+
+  :global(svg) {
+    display: block;
+    width: rem(32);
+    height: rem(32);
+  }
 }
 
 .emptyState {

@@ -33,6 +33,11 @@ const displayValue = computed(() => {
   return matched?.label ?? props.modelValue
 })
 
+function isOptionSelected(option: UiSelectOption): boolean {
+  const value = option.outputValue ?? option.label
+  return props.modelValue === value || props.modelValue === option.label
+}
+
 function selectOption(option: UiSelectOption) {
   emit('update:modelValue', option.outputValue ?? option.label)
   close()
@@ -43,7 +48,7 @@ function selectOption(option: UiSelectOption) {
   <div ref="wrapperRef" :class="$style.root">
     <button
       type="button"
-      :class="[$style.shell, disabled && $style.disabled]"
+      :class="[$style.shell, isOpen && $style.shellOpen, disabled && $style.disabled]"
       :disabled="disabled"
       :aria-expanded="isOpen"
       @click.stop="toggle"
@@ -51,15 +56,20 @@ function selectOption(option: UiSelectOption) {
       <span :class="[displayValue ? $style.value : $style.placeholder]">
         {{ displayValue || placeholder }}
       </span>
-      <UIcon name="i-arrow-chevron-dropdown" :class="$style.icon" aria-hidden="true" />
+      <UIcon
+        :name="isOpen ? 'i-arrow-chevron-dropdown-open' : 'i-arrow-chevron-dropdown'"
+        :class="[$style.icon, isOpen && $style.iconOpen]"
+        aria-hidden="true"
+      />
     </button>
 
     <ul v-if="isOpen" :class="$style.dropdown" role="listbox">
       <li
         v-for="option in options"
         :key="option.value"
-        :class="$style.option"
+        :class="[$style.option, isOptionSelected(option) && $style.optionSelected]"
         role="option"
+        :aria-selected="isOptionSelected(option)"
         @click="selectOption(option)"
       >
         {{ option.label }}
@@ -69,8 +79,8 @@ function selectOption(option: UiSelectOption) {
 </template>
 
 <style module lang="scss">
-@use '~/assets/styles/tools/form-field' as field;
 @use '~/assets/styles/tools/functions' as *;
+@use '~/assets/styles/tools/form-field' as field;
 
 .root {
   position: relative;
@@ -78,11 +88,16 @@ function selectOption(option: UiSelectOption) {
 }
 
 .shell {
-  @include field.ui-control-shell;
+  @include field.ui-dropdown-control-shell;
   justify-content: space-between;
-  gap: var(--fs-space-1);
+  gap: rem(8);
   cursor: pointer;
   text-align: left;
+  font: inherit;
+}
+
+.shellOpen {
+  @include field.ui-control-shell-open;
 }
 
 .disabled {
@@ -91,21 +106,22 @@ function selectOption(option: UiSelectOption) {
 }
 
 .value {
-  @include field.ui-control-text;
+  @include field.ui-dropdown-control-text;
   flex: 1;
 }
 
 .placeholder {
-  @include field.ui-control-text;
+  @include field.ui-dropdown-control-text;
   flex: 1;
   color: var(--fs-figma-achromatic-middle-gray);
 }
 
 .icon {
-  flex-shrink: 0;
-  width: rem(24);
-  height: rem(24);
-  color: var(--fs-figma-achromatic-middle-gray);
+  @include field.ui-dropdown-chevron;
+}
+
+.iconOpen {
+  @include field.ui-dropdown-chevron-open;
 }
 
 .dropdown {
@@ -114,5 +130,9 @@ function selectOption(option: UiSelectOption) {
 
 .option {
   @include field.ui-dropdown-option;
+}
+
+.optionSelected {
+  @include field.ui-dropdown-option-selected;
 }
 </style>
