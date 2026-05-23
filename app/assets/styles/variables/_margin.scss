@@ -30,7 +30,7 @@
   @include margin-token('block', 72, 80, 134);
 
   /* Отступ от дополнительной навигации по вертикали (моб.: панель снизу, 28px от края) */
-  @include margin-token('nav-vertical', 28, 40, 90);
+  @include margin-token('nav-vertical', 28, 40, 78);
 
   /* Между блоком заголовка/подзаголовка и контентом */
   @include margin-token('title-content', 32, 32, 56);
