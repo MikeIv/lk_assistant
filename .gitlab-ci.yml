@@ -1,0 +1,57 @@
+stages:
+  - build
+  - deploy
+
+.build_frontend:
+  stage: build
+  image: node:20.19-alpine
+  variables:
+    HUSKY: '0'
+  before_script:
+    - corepack enable
+    - pnpm install --frozen-lockfile
+  script:
+    - pnpm run build
+  artifacts:
+    paths:
+      - .output
+  tags:
+    - docker
+    - $CI_JOB_STAGE
+
+build frontend:
+  extends: .build_frontend
+  environment:
+    name: $CI_COMMIT_BRANCH
+    url: https://olimp.portalrent.ru
+  rules:
+    - if: $CI_COMMIT_BRANCH != 'portal' && $CI_COMMIT_REF_PROTECTED == 'true'
+
+.deploy_frontend:
+  stage: deploy
+  script:
+    - rm -rf /var/www/portalrent/${CI_PROJECT_NAME}/${CI_COMMIT_BRANCH}/.output
+    - cd /var/www/portalrent/${CI_PROJECT_NAME}/${CI_COMMIT_BRANCH}
+    - git fetch ${CI_REPOSITORY_URL} ${CI_COMMIT_BRANCH}
+    - git reset --hard FETCH_HEAD
+    - git clean -fd
+    - cp -rf ${CI_PROJECT_DIR}/.output /var/www/portalrent/${CI_PROJECT_NAME}/${CI_COMMIT_BRANCH}
+    - |
+      # MM notification publish
+      curl -s -X POST -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Bearer ${MM_BOT}" \
+        -d "{\"channel_id\":\"${MM_GROUP}\",\"message\":\"Загружено [**${CI_PROJECT_NAME} / ${CI_ENVIRONMENT_NAME}**](${CI_ENVIRONMENT_URL})\nВетка: ${CI_COMMIT_BRANCH}\nАвтор: ${CI_COMMIT_AUTHOR}\nПравка: [${CI_COMMIT_TITLE}](${CI_PROJECT_URL}/-/commit/${CI_COMMIT_SHA})\"}" \
+        https://mm.grandfs-develop.ru/api/v4/posts > /dev/null
+
+deploy production:
+  extends: .deploy_frontend
+  environment:
+    name: $CI_COMMIT_BRANCH
+    url: https://olimp.portalrent.ru
+  needs:
+    - build frontend
+  only:
+    refs:
+      - main
+  tags:
+    - shell
+    - grand232
