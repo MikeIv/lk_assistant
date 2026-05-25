@@ -47,6 +47,13 @@ const navItems: CabinetNavItem[] = [
     bannerGradientTo: 'var(--fs-figma-vertical-surfing)',
   },
   {
+    to: '/premises',
+    label: 'Моё помещение',
+    icon: 'i-local-nav-premises',
+    accent: 'var(--fs-figma-main-building-sport-complex)',
+    bannerGradientTo: 'var(--fs-figma-vertical-children)',
+  },
+  {
     to: '/data',
     label: 'Мои данные',
     icon: 'i-local-nav-data',

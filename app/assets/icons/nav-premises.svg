@@ -1,0 +1,21 @@
+<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path
+    d="M5 12L15 4L25 12V26H5V12Z"
+    fill="currentColor"
+    opacity="0.35"
+  />
+  <path
+    d="M7 13L15 6.5L23 13V25H7V13Z"
+    fill="currentColor"
+  />
+  <path
+    d="M13 17H17V25H13V17Z"
+    fill="currentColor"
+    opacity="0.72"
+  />
+  <path
+    d="M9 15H11V17H9V15ZM19 15H21V17H19V15ZM9 19H11V21H9V19ZM19 19H21V21H19V19Z"
+    fill="currentColor"
+    opacity="0.72"
+  />
+</svg>
