@@ -62,7 +62,6 @@ deploy production:
     - build frontend
   only:
     refs:
-      - develop
       - main
   tags:
     - shell
