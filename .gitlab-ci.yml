@@ -32,13 +32,21 @@ build frontend:
 .deploy_frontend:
   stage: deploy
   script:
-    - rm -rf /var/www/portalrent/${CI_PROJECT_NAME}/${CI_COMMIT_BRANCH}/.output
-    - cd /var/www/portalrent/${CI_PROJECT_NAME}/${CI_COMMIT_BRANCH}
-    - git fetch ${CI_REPOSITORY_URL} ${CI_COMMIT_BRANCH}
-    - git reset --hard FETCH_HEAD
-    - git clean -fd
-    - cp -rf ${CI_PROJECT_DIR}/.output /var/www/portalrent/${CI_PROJECT_NAME}/${CI_COMMIT_BRANCH}
-    - test -f /var/www/portalrent/${CI_PROJECT_NAME}/${CI_COMMIT_BRANCH}/.output/public/index.html
+    - DEPLOY_DIR=/var/www/portalrent/${CI_PROJECT_NAME}/${CI_COMMIT_BRANCH}
+    - mkdir -p "$(dirname "${DEPLOY_DIR}")"
+    - |
+      if [ ! -d "${DEPLOY_DIR}/.git" ]; then
+        rm -rf "${DEPLOY_DIR}"
+        git clone --branch "${CI_COMMIT_BRANCH}" --depth 1 "${CI_REPOSITORY_URL}" "${DEPLOY_DIR}"
+      else
+        cd "${DEPLOY_DIR}"
+        git fetch "${CI_REPOSITORY_URL}" "${CI_COMMIT_BRANCH}"
+        git reset --hard FETCH_HEAD
+        git clean -fd
+      fi
+    - rm -rf ${DEPLOY_DIR}/.output
+    - cp -rf ${CI_PROJECT_DIR}/.output ${DEPLOY_DIR}/
+    - test -f ${DEPLOY_DIR}/.output/public/index.html
     - |
       # MM notification publish
       curl -s -X POST -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Bearer ${MM_BOT}" \
