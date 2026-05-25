@@ -4,11 +4,11 @@ stages:
 
 .build_frontend:
   stage: build
-  image: node:20.19-alpine
+  image: node:22-alpine
   variables:
     HUSKY: '0'
   before_script:
-    # Corepack из node:20-alpine ломается на pnpm 11 (ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING)
+    # pnpm 11.1.1 (packageManager) требует Node >= 22.13; на Node 20 падает с node:sqlite
     - npm install -g pnpm@11.1.1
     - pnpm install --frozen-lockfile
   script:
