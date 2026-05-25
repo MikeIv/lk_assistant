@@ -7,6 +7,7 @@ stages:
   image: node:22-alpine
   variables:
     HUSKY: '0'
+    NODE_ENV: production
   before_script:
     # pnpm 11.1.1 (packageManager) требует Node >= 22.13; на Node 20 падает с node:sqlite
     - npm install -g pnpm@11.1.1
@@ -37,6 +38,7 @@ build frontend:
     - git reset --hard FETCH_HEAD
     - git clean -fd
     - cp -rf ${CI_PROJECT_DIR}/.output /var/www/portalrent/${CI_PROJECT_NAME}/${CI_COMMIT_BRANCH}
+    - test -f /var/www/portalrent/${CI_PROJECT_NAME}/${CI_COMMIT_BRANCH}/.output/public/index.html
     - |
       # MM notification publish
       curl -s -X POST -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Bearer ${MM_BOT}" \
@@ -52,6 +54,7 @@ deploy production:
     - build frontend
   only:
     refs:
+      - develop
       - main
   tags:
     - shell
