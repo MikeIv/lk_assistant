@@ -88,6 +88,8 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+    /** Как Shelk / Booking: статическая SPA-сборка для nginx без Node-процесса. */
+    static: !isDev,
     compressPublicAssets: true,
   },
 })
