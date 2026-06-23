@@ -1,0 +1,48 @@
+---
+description: LK Arenda Olimp — фаза, команды, эталоны, MCP, ограничения
+alwaysApply: true
+---
+
+# LK_arenda_Olimp
+
+**Пакет:** `LK_arenda_Olimp` · **Remote:** GitLab `olimpprojects/lk-assistant` · **SSR:** `false` (SPA).
+
+**Фаза:** активная разработка ЛК — отчёты с API/mock; остальные разделы — заглушки или моки. Детали: `.planning/PROJECT.md`, `README.md`.
+
+## Команды
+
+```bash
+pnpm dev | typecheck | verify | build | lint:all
+```
+
+## Эталоны (читать, не искать)
+
+| Что              | Путь                                                  |
+| ---------------- | ----------------------------------------------------- |
+| API client       | `app/composables/useApi.ts`                            |
+| Server HTTP      | `server/utils/serverApi.ts`                           |
+| Роли ЛК          | `app/composables/useCabinetRole.ts`                   |
+| Навигация ЛК     | `app/composables/useCabinetNav.ts`                    |
+| Отчёты (API/mock) | `app/composables/reports/useReports.ts`              |
+| Таблица отчётов  | `app/composables/reports/useReportsTable.ts`          |
+| Shell ЛК         | `app/components/cabinet/CabinetSidebar.vue`           |
+| UI Kit кнопка    | `app/components/ui/UiButton.vue`                      |
+| Типы отчётов     | `shared/types/reports.ts`                             |
+| Нормализация API | `shared/utils/reportsNormalize.ts`                    |
+
+Стек и код-стиль — `nuxt-template.mdc` (при правках `app/`, `server/`, `shared/`).
+
+## MCP
+
+- Доки библиотек → **context7**
+- Nuxt API / модули → **nuxt_remote**
+- UI Kit Figma → **figma**
+- Код проекта → read/grep; широкий поиск → Task explore
+
+## Ограничения
+
+- GitLab; коммиты — по просьбе; не коммитить `.env`
+- Не включать `ssr: true` без запроса; не трогать `srcDir`, ESLint/Husky pipeline, массовые `--fs-*`, рефактор `useApi`/`serverApi` без запроса
+- `NUXT_PUBLIC_CONTRACT_ID` — временный заголовок отчётов до auth
+- Деплой: `.gitlab-ci.yml` → `olimp.portalrent.ru` (ветка `main`)
+- **M+:** `cp .planning/brief-template.md .planning/brief.md`

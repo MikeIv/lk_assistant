@@ -72,6 +72,7 @@ function toggleCollapsed() {
 </template>
 
 <style module lang="scss">
+@use 'sass:list';
 @use '~/assets/styles/tools/functions' as *;
 @use '~/assets/styles/tools/typography' as typo;
 
@@ -82,7 +83,7 @@ $sidebar-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: $sidebar-transition-duration;
   transition-timing-function: $sidebar-transition-easing;
 
-  @if length($properties) > 0 {
+  @if list.length($properties) > 0 {
     transition-property: $properties;
   }
 }

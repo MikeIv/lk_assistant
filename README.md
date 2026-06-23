@@ -90,7 +90,7 @@ shared/types, shared/utils
 docs/                   # продуктовая документация (по мере появления)
 ```
 
-Соглашения по стеку и верстке — в `.cursor/rules/` (локально, в Git не коммитятся).
+Соглашения по стеку, workflow агента и верстке — в `.cursor/rules/`, `AGENTS.md`, `.planning/PROJECT.md`.
 
 ## HTTP API
 

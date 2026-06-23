@@ -58,6 +58,7 @@ function toggleCollapsed() {
 </template>
 
 <style module lang="scss">
+@use 'sass:list';
 @use '~/assets/styles/tools/functions' as *;
 @use '~/assets/styles/tools/mixins' as mq;
 @use '~/assets/styles/tools/typography' as typo;
@@ -69,7 +70,7 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: $nav-transition-duration;
   transition-timing-function: $nav-transition-easing;
 
-  @if length($properties) > 0 {
+  @if list.length($properties) > 0 {
     transition-property: $properties;
   }
 }

@@ -19,12 +19,13 @@ logs
 .fleet
 .idea
 
-# Cursor / агент — только локально (не в remote)
-.cursor/
-AGENTS.md
+# Legacy / export
 .cursorrules
 CURSOR_RULES_EXPORT.md
 .vscode
+
+# Cursor AI local configuration
+.cursorignore
 
 # Local env files
 .env
@@ -32,4 +33,6 @@ CURSOR_RULES_EXPORT.md
 !.env.example
 
 # Планирование — локальные файлы сессии
-.planning/
+.planning/brief.md
+.planning/state.md
+.planning/plan.md
