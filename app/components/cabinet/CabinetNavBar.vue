@@ -453,11 +453,11 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  gap: rem(24);
+  gap: rem(8);
   width: max-content;
   min-width: rem(200);
   margin-top: rem(-1);
-  padding: rem(12) rem(24) rem(16);
+  padding: rem(10) rem(16) rem(14);
   border-radius: rem(16);
   background: var(--nav-submenu-accent);
   backdrop-filter: blur(20px);
@@ -469,6 +469,10 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
   touch-action: pan-x;
   scrollbar-width: none;
 
+  --nav-submenu-link-hover-bg: rgb(255 255 255 / 0.14);
+  --nav-submenu-link-active-bg: rgb(255 255 255 / 0.3);
+  --nav-submenu-link-active-hover-bg: rgb(255 255 255 / 0.38);
+
   &::-webkit-scrollbar {
     display: none;
   }
@@ -476,6 +480,10 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
 
 .submenuLink {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: rem(6) rem(12);
+  border-radius: rem(10);
   font-family: var(--fs-font-sans);
   font-size: rem(13);
   font-weight: 500;
@@ -483,20 +491,37 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
   color: var(--fs-figma-achromatic-white);
   text-decoration: none;
   white-space: nowrap;
+  background: transparent;
+  box-shadow: none;
 
-  &:hover {
-    opacity: 0.88;
+  @include nav-transition(background-color, color, box-shadow, transform);
+
+  &:hover:not(.submenuLinkActive) {
+    background: var(--nav-submenu-link-hover-bg);
+  }
+
+  &:active:not(.submenuLinkActive) {
+    transform: scale(0.98);
   }
 
   &:focus-visible {
     outline: rem(2) solid var(--fs-figma-achromatic-white);
     outline-offset: rem(2);
-    border-radius: rem(4);
   }
 }
 
 .submenuLinkActive {
   font-weight: 600;
+  background: var(--nav-submenu-link-active-bg);
+  box-shadow: 0 rem(1) rem(6) rgb(0 0 0 / 0.1);
+
+  &:hover {
+    background: var(--nav-submenu-link-active-hover-bg);
+  }
+
+  &:active {
+    transform: scale(0.99);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -507,6 +532,15 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
 
   .submenu {
     backdrop-filter: none;
+  }
+
+  .submenuLink {
+    transition: none;
+
+    &:active,
+    &.submenuLinkActive:active {
+      transform: none;
+    }
   }
 }
 </style>

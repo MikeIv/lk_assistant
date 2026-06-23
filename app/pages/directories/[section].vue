@@ -1,28 +1,18 @@
 <script setup lang="ts">
 const route = useRoute()
-const { items } = useCabinetDirectoriesNav()
-
-const sectionItem = computed(() =>
-  items.find((item) => item.to === `/directories/${String(route.params.section)}`),
-)
+const sectionItem = computed(() => resolveDirectoryNavItemFromRoute(route))
 
 watch(
   () => route.params.section,
   () => {
     if (!sectionItem.value) {
-      void navigateTo('/', { replace: true })
+      void navigateTo('/directories/premises', { replace: true })
     }
   },
   { immediate: true },
 )
 
 const { bannerProps } = useCabinetSectionBanner()
-
-useHead(
-  computed(() => ({
-    title: sectionItem.value ? `${sectionItem.value.label} — Справочники` : 'Справочники',
-  })),
-)
 </script>
 
 <template>

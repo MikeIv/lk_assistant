@@ -21,6 +21,13 @@ function resolveNavItemByPath(
     return undefined
   }
 
+  const directoryMatch = directoryItems.find(
+    (item) => path === item.to || path.startsWith(`${item.to}/`),
+  )
+  if (directoryMatch) {
+    return directoryMatch
+  }
+
   const topMatch = topItems.find((item) => {
     if (item.to === '/') {
       return false
@@ -28,11 +35,7 @@ function resolveNavItemByPath(
     return path === item.to || path.startsWith(`${item.to}/`)
   })
 
-  if (topMatch) {
-    return topMatch
-  }
-
-  return directoryItems.find((item) => path === item.to || path.startsWith(`${item.to}/`))
+  return topMatch
 }
 
 /**

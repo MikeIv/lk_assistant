@@ -38,6 +38,23 @@ export const directoryNavItems: CabinetDirectoryNavItem[] = [
   },
 ]
 
+export function findDirectoryNavItem(section: string): CabinetDirectoryNavItem | undefined {
+  return directoryNavItems.find((item) => item.to === `/directories/${section}`)
+}
+
+export function resolveDirectoryNavItemFromRoute(route: {
+  path: string
+  params: Record<string, string | string[] | undefined>
+}): CabinetDirectoryNavItem | undefined {
+  const section = route.params.section
+  if (typeof section === 'string' && section) {
+    return findDirectoryNavItem(section)
+  }
+
+  const match = route.path.match(/^\/directories\/([^/?#]+)/)
+  return match?.[1] ? findDirectoryNavItem(match[1]) : undefined
+}
+
 export function useCabinetDirectoriesNav() {
   const route = useRoute()
 

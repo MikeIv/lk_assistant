@@ -1,13 +1,20 @@
 <script setup lang="ts">
-useHead({
-  title: 'Справочники',
-})
+const route = useRoute()
+
+const sectionItem = computed(() => resolveDirectoryNavItemFromRoute(route))
+const pageTitle = computed(() => sectionItem.value?.label ?? 'Справочники')
+
+useHead(
+  computed(() => ({
+    title: pageTitle.value === 'Справочники' ? 'Справочники' : `${pageTitle.value} — Справочники`,
+  })),
+)
 </script>
 
 <template>
   <div :class="$style.root">
     <header :class="$style.header">
-      <h2 :class="$style.title">Справочники</h2>
+      <h2 :class="$style.title">{{ pageTitle }}</h2>
     </header>
     <NuxtPage />
   </div>
