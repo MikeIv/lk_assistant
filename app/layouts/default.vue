@@ -73,6 +73,7 @@ const { open: footerOpen, close: closeFooter } = useCabinetFooter()
     'main';
   height: 100dvh;
   min-height: 0;
+  overflow-x: clip;
 }
 
 .headerWrap {

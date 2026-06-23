@@ -107,6 +107,9 @@ function selectTopNavItem(_item: CabinetNavItem) {
 }
 
 function toggleCollapsed() {
+  if (!collapsed.value) {
+    expandedNavKey.value = null
+  }
   collapsed.value = !collapsed.value
 }
 
@@ -283,6 +286,7 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
   width: 100%;
   min-height: rem(84);
   padding-right: var(--nav-toggle-slot);
+  overflow-x: clip;
 
   @container cabinet-nav (max-width: rem(960)) {
     min-height: rem(128);
@@ -329,7 +333,6 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
   justify-content: center;
   width: 100%;
   min-width: 0;
-  overflow: visible;
   pointer-events: auto;
 }
 
