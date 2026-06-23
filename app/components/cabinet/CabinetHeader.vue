@@ -29,7 +29,7 @@ const { open: footerOpen, toggle: toggleFooter } = useCabinetFooter()
     </div>
 
     <div :class="$style.lead">
-      <h1 :class="$style.title">Личный кабинет арендатора</h1>
+      <h1 :class="$style.title">Личный кабинет сотрудника</h1>
       <p :class="$style.subtitle">ТРЦ «Олимпийский»</p>
     </div>
 

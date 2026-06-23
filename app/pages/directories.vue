@@ -1,19 +1,17 @@
 <script setup lang="ts">
-const { bannerProps } = useCabinetSectionBanner('/applications')
-
 useHead({
-  title: 'Мои заявки',
+  title: 'Справочники',
 })
 </script>
 
 <template>
-  <section :class="$style.root">
+  <div :class="$style.root">
     <header :class="$style.header">
-      <h2 :class="$style.title">Мои заявки</h2>
+      <h2 :class="$style.title">Справочники</h2>
+      <CabinetDirectoriesNav />
     </header>
-
-    <UiPromoBanner v-if="bannerProps" v-bind="bannerProps" />
-  </section>
+    <NuxtPage />
+  </div>
 </template>
 
 <style module lang="scss">
@@ -24,6 +22,9 @@ useHead({
 }
 
 .header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-margin-title-content);
   margin: 0;
 }
 

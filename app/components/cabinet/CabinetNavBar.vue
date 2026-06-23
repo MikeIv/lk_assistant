@@ -2,13 +2,11 @@
 const collapsed = useState('cabinet-nav-collapsed', () => false)
 const { items, isNavActive } = useCabinetNav()
 
-const collapseTriggerId = 'cabinet-nav-collapse-trigger'
-
 const arrowToggleBind = {
   type: 'button' as const,
   variant: 'primary' as const,
   size: 'arrow' as const,
-  iconSize: 20,
+  iconSize: 16,
 }
 
 function toggleCollapsed() {
@@ -19,21 +17,6 @@ function toggleCollapsed() {
 <template>
   <nav :class="$style.root" aria-label="Разделы личного кабинета">
     <div :class="$style.navCluster">
-      <div :class="$style.toggleRow">
-        <UiButton
-          :id="collapseTriggerId"
-          v-bind="arrowToggleBind"
-          :icon="collapsed ? 'i-arrow-chevron-right' : 'i-arrow-chevron-left'"
-          :aria-label="collapsed ? 'Развернуть меню навигации' : 'Свернуть меню навигации'"
-          :aria-expanded="!collapsed"
-          aria-controls="cabinet-nav-segment"
-          @click="toggleCollapsed"
-        />
-        <label :class="$style.toggleCaption" :for="collapseTriggerId">
-          {{ collapsed ? 'Развернуть меню' : 'Свернуть меню' }}
-        </label>
-      </div>
-
       <div :class="$style.menuHost">
         <div
           id="cabinet-nav-segment"
@@ -53,6 +36,18 @@ function toggleCollapsed() {
           </div>
         </div>
       </div>
+
+      <div :class="$style.toggleRow">
+        <UiButton
+          id="cabinet-nav-collapse-trigger"
+          v-bind="arrowToggleBind"
+          :icon="collapsed ? 'i-arrow-chevron-left' : 'i-arrow-chevron-right'"
+          :aria-label="collapsed ? 'Развернуть меню навигации' : 'Свернуть меню навигации'"
+          :aria-expanded="!collapsed"
+          aria-controls="cabinet-nav-segment"
+          @click="toggleCollapsed"
+        />
+      </div>
     </div>
   </nav>
 </template>
@@ -61,7 +56,6 @@ function toggleCollapsed() {
 @use 'sass:list';
 @use '~/assets/styles/tools/functions' as *;
 @use '~/assets/styles/tools/mixins' as mq;
-@use '~/assets/styles/tools/typography' as typo;
 
 $nav-transition-duration: 0.28s;
 $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
@@ -84,15 +78,14 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
 
 .root {
   --nav-inline-margin: var(--fs-margin-card);
-  --nav-toggle-slot: calc(#{rem(116)} + var(--fs-space-2));
+  --nav-toggle-size: #{rem(36)};
+  --nav-toggle-slot: calc(var(--nav-toggle-size) + #{rem(8)});
 
-  position: fixed;
-  z-index: 20;
-  right: 0;
-  bottom: var(--fs-margin-nav-vertical);
-  left: 0;
+  position: relative;
+  z-index: 5;
   box-sizing: border-box;
   width: 100%;
+  padding-block: var(--fs-space-2);
   padding-inline: var(--nav-inline-margin);
   pointer-events: none;
 
@@ -112,60 +105,46 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
   box-sizing: border-box;
   width: 100%;
   min-height: rem(84);
-  padding-left: var(--nav-toggle-slot);
+  padding-right: var(--nav-toggle-slot);
 
   @container cabinet-nav (max-width: rem(960)) {
-    min-height: rem(156);
-    padding-top: rem(72);
-    padding-left: 0;
+    min-height: rem(128);
+    padding-top: calc(var(--nav-toggle-size) + #{rem(12)});
+    padding-right: 0;
   }
 }
 
 .toggleRow {
   position: absolute;
   top: 50%;
-  left: 0;
+  right: 0;
   z-index: 2;
   box-sizing: border-box;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: var(--fs-space-1);
-  width: max-content;
-  max-width: 100%;
-  padding: var(--fs-space-2) var(--fs-space-1);
-  @include nav-shell-surface;
+  justify-content: center;
+  padding: rem(4);
+  border: 1px solid var(--fs-figma-stroke-light-gray);
+  border-radius: rem(12);
+  background: var(--fs-figma-achromatic-white);
   transform: translateY(-50%);
-  pointer-events: none;
+  pointer-events: auto;
 
   @container cabinet-nav (max-width: rem(960)) {
     top: 0;
+    right: 0;
+    left: auto;
     transform: none;
   }
 }
 
-.toggleCaption {
-  overflow: hidden;
-  color: var(--fs-color-text);
-  text-align: center;
-  white-space: nowrap;
-  opacity: 1;
-  cursor: pointer;
-  user-select: none;
-  pointer-events: auto;
-
-  @include typo.fs-text-tag;
-  font-weight: 600;
-  line-height: 1.2;
-
-  &:hover {
-    text-decoration: underline;
-    text-underline-offset: rem(2);
-  }
-}
-
 .toggleRow :global(button) {
-  pointer-events: auto;
+  min-width: var(--nav-toggle-size);
+  width: var(--nav-toggle-size);
+  max-width: var(--nav-toggle-size);
+  min-height: var(--nav-toggle-size);
+  height: var(--nav-toggle-size);
+  border-radius: rem(8);
 }
 
 .menuHost {
@@ -190,7 +169,7 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .shellWrapCollapsed {
-  transform: translateX(calc(-100% - 100vw));
+  transform: translateX(calc(100% + 100vw));
   pointer-events: none;
 }
 
@@ -218,10 +197,6 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
 @media (prefers-reduced-motion: reduce) {
   .shellWrap {
     transition: none;
-  }
-
-  .toggleRow,
-  .shellWrap {
     backdrop-filter: none;
   }
 }

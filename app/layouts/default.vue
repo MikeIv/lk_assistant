@@ -10,6 +10,10 @@ const { open: footerOpen, close: closeFooter } = useCabinetFooter()
       </div>
     </header>
 
+    <div :class="$style.navWrap">
+      <CabinetNavBar />
+    </div>
+
     <main :class="$style.main">
       <div :class="$style.content">
         <div :class="$style.shell">
@@ -17,8 +21,6 @@ const { open: footerOpen, close: closeFooter } = useCabinetFooter()
         </div>
       </div>
     </main>
-
-    <CabinetNavBar />
 
     <Teleport to="body">
       <Transition name="cabinet-footer">
@@ -64,9 +66,10 @@ const { open: footerOpen, close: closeFooter } = useCabinetFooter()
 
 .layout {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto auto 1fr;
   grid-template-areas:
     'header'
+    'nav'
     'main';
   height: 100dvh;
   min-height: 0;
@@ -79,6 +82,14 @@ const { open: footerOpen, close: closeFooter } = useCabinetFooter()
   background: var(--fs-color-cabinet-header-glass);
   border-bottom: 1px solid var(--fs-color-cabinet-header-border);
   backdrop-filter: blur(38px);
+}
+
+.navWrap {
+  grid-area: nav;
+  flex-shrink: 0;
+  min-width: 0;
+  z-index: 9;
+  background: var(--fs-figma-achromatic-light-gray);
 }
 
 .shell {
