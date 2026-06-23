@@ -5,7 +5,7 @@ export interface CabinetDirectoryNavItem {
   bannerGradientTo: string
 }
 
-const directoryItems: CabinetDirectoryNavItem[] = [
+export const directoryNavItems: CabinetDirectoryNavItem[] = [
   {
     to: '/directories/premises',
     label: 'Помещения',
@@ -46,5 +46,5 @@ export function useCabinetDirectoriesNav() {
     return path === to || path.startsWith(`${to}/`)
   }
 
-  return { items: directoryItems, isDirectoryNavActive }
+  return { items: directoryNavItems, isDirectoryNavActive }
 }

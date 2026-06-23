@@ -5,9 +5,12 @@
  */
 const props = withDefaults(
   defineProps<{
-    to: string
+    /** Без `to` — кнопка-триггер подменю (клик, не навигация). */
+    to?: string
     label: string
     active?: boolean
+    /** Подменю открыто — нижние углы без скругления для стыка с плашкой. */
+    submenuOpen?: boolean
     /** CSS-цвет акцента (полоска / заливка Active) */
     accent?: string
     /** Пункт «Главная» (без полоски, active — metallic border) */
@@ -15,33 +18,55 @@ const props = withDefaults(
   }>(),
   {
     active: false,
+    submenuOpen: false,
+    to: undefined,
     accent: 'var(--fs-figma-vertical-shop)',
     home: false,
   },
 )
 
+const emit = defineEmits<{
+  click: []
+}>()
+
+const style = useCssModule()
+const isLink = computed(() => Boolean(props.to))
+
 const rootStyle = computed(() => ({
   '--ui-nav-accent': props.accent,
+}))
+
+const sharedClass = computed(() => ({
+  [style.active]: props.active,
+  [style.home]: props.home,
+  [style.segment]: !props.home,
+  [style.submenuOpen]: props.submenuOpen,
 }))
 </script>
 
 <template>
   <NuxtLink
-    :to="props.to"
-    :class="[
-      $style.root,
-      {
-        [$style.active]: props.active,
-        [$style.home]: props.home,
-        [$style.segment]: !props.home,
-      },
-    ]"
+    v-if="isLink"
+    :to="props.to!"
+    :class="[style.root, sharedClass]"
     :style="rootStyle"
     :aria-current="props.active ? 'page' : undefined"
+    @click="emit('click')"
   >
     <span :class="$style.label">{{ props.label }}</span>
-    <span v-if="!props.home" :class="$style.indicator" aria-hidden="true" />
+    <span v-if="!props.home && !props.active" :class="$style.indicator" aria-hidden="true" />
   </NuxtLink>
+  <button
+    v-else
+    type="button"
+    :class="[style.root, sharedClass]"
+    :style="rootStyle"
+    v-bind="$attrs"
+    @click="emit('click')"
+  >
+    <span :class="$style.label">{{ props.label }}</span>
+    <span v-if="!props.home && !props.active" :class="$style.indicator" aria-hidden="true" />
+  </button>
 </template>
 
 <style module lang="scss">
@@ -55,6 +80,8 @@ const rootStyle = computed(() => ({
   align-items: center;
   justify-content: center;
   margin: 0;
+  padding: 0;
+  font: inherit;
   text-decoration: none;
   color: var(--fs-figma-achromatic-black);
   background: var(--fs-color-cabinet-nav-segment-bg);
@@ -79,7 +106,9 @@ const rootStyle = computed(() => ({
   min-height: rem(45);
   padding: rem(10) rem(18) rem(11);
   border-radius: rem(12);
-  gap: 0;
+  gap: rem(4);
+  color: var(--fs-figma-achromatic-black);
+  background: var(--fs-color-cabinet-nav-segment-bg);
 }
 
 .home {
@@ -111,15 +140,23 @@ const rootStyle = computed(() => ({
 }
 
 .segment.active {
+  justify-content: center;
+  gap: 0;
   min-height: rem(45);
-  padding-block: rem(11);
+  padding: rem(10) rem(18);
   color: var(--fs-figma-achromatic-white);
   background: var(--ui-nav-accent);
   border-color: var(--ui-nav-accent);
+}
 
-  .indicator {
-    display: none;
-  }
+.segment.submenuOpen {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.segment.submenuOpen.active {
+  border-top-left-radius: rem(12);
+  border-top-right-radius: rem(12);
 }
 
 .home.active {
@@ -149,8 +186,15 @@ const rootStyle = computed(() => ({
   }
 
   .segment.active {
+    justify-content: center;
+    gap: 0;
     min-height: rem(50);
-    padding-block: rem(12);
+    padding: rem(11) rem(22);
+  }
+
+  .segment.submenuOpen.active {
+    border-top-left-radius: rem(15);
+    border-top-right-radius: rem(15);
   }
 }
 

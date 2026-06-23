@@ -8,7 +8,6 @@ useHead({
   <div :class="$style.root">
     <header :class="$style.header">
       <h2 :class="$style.title">Справочники</h2>
-      <CabinetDirectoriesNav />
     </header>
     <NuxtPage />
   </div>
