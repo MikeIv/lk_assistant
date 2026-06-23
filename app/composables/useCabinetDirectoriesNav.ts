@@ -58,10 +58,12 @@ export function resolveDirectoryNavItemFromRoute(route: {
 export function useCabinetDirectoriesNav() {
   const route = useRoute()
 
+  const currentDirectoryItem = computed(() => resolveDirectoryNavItemFromRoute(route))
+
   function isDirectoryNavActive(to: string): boolean {
     const path = route.path
     return path === to || path.startsWith(`${to}/`)
   }
 
-  return { items: directoryNavItems, isDirectoryNavActive }
+  return { items: directoryNavItems, isDirectoryNavActive, currentDirectoryItem }
 }

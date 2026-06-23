@@ -1,8 +1,7 @@
 <script setup lang="ts">
-const route = useRoute()
+const { currentDirectoryItem } = useCabinetDirectoriesNav()
 
-const sectionItem = computed(() => resolveDirectoryNavItemFromRoute(route))
-const pageTitle = computed(() => sectionItem.value?.label ?? 'Справочники')
+const pageTitle = computed(() => currentDirectoryItem.value?.label ?? 'Справочники')
 
 useHead(
   computed(() => ({

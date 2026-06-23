@@ -1,11 +1,11 @@
 <script setup lang="ts">
 const route = useRoute()
-const sectionItem = computed(() => resolveDirectoryNavItemFromRoute(route))
+const { currentDirectoryItem } = useCabinetDirectoriesNav()
 
 watch(
   () => route.params.section,
   () => {
-    if (!sectionItem.value) {
+    if (!currentDirectoryItem.value) {
       void navigateTo('/directories/premises', { replace: true })
     }
   },
@@ -16,7 +16,7 @@ const { bannerProps } = useCabinetSectionBanner()
 </script>
 
 <template>
-  <section v-if="sectionItem" :class="$style.root">
+  <section v-if="currentDirectoryItem" :class="$style.root">
     <UiPromoBanner v-if="bannerProps" v-bind="bannerProps" />
   </section>
 </template>
