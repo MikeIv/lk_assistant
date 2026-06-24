@@ -265,7 +265,7 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 5;
   box-sizing: border-box;
   width: 100%;
-  padding-block: var(--fs-space-2);
+  padding-block: var(--fs-space-1);
   padding-inline: var(--nav-inline-margin);
   pointer-events: none;
 
@@ -345,7 +345,7 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
   width: fit-content;
   max-width: 100%;
   min-width: 0;
-  padding: var(--fs-space-2);
+  padding: var(--fs-space-1);
   overflow: visible;
   @include nav-shell-surface;
   transform: translateX(0);

@@ -22,7 +22,7 @@
   }
 }
 
-/* Область прокрутки main: вертикальные отступы, горизонталь — в cabinet-shell */
+/* Область прокрутки main: нижний отступ, горизонталь — в cabinet-shell */
 @mixin cabinet-main-content {
   box-sizing: border-box;
   display: flex;
@@ -32,7 +32,7 @@
   width: 100%;
   min-height: 0;
   overflow: auto;
-  padding-block: var(--fs-margin-title-content);
+  padding-block-end: var(--fs-space-3);
 }
 
 @mixin cabinet-main-content-inner {
