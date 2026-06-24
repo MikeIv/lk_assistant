@@ -19,20 +19,21 @@ stages:
       - .output
   tags:
     - docker
-    - $CI_JOB_STAGE
 
 build frontend:
   extends: .build_frontend
   environment:
     name: $CI_COMMIT_BRANCH
-    url: https://olimp.portalrent.ru
+    url: https://brokerolimp.portalrent.ru
   rules:
-    - if: $CI_COMMIT_BRANCH != 'portal' && $CI_COMMIT_REF_PROTECTED == 'true'
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
 
 .deploy_frontend:
   stage: deploy
+  variables:
+    PROJECT_TYPE: nuxt
   script:
-    - DEPLOY_DIR=/var/www/portalrent/${CI_PROJECT_NAME}/${CI_COMMIT_BRANCH}
+    - DEPLOY_DIR=/var/www/${CI_PROJECT_NAME}/${CI_COMMIT_BRANCH}
     - mkdir -p "$(dirname "${DEPLOY_DIR}")"
     - |
       if [ ! -d "${DEPLOY_DIR}/.git" ]; then
@@ -47,6 +48,7 @@ build frontend:
     - rm -rf ${DEPLOY_DIR}/.output
     - cp -rf ${CI_PROJECT_DIR}/.output ${DEPLOY_DIR}/
     - test -f ${DEPLOY_DIR}/.output/public/index.html
+    - ~/devdeployer/deploy.sh start
     - |
       # MM notification publish
       curl -s -X POST -H "Content-Type: application/json; charset=utf-8" -H "Authorization: Bearer ${MM_BOT}" \
@@ -57,12 +59,26 @@ deploy production:
   extends: .deploy_frontend
   environment:
     name: $CI_COMMIT_BRANCH
-    url: https://olimp.portalrent.ru
+    url: https://brokerolimp.portalrent.ru
+    on_stop: destroy frontend
   needs:
     - build frontend
-  only:
-    refs:
-      - main
+  rules:
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
+  tags:
+    - shell
+    - grand232
+
+destroy frontend:
+  stage: deploy
+  environment:
+    name: $CI_COMMIT_BRANCH
+    action: stop
+  script:
+    - ~/devdeployer/deploy.sh stop
+  rules:
+    - if: $CI_COMMIT_REF_PROTECTED == 'true'
+  when: manual
   tags:
     - shell
     - grand232
