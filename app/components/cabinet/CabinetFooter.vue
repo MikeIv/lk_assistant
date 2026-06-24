@@ -5,7 +5,7 @@ const year = new Date().getFullYear()
 <template>
   <footer :class="$style.root">
     <p :class="$style.line">
-      © {{ year }} ТРЦ «Олимпийский». Личный кабинет арендатора.
+      © {{ year }} ТРЦ «Олимпийский». Личный кабинет сотрудника.
     </p>
     <p :class="$style.muted">Техподдержка и реквизиты — по согласованию.</p>
   </footer>

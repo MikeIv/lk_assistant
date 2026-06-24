@@ -29,7 +29,7 @@ function resolveNavItemByPath(
   }
 
   const topMatch = topItems.find((item) => {
-    if (item.to === '/') {
+    if (item.home) {
       return false
     }
     return path === item.to || path.startsWith(`${item.to}/`)

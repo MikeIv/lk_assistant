@@ -22,6 +22,14 @@ export interface CabinetNavItem {
 const navItems: CabinetNavItem[] = [
   {
     to: '/',
+    label: 'Главная',
+    icon: 'i-local-nav-home',
+    accent: 'var(--fs-color-cabinet-nav-indicator-home)',
+    bannerGradientTo: 'var(--fs-figma-metallic-gradient-grey-2)',
+    home: true,
+  },
+  {
+    to: '/current',
     label: 'Текущие дела',
     icon: 'i-local-nav-applications',
     accent: 'var(--fs-figma-vertical-shop)',
@@ -49,13 +57,12 @@ export function useCabinetNav() {
     return path === to || path.startsWith(`${to}/`)
   }
 
-  /** Один активный пункт верхнего уровня: «Справочники» перекрывает «/». */
+  /** Один активный пункт верхнего уровня: «Справочники» не гасит «Главную» на `/`. */
   function isTopNavItemActive(item: CabinetNavItem): boolean {
     const directoriesActive = isNavActive('/directories') || expandedNavKey.value === '/directories'
 
-    if (item.to === '/') {
-      const onHome = route.path === '/' || route.path === ''
-      return onHome && !directoriesActive
+    if (item.home) {
+      return isNavActive('/') && !directoriesActive
     }
 
     if (item.children?.length) {

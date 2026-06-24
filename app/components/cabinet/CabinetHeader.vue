@@ -38,7 +38,7 @@ const { open: footerOpen, toggle: toggleFooter } = useCabinetFooter()
         v-if="isAdmin"
         :class="[$style.roleTag, $style.roleTagActive]"
       >
-        Администратор
+        Брокер
       </span>
       <span v-else :class="$style.roleTag">Пользователь</span>
 

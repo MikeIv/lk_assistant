@@ -1,10 +1,10 @@
 <script setup lang="ts">
 useHead({
-  titleTemplate: (title) => (title ? `${title} | ЛК арендатора` : 'ЛК арендатора | Олимпийский'),
+  titleTemplate: (title) => (title ? `${title} | ЛК сотрудника` : 'ЛК сотрудника | Олимпийский'),
   meta: [
     { charset: 'utf-8' },
     { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-    { name: 'description', content: 'Личный кабинет арендатора ТРЦ «Олимпийский»' },
+    { name: 'description', content: 'Личный кабинет сотрудника ТРЦ «Олимпийский»' },
   ],
   link: [
     { rel: 'icon', href: '/favicon.ico', sizes: 'any' },
