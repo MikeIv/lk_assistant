@@ -2,11 +2,23 @@
 import type { CabinetNavItem } from '~/composables/useCabinetNav'
 
 const collapsed = useState('cabinet-nav-collapsed', () => false)
-const expandedNavKey = useState<string | null>('cabinet-nav-submenu-key', () => null)
 
 const route = useRoute()
-const { items, isTopNavItemActive } = useCabinetNav()
-const { isDirectoryNavActive } = useCabinetDirectoriesNav()
+const { items, isTopNavItemActive, isNavActive } = useCabinetNav()
+const {
+  expandedNavKey,
+  expandedNavItem,
+  submenuReady,
+  submenuStyle,
+  shellWrapEl,
+  flyoutEl,
+  bindTriggerRef,
+  isSubmenuExpanded,
+  toggleSubmenu,
+  closeSubmenu,
+  syncExpandedNavFromRoute,
+  updateLayoutMetrics,
+} = useCabinetNavSubmenuLayout(items)
 
 const arrowToggleBind = {
   type: 'button' as const,
@@ -15,100 +27,21 @@ const arrowToggleBind = {
   iconSize: 16,
 }
 
-const expandedNavItem = computed(() =>
-  items.find((item) => item.to === expandedNavKey.value && item.children?.length),
-)
-
-const triggerEl = ref<HTMLElement | null>(null)
-const shellWrapEl = ref<HTMLElement | null>(null)
-const flyoutEl = ref<HTMLElement | null>(null)
-const triggerWidth = ref(0)
-const flyoutOffset = ref({ left: 0, top: 0 })
-
-let triggerResizeObserver: ResizeObserver | null = null
-
-const submenuStyle = computed(() => {
-  const accent = expandedNavItem.value?.accent
-  if (!accent) {
-    return undefined
-  }
-
-  return {
-    '--nav-submenu-accent': accent,
-    '--nav-submenu-bridge-bg': 'var(--fs-color-cabinet-nav-shell)',
-    '--nav-submenu-corner-radius': '16px',
-    '--nav-trigger-width': triggerWidth.value ? `${triggerWidth.value}px` : undefined,
-    '--nav-flyout-left': `${flyoutOffset.value.left}px`,
-    '--nav-flyout-top': `${flyoutOffset.value.top}px`,
-  }
-})
-
-function updateLayoutMetrics() {
-  const anchor = triggerEl.value
-  const shell = shellWrapEl.value
-  const flyout = flyoutEl.value
-
-  if (!anchor || !shell) {
-    triggerWidth.value = 0
-    return
-  }
-
-  triggerWidth.value = anchor.offsetWidth
-
-  const anchorRect = anchor.getBoundingClientRect()
-  const shellRect = shell.getBoundingClientRect()
-  const flyoutWidth = flyout?.offsetWidth ?? 0
-  const anchorCenterX = anchorRect.left - shellRect.left + anchorRect.width / 2
-
-  flyoutOffset.value = {
-    left: anchorCenterX - flyoutWidth / 2,
-    top: anchorRect.bottom - shellRect.top,
-  }
-}
-
-function bindTriggerRef(el: Element | ComponentPublicInstance | null) {
-  triggerResizeObserver?.disconnect()
-  triggerResizeObserver = null
-
-  const node = el instanceof HTMLElement ? el : null
-  triggerEl.value = node
-
-  if (!node) {
-    triggerWidth.value = 0
-    return
-  }
-
-  updateLayoutMetrics()
-
-  if (typeof ResizeObserver === 'undefined') {
-    return
-  }
-
-  triggerResizeObserver = new ResizeObserver(() => {
-    updateLayoutMetrics()
-  })
-  triggerResizeObserver.observe(node)
-}
-
 function hasChildren(item: CabinetNavItem): boolean {
   return Boolean(item.children?.length)
 }
 
-function isSubmenuExpanded(item: CabinetNavItem): boolean {
-  return expandedNavKey.value === item.to
-}
-
-function toggleSubmenu(item: CabinetNavItem) {
-  expandedNavKey.value = isSubmenuExpanded(item) ? null : item.to
-}
-
 function selectTopNavItem(_item: CabinetNavItem) {
-  expandedNavKey.value = null
+  closeSubmenu()
+}
+
+function isChildNavActive(to: string): boolean {
+  return isNavActive(to)
 }
 
 function toggleCollapsed() {
   if (!collapsed.value) {
-    expandedNavKey.value = null
+    closeSubmenu()
   }
   collapsed.value = !collapsed.value
 }
@@ -116,33 +49,10 @@ function toggleCollapsed() {
 watch(
   () => route.path,
   (path) => {
-    if (path === '/directories' || path.startsWith('/directories/')) {
-      expandedNavKey.value = '/directories'
-      return
-    }
-
-    if (expandedNavKey.value === '/directories') {
-      expandedNavKey.value = null
-    }
+    syncExpandedNavFromRoute(path)
   },
   { immediate: true },
 )
-
-watch(expandedNavKey, async () => {
-  await nextTick()
-  updateLayoutMetrics()
-})
-
-onMounted(() => {
-  updateLayoutMetrics()
-  window.addEventListener('resize', updateLayoutMetrics, { passive: true })
-})
-
-onUnmounted(() => {
-  triggerResizeObserver?.disconnect()
-  triggerResizeObserver = null
-  window.removeEventListener('resize', updateLayoutMetrics)
-})
 </script>
 
 <template>
@@ -153,14 +63,18 @@ onUnmounted(() => {
           id="cabinet-nav-segment"
           ref="shellWrapEl"
           :class="[$style.shellWrap, { [$style.shellWrapCollapsed]: collapsed }]"
+          :style="submenuReady ? submenuStyle : undefined"
           :aria-hidden="collapsed"
         >
           <div :class="$style.segment">
             <template v-for="item in items" :key="item.to">
               <div
                 v-if="hasChildren(item)"
-                :ref="bindTriggerRef"
-                :class="$style.navItemAnchor"
+                :ref="expandedNavKey === item.to ? bindTriggerRef : undefined"
+                :class="[
+                  $style.navItemAnchor,
+                  { [$style.navItemAnchorExpanded]: isSubmenuExpanded(item) },
+                ]"
               >
                 <UiNavButton
                   :label="item.label"
@@ -187,16 +101,15 @@ onUnmounted(() => {
 
           <Transition name="cabinet-nav-submenu" @after-enter="updateLayoutMetrics">
             <div
-              v-if="expandedNavItem"
+              v-if="submenuReady && expandedNavItem"
               id="cabinet-nav-submenu"
               ref="flyoutEl"
               :class="$style.submenuFlyout"
-              :style="submenuStyle"
             >
               <div :class="$style.submenuBridge" aria-hidden="true" />
               <div :class="$style.submenuJunction" aria-hidden="true">
-                <span :class="$style.submenuJunctionCurveLeft" />
-                <span :class="$style.submenuJunctionCurveRight" />
+                <span :class="$style.junctionCurveStart" />
+                <span :class="$style.junctionCurveEnd" />
               </div>
               <div :class="$style.submenu">
                 <NuxtLink
@@ -205,9 +118,9 @@ onUnmounted(() => {
                   :to="child.to"
                   :class="[
                     $style.submenuLink,
-                    { [$style.submenuLinkActive]: isDirectoryNavActive(child.to) },
+                    { [$style.submenuLinkActive]: isChildNavActive(child.to) },
                   ]"
-                  :aria-current="isDirectoryNavActive(child.to) ? 'page' : undefined"
+                  :aria-current="isChildNavActive(child.to) ? 'page' : undefined"
                 >
                   {{ child.label }}
                 </NuxtLink>
@@ -236,6 +149,8 @@ onUnmounted(() => {
 @use 'sass:list';
 @use '~/assets/styles/tools/functions' as *;
 @use '~/assets/styles/tools/mixins' as mq;
+@use '~/assets/styles/tools/cabinet-nav-submenu' as nav-submenu;
+@use '~/assets/styles/variables/z-index' as z;
 
 $nav-transition-duration: 0.28s;
 $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
@@ -262,7 +177,7 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
   --nav-toggle-slot: calc(var(--nav-toggle-size) + #{rem(8)});
 
   position: relative;
-  z-index: 5;
+  z-index: z.z('cabinet-nav-bar');
   box-sizing: border-box;
   width: 100%;
   padding-block: var(--fs-space-1);
@@ -299,7 +214,7 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
   position: absolute;
   top: 50%;
   right: 0;
-  z-index: 2;
+  z-index: z.z('cabinet-nav-toggle');
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -374,6 +289,11 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
   touch-action: pan-x;
   scrollbar-width: none;
 
+  & > * {
+    position: relative;
+    z-index: z.z('cabinet-nav-segment-item');
+  }
+
   &::-webkit-scrollbar {
     display: none;
   }
@@ -385,146 +305,42 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
   align-items: stretch;
 }
 
+.segment > .navItemAnchorExpanded {
+  z-index: z.z('cabinet-nav-active-trigger');
+}
+
 .submenuFlyout {
-  position: absolute;
-  top: var(--nav-flyout-top, 0);
-  left: var(--nav-flyout-left, 0);
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: max-content;
-  max-width: min(100vw, rem(640));
-  margin-top: 0;
-  padding-top: rem(11);
-  pointer-events: auto;
+  @include nav-submenu.flyout;
 }
 
 .submenuBridge {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: var(--nav-trigger-width, 100%);
-  height: rem(11);
-  transform: translateX(-50%);
-  background: var(--nav-submenu-accent);
-  pointer-events: none;
+  @include nav-submenu.bridge;
 }
 
 .submenuJunction {
-  position: relative;
-  z-index: 1;
-  flex-shrink: 0;
-  width: 100%;
-  height: 0;
-  pointer-events: none;
+  @include nav-submenu.junction-host;
 }
 
-@mixin submenu-junction-curve($circle-position) {
-  width: var(--nav-submenu-corner-radius, #{rem(16)});
-  height: var(--nav-submenu-corner-radius, #{rem(16)});
-  background: radial-gradient(
-    circle at $circle-position,
-    var(--nav-submenu-bridge-bg) calc(var(--nav-submenu-corner-radius, #{rem(16)}) - #{rem(0.5)}),
-    var(--nav-submenu-accent) var(--nav-submenu-corner-radius, #{rem(16)})
-  );
+.junctionCurveStart {
+  @include nav-submenu.junction-curve-start;
 }
 
-.submenuJunctionCurveLeft,
-.submenuJunctionCurveRight {
-  position: absolute;
-  top: rem(-16);
-}
-
-.submenuJunctionCurveLeft {
-  left: calc(50% - var(--nav-trigger-width, 100%) / 2 - var(--nav-submenu-corner-radius, #{rem(16)}));
-  transform-origin: 100% 100%;
-  transform: translateY(calc(-1 * var(--nav-submenu-corner-radius, #{rem(16)}))) rotate(-90deg);
-  @include submenu-junction-curve(100% 0);
-}
-
-.submenuJunctionCurveRight {
-  right: calc(50% - var(--nav-trigger-width, 100%) / 2 - var(--nav-submenu-corner-radius, #{rem(16)}));
-  transform-origin: 0 100%;
-  transform: translateY(calc(-1 * var(--nav-submenu-corner-radius, #{rem(16)}))) rotate(90deg);
-  @include submenu-junction-curve(0 0);
+.junctionCurveEnd {
+  @include nav-submenu.junction-curve-end;
 }
 
 .submenu {
-  position: relative;
-  z-index: 0;
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: rem(8);
-  width: max-content;
-  min-width: rem(200);
-  margin-top: rem(-1);
-  padding: rem(10) rem(16) rem(14);
-  border-radius: rem(16);
-  background: var(--nav-submenu-accent);
-  backdrop-filter: blur(20px);
-  box-shadow: var(--fs-shadow-cabinet-nav);
-  overflow-x: auto;
-  overflow-y: hidden;
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-x;
-  scrollbar-width: none;
-
-  --nav-submenu-link-hover-bg: rgb(255 255 255 / 0.14);
-  --nav-submenu-link-active-bg: rgb(255 255 255 / 0.3);
-  --nav-submenu-link-active-hover-bg: rgb(255 255 255 / 0.38);
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  @include nav-submenu.panel;
 }
 
 .submenuLink {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  padding: rem(6) rem(12);
-  border-radius: rem(10);
-  font-family: var(--fs-font-sans);
-  font-size: rem(13);
-  font-weight: 500;
-  line-height: 1.4;
-  color: var(--fs-figma-achromatic-white);
-  text-decoration: none;
-  white-space: nowrap;
-  background: transparent;
-  box-shadow: none;
+  @include nav-submenu.link;
 
   @include nav-transition(background-color, color, box-shadow, transform);
-
-  &:hover:not(.submenuLinkActive) {
-    background: var(--nav-submenu-link-hover-bg);
-  }
-
-  &:active:not(.submenuLinkActive) {
-    transform: scale(0.98);
-  }
-
-  &:focus-visible {
-    outline: rem(2) solid var(--fs-figma-achromatic-white);
-    outline-offset: rem(2);
-  }
 }
 
 .submenuLinkActive {
-  font-weight: 600;
-  background: var(--nav-submenu-link-active-bg);
-  box-shadow: 0 rem(1) rem(6) rgb(0 0 0 / 0.1);
-
-  &:hover {
-    background: var(--nav-submenu-link-active-hover-bg);
-  }
-
-  &:active {
-    transform: scale(0.99);
-  }
+  @include nav-submenu.link-active;
 }
 
 @media (prefers-reduced-motion: reduce) {

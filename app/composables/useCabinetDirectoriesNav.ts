@@ -1,9 +1,6 @@
-export interface CabinetDirectoryNavItem {
-  to: string
-  label: string
-  accent: string
-  bannerGradientTo: string
-}
+import type { CabinetSubNavItem } from '#shared/types/cabinetNav'
+
+export type CabinetDirectoryNavItem = CabinetSubNavItem
 
 export const directoryNavItems: CabinetDirectoryNavItem[] = [
   {

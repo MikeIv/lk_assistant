@@ -1,5 +1,8 @@
-import type { CabinetDirectoryNavItem } from '~/composables/useCabinetDirectoriesNav'
+import type { CabinetSubNavItem } from '#shared/types/cabinetNav'
 import { directoryNavItems } from '~/composables/useCabinetDirectoriesNav'
+import { brokerNavItems } from '~/composables/useCabinetBrokerNav'
+
+export type { CabinetSubNavItem }
 
 export interface CabinetNavItem {
   to: string
@@ -16,7 +19,7 @@ export interface CabinetNavItem {
   /** Пункт без цветной полоски (node 13:175). */
   home?: boolean
   /** Подразделы: родитель открывает подменю, не ведёт на `to`. */
-  children?: readonly CabinetDirectoryNavItem[]
+  children?: readonly CabinetSubNavItem[]
 }
 
 const navItems: CabinetNavItem[] = [
@@ -29,11 +32,12 @@ const navItems: CabinetNavItem[] = [
     home: true,
   },
   {
-    to: '/current',
-    label: 'Текущие дела',
+    to: '/broker',
+    label: 'Брокер',
     icon: 'i-local-nav-applications',
     accent: 'var(--fs-figma-vertical-shop)',
     bannerGradientTo: 'var(--fs-figma-main-building-concert-hall)',
+    children: brokerNavItems,
   },
   {
     to: '/directories',
@@ -57,12 +61,12 @@ export function useCabinetNav() {
     return path === to || path.startsWith(`${to}/`)
   }
 
-  /** Один активный пункт верхнего уровня: «Справочники» не гасит «Главную» на `/`. */
+  /** Один активный пункт верхнего уровня: подменю не гасит «Главную» на `/`. */
   function isTopNavItemActive(item: CabinetNavItem): boolean {
-    const directoriesActive = isNavActive('/directories') || expandedNavKey.value === '/directories'
+    const submenuExpanded = expandedNavKey.value !== null
 
     if (item.home) {
-      return isNavActive('/') && !directoriesActive
+      return isNavActive('/') && !submenuExpanded
     }
 
     if (item.children?.length) {

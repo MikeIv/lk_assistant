@@ -157,6 +157,7 @@ const sharedClass = computed(() => ({
 .segment.submenuOpen.active {
   border-top-left-radius: rem(12);
   border-top-right-radius: rem(12);
+  border-bottom-width: 0;
 }
 
 .home.active {
@@ -195,6 +196,7 @@ const sharedClass = computed(() => ({
   .segment.submenuOpen.active {
     border-top-left-radius: rem(15);
     border-top-right-radius: rem(15);
+    border-bottom-width: 0;
   }
 }
 

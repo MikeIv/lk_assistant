@@ -1,9 +1,20 @@
 @use 'sass:map';
 
+/**
+ * Именованные слои z-index. Локальный стек подменю навбара (внутри shellWrap):
+ * junction → segment-item → bridge → active-trigger → submenu-panel.
+ */
 $z-layers: (
   'modal': 1000,
   'dropdown': 100,
   'header': 50,
+  'cabinet-nav-bar': 5,
+  'cabinet-nav-submenu-panel': 5,
+  'cabinet-nav-active-trigger': 4,
+  'cabinet-nav-submenu-bridge': 3,
+  'cabinet-nav-segment-item': 2,
+  'cabinet-nav-toggle': 2,
+  'cabinet-nav-submenu-junction': 1,
   'default': 1,
 );
 
