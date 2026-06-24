@@ -1,13 +1,13 @@
 <script setup lang="ts">
-useHead({
-  title: 'Текущие дела',
-})
+const title = 'Текущие дела'
+
+useHead({ title })
 </script>
 
 <template>
   <section :class="$style.root">
     <header :class="$style.header">
-      <h2 :class="$style.title">Текущие дела</h2>
+      <h2 :class="$style.title">{{ title }}</h2>
     </header>
   </section>
 </template>
