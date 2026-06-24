@@ -34,7 +34,5 @@ AGENTS.md
 .env.*
 !.env.example
 
-# Планирование — локальные файлы сессии
-.planning/brief.md
-.planning/state.md
-.planning/plan.md
+# Планирование — локальная директория сессии
+.planning/
