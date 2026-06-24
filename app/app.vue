@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const APP_TITLE = 'ЛК сотрудника'
+const APP_TITLE = 'ЛК'
 const APP_TITLE_DEFAULT = `${APP_TITLE} | Олимпийский`
 const APP_DESCRIPTION = 'Личный кабинет сотрудника ТРЦ «Олимпийский»'
 
