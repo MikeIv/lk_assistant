@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CabinetNavItem } from '~/composables/useCabinetNav'
+import { useCabinetNavSubmenuLayout } from '~/composables/useCabinetNavSubmenuLayout'
 
 const collapsed = useState('cabinet-nav-collapsed', () => false)
 

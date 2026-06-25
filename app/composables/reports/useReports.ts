@@ -1,13 +1,5 @@
-import { REPORTS_MOCK_HEADERS, REPORTS_MOCK_ITEMS } from '#shared/constants/reportsMock'
 import { API_PATHS } from '#shared/constants/api'
-import { getReportRequestHeaders } from '#shared/utils/reportsApiHeaders'
-import {
-  compareReportPeriods,
-  matchesReportPeriodFilter,
-  matchesReportStatusFilter,
-} from '#shared/utils/reportsFilters'
-import { normalizeReportHeaders, normalizeReportItem } from '#shared/utils/reportsNormalize'
-import { buildReportsQueryParams } from '#shared/utils/reportsQuery'
+import { REPORTS_MOCK_HEADERS, REPORTS_MOCK_ITEMS } from '#shared/constants/reportsMock'
 import type {
   ReportApiResponse,
   ReportItem,
@@ -16,6 +8,15 @@ import type {
   ReportStatus,
   ReportsPagination,
 } from '#shared/types/reports'
+import { getReportRequestHeaders } from '#shared/utils/reportsApiHeaders'
+import {
+  compareReportPeriods,
+  matchesReportPeriodFilter,
+  matchesReportStatusFilter,
+} from '#shared/utils/reportsFilters'
+import { normalizeReportHeaders, normalizeReportItem } from '#shared/utils/reportsNormalize'
+import { buildReportsQueryParams } from '#shared/utils/reportsQuery'
+import { useApiConfig } from '~/composables/useApiConfig'
 
 const DEFAULT_SORT: ReportPeriodSort = 'desc'
 

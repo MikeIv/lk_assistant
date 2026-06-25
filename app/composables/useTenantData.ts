@@ -1,5 +1,6 @@
 import { API_PATHS } from '#shared/constants/api'
 import { TENANT_DATA_MOCK } from '#shared/constants/tenantDataMock'
+import { useApiConfig } from '~/composables/useApiConfig'
 import type { TenantDataInfo, TenantDataTabKey } from '#shared/types/tenantData'
 
 /**

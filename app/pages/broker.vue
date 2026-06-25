@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useCabinetBrokerNav } from '~/composables/useCabinetBrokerNav'
 const { currentBrokerItem } = useCabinetBrokerNav()
 
 const pageTitle = computed(() => currentBrokerItem.value?.label ?? 'Брокер')

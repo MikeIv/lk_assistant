@@ -1,4 +1,5 @@
 import { joinApiUrl, normalizeApiBaseUrl } from '#shared/utils/normalizeApiBaseUrl'
+import { useAuthToken } from '~/composables/useAuthToken'
 import type { AsyncData, UseFetchOptions } from 'nuxt/app'
 import type { FetchError, FetchOptions } from 'ofetch'
 

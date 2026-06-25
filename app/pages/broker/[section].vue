@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useCabinetBrokerNav } from '~/composables/useCabinetBrokerNav'
 const route = useRoute()
 const { currentBrokerItem } = useCabinetBrokerNav()
 
