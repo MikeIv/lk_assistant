@@ -1,5 +1,5 @@
 import { REPORTS_MOCK_HEADERS, REPORTS_MOCK_ITEMS } from '#shared/constants/reportsMock'
-import { normalizeApiBaseUrl } from '#shared/utils/normalizeApiBaseUrl'
+import { API_PATHS } from '#shared/constants/api'
 import { getReportRequestHeaders } from '#shared/utils/reportsApiHeaders'
 import {
   compareReportPeriods,
@@ -35,9 +35,7 @@ export function useReports() {
   const api = useApi()
   const route = useRoute()
   const router = useRouter()
-  const config = useRuntimeConfig()
-
-  const isMockMode = computed(() => !normalizeApiBaseUrl(config.public.apiBase))
+  const { isMockMode } = useApiConfig()
 
   const apiResponse = ref<ReportApiResponse | null>(null)
   const error = ref<string | null>(null)
@@ -196,7 +194,7 @@ export function useReports() {
         statusFromRoute: statusFromDebtCounterFilter.value,
       })
 
-      apiResponse.value = await api<ReportApiResponse>(`/tenants/reports?${query}`, {
+      apiResponse.value = await api<ReportApiResponse>(`${API_PATHS.tenants.reports}?${query}`, {
         headers: getReportRequestHeaders(),
       })
     } catch (cause) {

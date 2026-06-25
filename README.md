@@ -94,12 +94,17 @@ docs/                   # продуктовая документация (по 
 
 ## HTTP API
 
-- База: **`runtimeConfig.public.apiBase`** ← **`NUXT_PUBLIC_API_BASE`** ([`.env.example`](.env.example))
-- Клиент: **`useApi()`**, **`useApiFetch()`** — [`app/composables/useApi.ts`](app/composables/useApi.ts)
-- Сервер: **`serverApi(event?)`** — [`server/utils/serverApi.ts`](server/utils/serverApi.ts)
-- Типизация `public.apiBase` — [`types/nuxt-public.d.ts`](types/nuxt-public.d.ts)
+Бэкенд: [Swagger UI](https://olimpapi.portalrent.ru/docs/api#/) · [OpenAPI JSON](https://olimpapi.portalrent.ru/docs/api.json)
 
-Пустой `NUXT_PUBLIC_API_BASE` — относительные пути к текущему origin.
+- База: **`runtimeConfig.public.apiBase`** ← **`NUXT_PUBLIC_API_BASE`** ([`.env.example`](.env.example)), дефолт `https://olimpapi.portalrent.ru/api`
+- Пути: **`API_PATHS`** в [`shared/constants/api.ts`](shared/constants/api.ts)
+- Клиент: **`useApi()`**, **`useApiFetch()`** — [`app/composables/useApi.ts`](app/composables/useApi.ts) (Bearer + cookies)
+- Конфиг: **`useApiConfig()`** — mock-режим, docs URL
+- Auth token: **`useAuthToken()`** — access JWT до полноценного login-flow
+- Сервер: **`serverApi(event?)`** — [`server/utils/serverApi.ts`](server/utils/serverApi.ts)
+- Типизация `public.*` — [`types/nuxt-public.d.ts`](types/nuxt-public.d.ts)
+
+Пустой `NUXT_PUBLIC_API_BASE` — mock-режим (локальные данные).
 
 ## Документация
 

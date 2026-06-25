@@ -1,5 +1,5 @@
+import { API_PATHS } from '#shared/constants/api'
 import { TENANT_DATA_MOCK } from '#shared/constants/tenantDataMock'
-import { normalizeApiBaseUrl } from '#shared/utils/normalizeApiBaseUrl'
 import type { TenantDataInfo, TenantDataTabKey } from '#shared/types/tenantData'
 
 /**
@@ -7,13 +7,12 @@ import type { TenantDataInfo, TenantDataTabKey } from '#shared/types/tenantData'
  * Пока API не подключено — локальный mock из TENANT_DATA_MOCK.
  */
 export function useTenantData() {
-  const config = useRuntimeConfig()
-  const isMockMode = computed(() => !normalizeApiBaseUrl(config.public.apiBase))
+  const { isMockMode } = useApiConfig()
 
   const apiNotice = computed(() =>
     isMockMode.value
       ? null
-      : 'API `/tenants/data` пока не подключён — показаны mock-данные до согласования контракта.',
+      : `API \`${API_PATHS.tenants.data}\` пока не подключён — показаны mock-данные до согласования контракта.`,
   )
 
   const activeTab = ref<TenantDataTabKey>('general')

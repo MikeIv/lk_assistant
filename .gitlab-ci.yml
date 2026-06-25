@@ -8,6 +8,7 @@ stages:
   variables:
     HUSKY: '0'
     NODE_ENV: production
+    NUXT_PUBLIC_API_BASE: https://olimpapi.portalrent.ru/api
   before_script:
     # pnpm 11.1.1 (packageManager) требует Node >= 22.13; на Node 20 падает с node:sqlite
     - npm install -g pnpm@11.1.1

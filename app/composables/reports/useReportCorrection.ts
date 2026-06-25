@@ -1,3 +1,4 @@
+import { API_PATHS } from '#shared/constants/api'
 import { getReportRequestHeaders } from '#shared/utils/reportsApiHeaders'
 
 export function useReportCorrection() {
@@ -35,7 +36,7 @@ export function useReportCorrection() {
     error.value = null
 
     try {
-      await api(`/tenants/reports/${reportId.value}/request/edit`, {
+      await api(API_PATHS.tenants.reportRequestEdit(reportId.value), {
         method: 'POST',
         headers: getReportRequestHeaders(),
         body: {

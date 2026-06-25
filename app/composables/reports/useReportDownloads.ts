@@ -1,3 +1,4 @@
+import { API_PATHS } from '#shared/constants/api'
 import { getReportRequestHeaders } from '#shared/utils/reportsApiHeaders'
 
 function triggerBrowserDownload(blob: Blob, filename: string) {
@@ -34,7 +35,7 @@ export function useReportDownloads() {
     error.value = null
 
     try {
-      const blob = await api<Blob>(`/tenants/reports/${id}/pdf`, {
+      const blob = await api<Blob>(API_PATHS.tenants.reportPdf(id), {
         headers: {
           Accept: 'application/pdf',
           ...getReportRequestHeaders(),
@@ -56,7 +57,7 @@ export function useReportDownloads() {
     error.value = null
 
     try {
-      const blob = await api<Blob>(`/tenants/reports/${id}/documents`, {
+      const blob = await api<Blob>(API_PATHS.tenants.reportDocuments(id), {
         headers: getReportRequestHeaders(),
         responseType: 'blob',
       })
