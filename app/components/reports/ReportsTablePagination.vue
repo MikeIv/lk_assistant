@@ -133,11 +133,11 @@ function goNext() {
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: rem(58);
-  height: rem(58);
-  padding: rem(2) 0 rem(1);
+  width: rem(32);
+  height: rem(32);
+  padding: 0;
   border: none;
-  border-radius: rem(49);
+  border-radius: 50%;
   color: var(--fs-figma-achromatic-black);
   background: transparent;
   cursor: pointer;
@@ -166,8 +166,7 @@ function goNext() {
 }
 
 @media (max-width: #{bp.$tablet - 1px}) {
-  .arrow,
-  .page {
+  .arrow {
     width: rem(44);
     height: rem(44);
   }
