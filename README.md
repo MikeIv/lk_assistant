@@ -66,6 +66,8 @@ pnpm approve-builds --all
 
 Перед коммитом: **`pnpm lint:all`**.
 
+Сообщения коммитов — **строго на английском**, формат [Conventional Commits](https://www.conventionalcommits.org/): `feat: add API configuration`, `fix: reports pagination`.
+
 ## Качество кода и pre-commit
 
 - **ESLint**: `@nuxt/eslint`, [`eslint.config.mjs`](eslint.config.mjs)
