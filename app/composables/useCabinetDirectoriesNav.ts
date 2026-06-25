@@ -14,6 +14,7 @@ export const directoryNavItems: CabinetDirectoryNavItem[] = [
     label: 'Юр. лица',
     accent: 'var(--fs-figma-vertical-fitness)',
     bannerGradientTo: 'var(--fs-figma-main-building-concert-hall)',
+    hasContent: true,
   },
   {
     to: '/directories/brands',

@@ -1,6 +1,20 @@
 <script setup lang="ts">
 const route = useRoute()
 const { currentDirectoryItem } = useCabinetDirectoriesNav()
+const { bannerProps } = useCabinetSectionBanner()
+
+const section = computed(() => {
+  const value = route.params.section
+  return typeof value === 'string' ? value : ''
+})
+
+const developmentBannerProps = computed(() => {
+  if (currentDirectoryItem.value?.hasContent || !bannerProps.value) {
+    return undefined
+  }
+
+  return bannerProps.value
+})
 
 watch(
   () => route.params.section,
@@ -11,13 +25,12 @@ watch(
   },
   { immediate: true },
 )
-
-const { bannerProps } = useCabinetSectionBanner()
 </script>
 
 <template>
   <section v-if="currentDirectoryItem" :class="$style.root">
-    <UiPromoBanner v-if="bannerProps" v-bind="bannerProps" />
+    <UiPromoBanner v-if="developmentBannerProps" v-bind="developmentBannerProps" />
+    <DirectLgEntitiesSec v-if="section === 'legal-entities'" />
   </section>
 </template>
 

@@ -22,6 +22,12 @@ export const API_PATHS = {
     list: '/v1/news',
     detail: (id: number | string) => `/v1/news/${id}`,
   },
+  dictionary: {
+    legalEntities: {
+      list: '/v1/dictionary/legal-entities',
+      detail: (id: number | string) => `/v1/dictionary/legal-entities/${id}`,
+    },
+  },
   /** ЛК-аренда: эндпоинты вне текущего OpenAPI (LK-Shelk), до появления в спеке. */
   tenants: {
     reports: '/tenants/reports',
