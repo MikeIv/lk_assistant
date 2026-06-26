@@ -1,5 +1,5 @@
 /**
- * Общие HTTP-типы. Контракт: OpenAPI https://olimpapi.portalrent.ru/docs/api.json
+ * Общие HTTP-типы. Контракт: OpenAPI https://olimpapi.portalrent.ru/docs/broker.json
  */
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS'
 

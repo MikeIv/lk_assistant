@@ -1,6 +1,6 @@
 import type {
-  LegalEntity,
   LegalEntitiesPagination,
+  LegalEntity,
   LegalEntitySortDirection,
   LegalEntitySortKey,
 } from '#shared/types/legalEntities'
@@ -96,6 +96,20 @@ export function buildLegalEntitiesPagination(
     rangeFrom,
     rangeTo,
   }
+}
+
+/** Пагинация из payload `brokerLegalEntity.index` (без пересчёта last_page на клиенте). */
+export function toLegalEntitiesApiPagination(payload: {
+  current_page: number
+  last_page: number
+  per_page: number
+  total: number
+}): LegalEntitiesPagination {
+  const { total, current_page: currentPage, per_page: perPage, last_page: lastPage } = payload
+  const rangeFrom = total === 0 ? 0 : (currentPage - 1) * perPage + 1
+  const rangeTo = total === 0 ? 0 : Math.min(currentPage * perPage, total)
+
+  return { currentPage, lastPage, perPage, total, rangeFrom, rangeTo }
 }
 
 export function paginateLegalEntities(

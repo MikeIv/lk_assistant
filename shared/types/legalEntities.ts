@@ -31,6 +31,10 @@ export interface LegalEntitiesListApiResponse {
   success: boolean
   message: string
   payload: {
-    items: LegalEntityApiResource[]
+    data: LegalEntityApiResource[]
+    current_page: number
+    per_page: number
+    total: number
+    last_page: number
   }
 }

@@ -96,7 +96,7 @@ docs/                   # продуктовая документация (по 
 
 ## HTTP API
 
-Бэкенд: [Swagger UI](https://olimpapi.portalrent.ru/docs/api#/) · [OpenAPI JSON](https://olimpapi.portalrent.ru/docs/api.json)
+Бэкенд: [Swagger UI](https://olimpapi.portalrent.ru/docs/broker#/) · [OpenAPI JSON](https://olimpapi.portalrent.ru/docs/broker.json)
 
 - База: **`runtimeConfig.public.apiBase`** ← **`NUXT_PUBLIC_API_BASE`** ([`.env.example`](.env.example)), дефолт `https://olimpapi.portalrent.ru/api`
 - Пути: **`API_PATHS`** в [`shared/constants/api.ts`](shared/constants/api.ts)

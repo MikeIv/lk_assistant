@@ -1,32 +1,30 @@
 /**
- * Контракт бэкенда СК «Олимпийский».
- * OpenAPI: https://olimpapi.portalrent.ru/docs/api.json
- * Swagger UI: https://olimpapi.portalrent.ru/docs/api#/
+ * Контракт бэкенда СК «Олимпийский» (ЛК брокера).
+ * OpenAPI: https://olimpapi.portalrent.ru/docs/broker.json
+ * Swagger UI: https://olimpapi.portalrent.ru/docs/broker#/
  */
 export const API_DEFAULT_BASE = 'https://olimpapi.portalrent.ru/api' as const
 
-export const API_DOCS_URL = 'https://olimpapi.portalrent.ru/docs/api#/' as const
+export const API_DOCS_URL = 'https://olimpapi.portalrent.ru/docs/broker#/' as const
 
-export const API_OPENAPI_URL = 'https://olimpapi.portalrent.ru/docs/api.json' as const
+export const API_OPENAPI_URL = 'https://olimpapi.portalrent.ru/docs/broker.json' as const
 
 /** Пути относительно {@link API_DEFAULT_BASE} (`/api` + сегмент). */
 export const API_PATHS = {
-  auth: {
-    login: '/v1/auth/login',
-    register: '/v1/auth/register',
-    forgot: '/v1/auth/forgot',
-    refresh: '/v1/auth/refresh',
-    logout: '/v1/auth/logout',
+  broker: {
+    auth: {
+      login: '/v1/broker/auth/login',
+      refresh: '/v1/broker/auth/refresh',
+      logout: '/v1/broker/auth/logout',
+    },
+    legalEntities: {
+      list: '/v1/broker/legal-entities',
+      detail: (id: number | string) => `/v1/broker/legal-entities/${id}`,
+    },
   },
   news: {
     list: '/v1/news',
     detail: (id: number | string) => `/v1/news/${id}`,
-  },
-  dictionary: {
-    legalEntities: {
-      list: '/v1/dictionary/legal-entities',
-      detail: (id: number | string) => `/v1/dictionary/legal-entities/${id}`,
-    },
   },
   /** ЛК-аренда: эндпоинты вне текущего OpenAPI (LK-Shelk), до появления в спеке. */
   tenants: {
