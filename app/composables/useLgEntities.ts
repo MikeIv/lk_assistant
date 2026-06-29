@@ -4,6 +4,9 @@ import type {
   LegalEntitiesListApiResponse,
   LegalEntitiesPagination,
   LegalEntity,
+  LegalEntityCreateApiResponse,
+  LegalEntityCreatePayload,
+  LegalEntityCreateResult,
   LegalEntitySortDirection,
   LegalEntitySortKey,
 } from '#shared/types/legalEntities'
@@ -19,7 +22,16 @@ import {
   sortLegalEntities,
   toLegalEntitiesApiPagination,
 } from '#shared/utils/legalEntitiesTable'
+import {
+  emptyLegalEntityCreateFieldErrors,
+  findLegalEntityDuplicateErrors,
+  hasLegalEntityCreateFieldErrors,
+  normalizeLegalEntityCreatePayload,
+  parseLegalEntityCreateFieldErrors,
+  validateLegalEntityCreateForm,
+} from '#shared/utils/legalEntitiesValidation'
 import { useApiConfig } from '~/composables/useApiConfig'
+import type { FetchError } from 'ofetch'
 
 const SEARCH_DEBOUNCE_MS = 300
 
@@ -31,6 +43,12 @@ export function useLgEntities() {
   const apiResponse = ref<LegalEntitiesListApiResponse | null>(null)
   const error = ref<string | null>(null)
   const isLoading = ref(false)
+  const mockExtraItems = ref<LegalEntity[]>([])
+
+  const mockSourceItems = computed<LegalEntity[]>(() => [
+    ...LEGAL_ENTITIES_MOCK_ITEMS,
+    ...mockExtraItems.value,
+  ])
 
   const searchQuery = ref('')
   const sortKey = ref<LegalEntitySortKey>(LEGAL_ENTITIES_DEFAULT_SORT_KEY)
@@ -45,8 +63,8 @@ export function useLgEntities() {
 
     const query = searchQuery.value.trim()
     const filtered = query
-      ? LEGAL_ENTITIES_MOCK_ITEMS.filter((item) => matchesLegalEntitySearch(item, query))
-      : LEGAL_ENTITIES_MOCK_ITEMS
+      ? mockSourceItems.value.filter((item) => matchesLegalEntitySearch(item, query))
+      : mockSourceItems.value
 
     return sortLegalEntities(filtered, sortKey.value, sortDirection.value)
   })
@@ -92,8 +110,10 @@ export function useLgEntities() {
     },
   )
 
-  async function fetchItems(page = currentPage.value) {
-    isLoading.value = true
+  async function fetchItems(page = currentPage.value, options?: { silent?: boolean }) {
+    if (!options?.silent) {
+      isLoading.value = true
+    }
     error.value = null
 
     try {
@@ -117,7 +137,9 @@ export function useLgEntities() {
       error.value = 'Не удалось загрузить список юридических лиц'
       apiResponse.value = null
     } finally {
-      isLoading.value = false
+      if (!options?.silent) {
+        isLoading.value = false
+      }
     }
   }
 
@@ -171,6 +193,77 @@ export function useLgEntities() {
     clearTimeout(searchDebounceTimer)
   })
 
+  async function createLegalEntity(
+    payload: LegalEntityCreatePayload,
+  ): Promise<LegalEntityCreateResult> {
+    const normalizedPayload = normalizeLegalEntityCreatePayload(payload)
+
+    const clientFieldErrors = validateLegalEntityCreateForm(normalizedPayload)
+    if (hasLegalEntityCreateFieldErrors(clientFieldErrors)) {
+      return {
+        ok: false,
+        fieldErrors: clientFieldErrors,
+        generalError: null,
+      }
+    }
+
+    try {
+      if (isMockMode.value) {
+        const duplicateErrors = findLegalEntityDuplicateErrors(
+          mockSourceItems.value,
+          normalizedPayload,
+        )
+
+        if (hasLegalEntityCreateFieldErrors(duplicateErrors)) {
+          return {
+            ok: false,
+            fieldErrors: duplicateErrors,
+            generalError: null,
+          }
+        }
+
+        mockExtraItems.value.push({
+          id: LEGAL_ENTITIES_MOCK_ITEMS.length + mockExtraItems.value.length + 1,
+          legal_entity: normalizedPayload.legal_entity,
+          inn: normalizedPayload.inn,
+          kpp: normalizedPayload.kpp,
+        })
+
+        return { ok: true }
+      }
+
+      await api<LegalEntityCreateApiResponse>(API_PATHS.broker.legalEntities.list, {
+        method: 'POST',
+        body: normalizedPayload,
+      })
+
+      await fetchItems(currentPage.value, { silent: true })
+
+      return { ok: true }
+    } catch (cause) {
+      const fetchError = cause as FetchError<unknown>
+      const status = fetchError.response?.status ?? fetchError.statusCode
+
+      if (status === 422) {
+        const fieldErrors = parseLegalEntityCreateFieldErrors(fetchError.data)
+
+        return {
+          ok: false,
+          fieldErrors,
+          generalError: hasLegalEntityCreateFieldErrors(fieldErrors)
+            ? null
+            : 'Не удалось создать юридическое лицо',
+        }
+      }
+
+      return {
+        ok: false,
+        fieldErrors: emptyLegalEntityCreateFieldErrors(),
+        generalError: 'Не удалось создать юридическое лицо',
+      }
+    }
+  }
+
   return {
     items,
     pagination,
@@ -184,5 +277,6 @@ export function useLgEntities() {
     setPerPage,
     toggleSort,
     refresh: () => fetchItems(),
+    createLegalEntity,
   }
 }

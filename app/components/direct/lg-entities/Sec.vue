@@ -12,7 +12,10 @@ const {
   setPerPage,
   toggleSort,
   refresh,
+  createLegalEntity,
 } = useLgEntities()
+
+const isCreateOpen = ref(false)
 </script>
 
 <template>
@@ -34,7 +37,10 @@ const {
       @page-change="setPage"
       @per-page-change="setPerPage"
       @sort-change="toggleSort"
+      @create="isCreateOpen = true"
     />
+
+    <DirectLgEntitiesCreateModal v-model:open="isCreateOpen" :submit-fn="createLegalEntity" />
   </div>
 </template>
 

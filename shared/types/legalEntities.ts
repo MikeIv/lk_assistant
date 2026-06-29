@@ -38,3 +38,25 @@ export interface LegalEntitiesListApiResponse {
     last_page: number
   }
 }
+
+export interface LegalEntityCreatePayload {
+  legal_entity: string
+  inn: string
+  kpp: string | null
+}
+
+export interface LegalEntityCreateApiResponse {
+  success: boolean
+  message: string
+  payload: LegalEntityApiResource
+}
+
+export interface LegalEntityCreateFieldErrors {
+  legal_entity: string | null
+  inn: string | null
+  kpp: string | null
+}
+
+export type LegalEntityCreateResult =
+  | { ok: true }
+  | { ok: false; fieldErrors: LegalEntityCreateFieldErrors; generalError: string | null }
