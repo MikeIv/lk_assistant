@@ -115,6 +115,7 @@ const calendarOptions = computed<CalendarOptions>(() => ({
   selectable: true,
   selectMirror: true,
   dayMaxEvents: true,
+  dayHeaderFormat: { weekday: 'short' },
   events: events.value,
   dateClick: onDateClick,
   eventClick: onEventClick,
@@ -153,16 +154,63 @@ const calendarOptions = computed<CalendarOptions>(() => ({
 
 <style module lang="scss">
 @use '~/assets/styles/tools/functions' as *;
+@use '~/assets/styles/variables/resolutions' as bp;
+
+@mixin calendar-compact-fc {
+  :global(.fc) {
+    --fc-small-font-size: 0.75rem;
+    font-size: rem(13);
+  }
+
+  :global(.fc .fc-toolbar) {
+    flex-wrap: wrap;
+    gap: rem(4);
+    margin-bottom: rem(6);
+  }
+
+  :global(.fc .fc-toolbar-title) {
+    font-size: rem(17);
+    line-height: 1.2;
+  }
+
+  :global(.fc .fc-button) {
+    padding: rem(3) rem(8);
+    font-size: rem(12);
+    line-height: 1.3;
+  }
+
+  :global(.fc .fc-col-header-cell-cushion) {
+    padding: rem(4) rem(2);
+    font-size: rem(11);
+    font-weight: 600;
+  }
+
+  :global(.fc .fc-daygrid-day-number) {
+    padding: rem(2) rem(4);
+    font-size: rem(11);
+  }
+
+  :global(.fc .fc-daygrid-event) {
+    margin-top: rem(1);
+    font-size: rem(11);
+  }
+
+  :global(.fc .fc-daygrid-more-link) {
+    font-size: rem(10);
+  }
+}
 
 .root {
   display: flex;
   gap: var(--fs-space-3);
+  align-items: flex-start;
   width: 100%;
-  min-height: rem(560);
 }
 
 .calendarMain {
-  flex: 3;
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: bp.$desktopMin;
   min-width: 0;
   padding: var(--fs-space-2);
   border-radius: rem(12);
@@ -171,7 +219,7 @@ const calendarOptions = computed<CalendarOptions>(() => ({
 }
 
 .eventsSidebar {
-  flex: 1;
+  flex: 1 1 rem(280);
   min-width: rem(240);
   max-width: rem(320);
   padding: var(--fs-space-2);
@@ -181,12 +229,33 @@ const calendarOptions = computed<CalendarOptions>(() => ({
   overflow-y: auto;
 }
 
-@media (max-width: 960px) {
+@media (min-width: bp.$desktopMin) {
+  .root {
+    gap: var(--fs-space-2);
+  }
+
+  .calendarMain {
+    padding: var(--fs-space-1) var(--fs-space-2);
+
+    @include calendar-compact-fc;
+  }
+
+  .eventsSidebar {
+    padding: var(--fs-space-1) var(--fs-space-2);
+  }
+}
+
+@media (max-width: bp.$tabletMax) {
   .root {
     flex-direction: column;
   }
 
+  .calendarMain {
+    max-width: none;
+  }
+
   .eventsSidebar {
+    flex: 1 1 auto;
     max-width: none;
   }
 }

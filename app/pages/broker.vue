@@ -25,6 +25,8 @@ useHead(
 
 .root {
   @include cabinet.cabinet-section-layout;
+  flex: 1;
+  min-height: 0;
 }
 
 .header {
