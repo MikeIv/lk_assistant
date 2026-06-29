@@ -32,7 +32,7 @@ const events = ref<CalendarEvent[]>([
     end: '2026-06-30',
     allDay: true,
     color: '#3b82f6',
-    extendedProps: { description: 'Обсудить проект myhomefab' },
+    extendedProps: { description: 'Обсудить проект' },
   },
 ])
 
