@@ -77,7 +77,7 @@ export function usePremises() {
   )
 
   const items = computed<Premise[]>(() =>
-    paginatePremises(filteredItems.value, pagination.value.currentPage, perPage.value),
+    paginatePremises(filteredItems.value, pagination.value.currentPage, pagination.value.perPage),
   )
 
   watch(
@@ -105,6 +105,10 @@ export function usePremises() {
       room_type_id: payload.room_type_id,
       room_type: resolveRoomTypeName(payload.room_type_id),
     }
+  }
+
+  function nextMockPremiseId(): number {
+    return mockSourceItems.value.reduce((max, item) => Math.max(max, item.id), 0) + 1
   }
 
   async function fetchRoomTypes() {
@@ -148,13 +152,9 @@ export function usePremises() {
     isLoading.value = true
     error.value = null
 
-    try {
-      await Promise.all([fetchItems({ silent: true }), fetchRoomTypes()])
-    } catch {
-      error.value = 'Не удалось загрузить список помещений'
-    } finally {
-      isLoading.value = false
-    }
+    await Promise.all([fetchItems({ silent: true }), fetchRoomTypes()])
+
+    isLoading.value = false
   }
 
   function setPage(page: number) {
@@ -224,12 +224,7 @@ export function usePremises() {
 
     try {
       if (isMockMode.value) {
-        mockExtraItems.value.push(
-          buildPremiseFromPayload(
-            normalizedPayload,
-            PREMISES_MOCK_ITEMS.length + mockExtraItems.value.length + 1,
-          ),
-        )
+        mockExtraItems.value.push(buildPremiseFromPayload(normalizedPayload, nextMockPremiseId()))
 
         return { ok: true }
       }

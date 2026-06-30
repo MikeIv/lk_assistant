@@ -34,7 +34,14 @@ const optionalAreaField = z
   })
 
 export const premiseFormSchema = z.object({
-  room_type_id: z.string().trim().min(1, PREMISE_REQUIRED_ROOM_TYPE_MESSAGE),
+  room_type_id: z
+    .string()
+    .trim()
+    .min(1, PREMISE_REQUIRED_ROOM_TYPE_MESSAGE)
+    .refine(
+      (value) => Number.isInteger(Number(value)) && Number(value) > 0,
+      PREMISE_REQUIRED_ROOM_TYPE_MESSAGE,
+    ),
   name: z
     .string()
     .trim()

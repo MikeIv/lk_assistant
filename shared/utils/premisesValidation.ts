@@ -39,8 +39,10 @@ export function normalizePremiseFormValues(values: {
   floor_bti: string
   area_bti: string
 }): PremiseCreatePayload {
+  const roomTypeId = Number(values.room_type_id)
+
   return normalizePremiseCreatePayload({
-    room_type_id: Number(values.room_type_id),
+    room_type_id: roomTypeId,
     name: values.name,
     floor: values.floor.trim() ? values.floor : null,
     area: parseOptionalArea(values.area),
@@ -77,6 +79,8 @@ const FORM_FIELD_KEYS = [
   'area_bti',
 ] as const satisfies ReadonlyArray<keyof PremiseCreateFieldErrors>
 
+export const PREMISE_FORM_FIELD_KEYS = FORM_FIELD_KEYS
+
 export function parsePremiseCreateFieldErrors(data: unknown): PremiseCreateFieldErrors {
   const payload = data as ApiValidationErrorResponse
   const errors = payload.errors
@@ -104,7 +108,10 @@ export function validatePremiseFormPayload(
   payload: PremiseCreatePayload,
 ): PremiseCreateFieldErrors {
   const result = premiseFormSchema.safeParse({
-    room_type_id: String(payload.room_type_id || ''),
+    room_type_id:
+      Number.isFinite(payload.room_type_id) && payload.room_type_id > 0
+        ? String(payload.room_type_id)
+        : '',
     name: payload.name,
     floor: payload.floor ?? '',
     area: payload.area === null ? '' : String(payload.area),

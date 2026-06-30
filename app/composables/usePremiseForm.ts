@@ -7,17 +7,12 @@ import type {
   PremiseCreatePayload,
 } from '#shared/types/premises'
 import { premiseFormSchema } from '#shared/utils/premisesSchema'
-import { normalizePremiseFormValues } from '#shared/utils/premisesValidation'
+import {
+  normalizePremiseFormValues,
+  PREMISE_FORM_FIELD_KEYS,
+} from '#shared/utils/premisesValidation'
 
-const FORM_FIELD_KEYS = [
-  'room_type_id',
-  'name',
-  'floor',
-  'area',
-  'name_bti',
-  'floor_bti',
-  'area_bti',
-] as const satisfies ReadonlyArray<keyof PremiseCreateFieldErrors>
+const FORM_FIELD_KEYS = PREMISE_FORM_FIELD_KEYS
 
 export interface PremiseFormInitialValues {
   room_type_id: string
