@@ -70,12 +70,26 @@
   --fs-color-primary-strong: var(--fs-figma-vertical-shop);
   --fs-color-error: var(--fs-figma-system-counter-error);
   --fs-color-success: var(--fs-figma-system-success);
+  --fs-color-warning: var(--fs-figma-vertical-entertainments);
   --fs-color-button-on-light: var(--fs-figma-system-button-gray);
 
   /* Кнопки UI Kit (Figma: node 153:50 — Button/Desktop, Primary & Secondary) */
   --fs-color-ui-button-border: rgb(234 234 235 / 0.32);
   --fs-color-ui-button-outline-hover: var(--fs-figma-metallic-gradient-grey-2);
   --fs-color-ui-button-inverse-pressed-text: rgb(255 255 255 / 0.7);
+  --fs-color-ui-button-success-bg: var(--fs-color-success);
+  --fs-color-ui-button-success-text: var(--fs-figma-achromatic-white);
+  --fs-color-ui-button-success-border: rgb(255 255 255 / 0.22);
+  --fs-color-ui-button-success-border-hover: rgb(255 255 255 / 0.35);
+  --fs-color-ui-button-warning-bg: var(--fs-color-warning);
+  --fs-color-ui-button-warning-text: var(--fs-figma-achromatic-white);
+  --fs-color-ui-button-warning-border: rgb(255 255 255 / 0.22);
+  --fs-color-ui-button-warning-border-hover: rgb(255 255 255 / 0.35);
+  --fs-color-ui-button-warning-surface: color-mix(
+    in srgb,
+    var(--fs-color-ui-button-warning-bg) 8%,
+    transparent
+  );
 
   /* Каркас ЛК */
   --fs-cabinet-chrome-height: 4.375rem; /* 70px — Desktop/Header (Figma node 9:35) */

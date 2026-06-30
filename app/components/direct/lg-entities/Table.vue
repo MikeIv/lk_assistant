@@ -22,6 +22,7 @@ const emit = defineEmits<{
   pageChange: [page: number]
   perPageChange: [value: number]
   sortChange: [key: LegalEntitySortKey]
+  rowClick: [item: LegalEntity]
   create: []
 }>()
 
@@ -129,7 +130,17 @@ function handlePerPageChange(event: Event) {
             </td>
           </tr>
 
-          <tr v-for="item in items" v-else :key="item.id" :class="$style.row">
+          <tr
+            v-for="item in items"
+            v-else
+            :key="item.id"
+            :class="$style.row"
+            tabindex="0"
+            role="button"
+            :aria-label="`Редактировать ${item.legal_entity}`"
+            @click="emit('rowClick', item)"
+            @keydown.enter="emit('rowClick', item)"
+          >
             <td :class="[$style.td, tdAlignClass.center]">{{ item.id }}</td>
             <td :class="[$style.td, tdAlignClass.start]">{{ item.legal_entity }}</td>
             <td :class="[$style.td, tdAlignClass.center]">{{ item.inn }}</td>
@@ -318,6 +329,7 @@ function handlePerPageChange(event: Event) {
 }
 
 .row {
+  cursor: pointer;
   transition: background-color 0.16s ease;
 
   &:hover {

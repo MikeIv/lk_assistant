@@ -7,6 +7,7 @@ import type {
   LegalEntityCreateApiResponse,
   LegalEntityCreatePayload,
   LegalEntityCreateResult,
+  LegalEntityDeleteResult,
   LegalEntitySortDirection,
   LegalEntitySortKey,
 } from '#shared/types/legalEntities'
@@ -28,7 +29,7 @@ import {
   hasLegalEntityCreateFieldErrors,
   normalizeLegalEntityCreatePayload,
   parseLegalEntityCreateFieldErrors,
-  validateLegalEntityCreateForm,
+  validateLegalEntityFormPayload,
 } from '#shared/utils/legalEntitiesValidation'
 import { useApiConfig } from '~/composables/useApiConfig'
 import type { FetchError } from 'ofetch'
@@ -44,10 +45,14 @@ export function useLgEntities() {
   const error = ref<string | null>(null)
   const isLoading = ref(false)
   const mockExtraItems = ref<LegalEntity[]>([])
+  const mockDeletedIds = ref<Set<number>>(new Set())
+  const mockUpdatedItems = ref<Map<number, LegalEntity>>(new Map())
 
   const mockSourceItems = computed<LegalEntity[]>(() => [
-    ...LEGAL_ENTITIES_MOCK_ITEMS,
-    ...mockExtraItems.value,
+    ...LEGAL_ENTITIES_MOCK_ITEMS.filter((item) => !mockDeletedIds.value.has(item.id)).map(
+      (item) => mockUpdatedItems.value.get(item.id) ?? item,
+    ),
+    ...mockExtraItems.value.filter((item) => !mockDeletedIds.value.has(item.id)),
   ])
 
   const searchQuery = ref('')
@@ -193,18 +198,39 @@ export function useLgEntities() {
     clearTimeout(searchDebounceTimer)
   })
 
+  function validationFailure(fieldErrors: LegalEntityCreateFieldErrors): LegalEntityCreateResult {
+    return { ok: false, fieldErrors, generalError: null }
+  }
+
+  function mutationFailure(cause: unknown, fallbackMessage: string): LegalEntityCreateResult {
+    const fetchError = cause as FetchError<unknown>
+    const status = fetchError.response?.status ?? fetchError.statusCode
+
+    if (status === 422) {
+      const fieldErrors = parseLegalEntityCreateFieldErrors(fetchError.data)
+
+      return {
+        ok: false,
+        fieldErrors,
+        generalError: hasLegalEntityCreateFieldErrors(fieldErrors) ? null : fallbackMessage,
+      }
+    }
+
+    return {
+      ok: false,
+      fieldErrors: emptyLegalEntityCreateFieldErrors(),
+      generalError: fallbackMessage,
+    }
+  }
+
   async function createLegalEntity(
     payload: LegalEntityCreatePayload,
   ): Promise<LegalEntityCreateResult> {
     const normalizedPayload = normalizeLegalEntityCreatePayload(payload)
 
-    const clientFieldErrors = validateLegalEntityCreateForm(normalizedPayload)
+    const clientFieldErrors = validateLegalEntityFormPayload(normalizedPayload)
     if (hasLegalEntityCreateFieldErrors(clientFieldErrors)) {
-      return {
-        ok: false,
-        fieldErrors: clientFieldErrors,
-        generalError: null,
-      }
+      return validationFailure(clientFieldErrors)
     }
 
     try {
@@ -215,11 +241,7 @@ export function useLgEntities() {
         )
 
         if (hasLegalEntityCreateFieldErrors(duplicateErrors)) {
-          return {
-            ok: false,
-            fieldErrors: duplicateErrors,
-            generalError: null,
-          }
+          return validationFailure(duplicateErrors)
         }
 
         mockExtraItems.value.push({
@@ -241,25 +263,84 @@ export function useLgEntities() {
 
       return { ok: true }
     } catch (cause) {
-      const fetchError = cause as FetchError<unknown>
-      const status = fetchError.response?.status ?? fetchError.statusCode
+      return mutationFailure(cause, 'Не удалось создать юридическое лицо')
+    }
+  }
 
-      if (status === 422) {
-        const fieldErrors = parseLegalEntityCreateFieldErrors(fetchError.data)
+  async function updateLegalEntity(
+    id: number,
+    payload: LegalEntityCreatePayload,
+  ): Promise<LegalEntityCreateResult> {
+    const normalizedPayload = normalizeLegalEntityCreatePayload(payload)
 
-        return {
-          ok: false,
-          fieldErrors,
-          generalError: hasLegalEntityCreateFieldErrors(fieldErrors)
-            ? null
-            : 'Не удалось создать юридическое лицо',
+    const clientFieldErrors = validateLegalEntityFormPayload(normalizedPayload)
+    if (hasLegalEntityCreateFieldErrors(clientFieldErrors)) {
+      return validationFailure(clientFieldErrors)
+    }
+
+    try {
+      if (isMockMode.value) {
+        const duplicateErrors = findLegalEntityDuplicateErrors(
+          mockSourceItems.value,
+          normalizedPayload,
+          id,
+        )
+
+        if (hasLegalEntityCreateFieldErrors(duplicateErrors)) {
+          return validationFailure(duplicateErrors)
         }
+
+        const updatedEntity: LegalEntity = {
+          id,
+          legal_entity: normalizedPayload.legal_entity,
+          inn: normalizedPayload.inn,
+          kpp: normalizedPayload.kpp,
+        }
+
+        const extraIndex = mockExtraItems.value.findIndex((item) => item.id === id)
+        if (extraIndex >= 0) {
+          mockExtraItems.value.splice(extraIndex, 1, updatedEntity)
+        } else {
+          mockUpdatedItems.value.set(id, updatedEntity)
+        }
+
+        return { ok: true }
       }
 
+      await api<LegalEntityCreateApiResponse>(API_PATHS.broker.legalEntities.detail(id), {
+        method: 'PUT',
+        body: normalizedPayload,
+      })
+
+      await fetchItems(currentPage.value, { silent: true })
+
+      return { ok: true }
+    } catch (cause) {
+      return mutationFailure(cause, 'Не удалось обновить юридическое лицо')
+    }
+  }
+
+  async function deleteLegalEntity(id: number): Promise<LegalEntityDeleteResult> {
+    try {
+      if (isMockMode.value) {
+        mockDeletedIds.value = new Set([...mockDeletedIds.value, id])
+        mockUpdatedItems.value.delete(id)
+        mockExtraItems.value = mockExtraItems.value.filter((item) => item.id !== id)
+
+        return { ok: true }
+      }
+
+      await api(API_PATHS.broker.legalEntities.detail(id), {
+        method: 'DELETE',
+      })
+
+      await fetchItems(currentPage.value, { silent: true })
+
+      return { ok: true }
+    } catch {
       return {
         ok: false,
-        fieldErrors: emptyLegalEntityCreateFieldErrors(),
-        generalError: 'Не удалось создать юридическое лицо',
+        generalError: 'Не удалось удалить юридическое лицо',
       }
     }
   }
@@ -278,5 +359,7 @@ export function useLgEntities() {
     toggleSort,
     refresh: () => fetchItems(),
     createLegalEntity,
+    updateLegalEntity,
+    deleteLegalEntity,
   }
 }

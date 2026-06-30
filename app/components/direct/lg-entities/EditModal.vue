@@ -1,14 +1,23 @@
 <script setup lang="ts">
-import type { LegalEntityCreateResult, LegalEntityCreatePayload } from '#shared/types/legalEntities'
+import type {
+  LegalEntity,
+  LegalEntityCreatePayload,
+  LegalEntityCreateResult,
+  LegalEntityDeleteResult,
+} from '#shared/types/legalEntities'
 
 const props = defineProps<{
-  submitFn: (payload: LegalEntityCreatePayload) => Promise<LegalEntityCreateResult>
+  entity: LegalEntity | null
+  submitFn: (id: number, payload: LegalEntityCreatePayload) => Promise<LegalEntityCreateResult>
+  deleteFn: (id: number) => Promise<LegalEntityDeleteResult>
 }>()
 
 const open = defineModel<boolean>('open', { required: true })
 
 const generalError = ref<string | null>(null)
 const isSubmitting = ref(false)
+const isDeleting = ref(false)
+const isDeleteConfirmOpen = ref(false)
 
 const {
   handleSubmit,
@@ -24,29 +33,37 @@ const {
   kppAttrs,
 } = useLegalEntityForm()
 
-watch(open, (isOpen) => {
-  if (isOpen) {
-    resetForm({
-      values: {
-        legal_entity: '',
-        inn: '',
-        kpp: '',
-      },
-    })
-    generalError.value = null
-  }
-})
+watch(
+  () => [open.value, props.entity] as const,
+  ([isOpen, entity]) => {
+    if (isOpen && entity) {
+      resetForm({
+        values: {
+          legal_entity: entity.legal_entity,
+          inn: entity.inn,
+          kpp: entity.kpp ?? '',
+        },
+      })
+      generalError.value = null
+      isDeleteConfirmOpen.value = false
+    }
+  },
+)
 
 function close() {
   open.value = false
 }
 
 const onSubmit = handleSubmit(async () => {
+  if (!props.entity) {
+    return
+  }
+
   generalError.value = null
   isSubmitting.value = true
 
   try {
-    const result = await props.submitFn(toPayload())
+    const result = await props.submitFn(props.entity.id, toPayload())
 
     if (result.ok) {
       close()
@@ -59,21 +76,52 @@ const onSubmit = handleSubmit(async () => {
     isSubmitting.value = false
   }
 })
+
+async function handleDeleteConfirm() {
+  if (!props.entity) {
+    return
+  }
+
+  generalError.value = null
+  isDeleting.value = true
+
+  try {
+    const result = await props.deleteFn(props.entity.id)
+
+    if (result.ok) {
+      close()
+      return
+    }
+
+    generalError.value = result.generalError
+    isDeleteConfirmOpen.value = false
+  } finally {
+    isDeleting.value = false
+  }
+}
+
+const isBusy = computed(() => isSubmitting.value || isDeleting.value)
 </script>
 
 <template>
   <Teleport to="body">
-    <div v-if="open" :class="$style.overlay" @mousedown.self="close">
+    <div v-if="open && entity" :class="$style.overlay" @mousedown.self="close">
       <form
         :class="$style.dialog"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="lg-entities-create-title"
+        aria-labelledby="lg-entities-edit-title"
         @submit.prevent="onSubmit"
       >
         <div :class="$style.header">
-          <h3 id="lg-entities-create-title" :class="$style.title">Создание юридического лица</h3>
-          <button type="button" :class="$style.closeButton" aria-label="Закрыть" @click="close">
+          <h3 id="lg-entities-edit-title" :class="$style.title">Редактирование юридического лица</h3>
+          <button
+            type="button"
+            :class="$style.closeButton"
+            aria-label="Закрыть"
+            :disabled="isBusy"
+            @click="close"
+          >
             ×
           </button>
         </div>
@@ -88,7 +136,7 @@ const onSubmit = handleSubmit(async () => {
               v-model="legalEntity"
               v-bind="legalEntityAttrs"
               placeholder="Введите наименование"
-              :disabled="isSubmitting"
+              :disabled="isBusy"
             />
           </div>
           <p v-if="errors.legal_entity" :class="$style.fieldError">{{ errors.legal_entity }}</p>
@@ -105,7 +153,7 @@ const onSubmit = handleSubmit(async () => {
               v-bind="innAttrs"
               placeholder="Введите ИНН"
               inputmode="numeric"
-              :disabled="isSubmitting"
+              :disabled="isBusy"
             />
           </div>
           <p v-if="errors.inn" :class="$style.fieldError">{{ errors.inn }}</p>
@@ -119,11 +167,34 @@ const onSubmit = handleSubmit(async () => {
               v-bind="kppAttrs"
               placeholder="Введите КПП"
               inputmode="numeric"
-              :disabled="isSubmitting"
+              :disabled="isBusy"
             />
           </div>
           <p v-if="errors.kpp" :class="$style.fieldError">{{ errors.kpp }}</p>
         </label>
+
+        <div v-if="isDeleteConfirmOpen" :class="$style.deleteConfirm">
+          <p :class="$style.deleteConfirmText">Удалить юридическое лицо «{{ entity.legal_entity }}»?</p>
+          <div :class="$style.deleteConfirmActions">
+            <UiButton
+              type="button"
+              size="sm"
+              variant="warning"
+              label="Удалить"
+              :loading="isDeleting"
+              :disabled="isBusy"
+              @click="handleDeleteConfirm"
+            />
+            <UiButton
+              type="button"
+              size="sm"
+              variant="soft"
+              label="Отмена"
+              :disabled="isBusy"
+              @click="isDeleteConfirmOpen = false"
+            />
+          </div>
+        </div>
 
         <p v-if="generalError" :class="$style.generalError">{{ generalError }}</p>
 
@@ -132,17 +203,26 @@ const onSubmit = handleSubmit(async () => {
             type="submit"
             size="sm"
             variant="success"
-            label="Создать"
+            label="Сохранить"
             :loading="isSubmitting"
-            :disabled="isSubmitting"
+            :disabled="isBusy"
           />
           <UiButton
             type="button"
             size="sm"
             variant="soft"
             label="Отменить"
-            :disabled="isSubmitting"
+            :disabled="isBusy"
             @click="close"
+          />
+          <UiButton
+            v-if="!isDeleteConfirmOpen"
+            type="button"
+            size="sm"
+            variant="warning"
+            label="Удалить"
+            :disabled="isBusy"
+            @click="isDeleteConfirmOpen = true"
           />
         </div>
       </form>
@@ -213,6 +293,11 @@ const onSubmit = handleSubmit(async () => {
     outline: 2px solid var(--fs-color-primary);
     outline-offset: 2px;
   }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
 }
 
 .field {
@@ -245,6 +330,27 @@ const onSubmit = handleSubmit(async () => {
   margin: 0;
   font-size: rem(12);
   color: var(--fs-color-error);
+}
+
+.deleteConfirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-1);
+  padding: var(--fs-space-2);
+  border-radius: rem(12);
+  background-color: var(--fs-color-ui-button-warning-surface);
+}
+
+.deleteConfirmText {
+  margin: 0;
+  font-size: rem(13);
+  color: var(--fs-color-text);
+}
+
+.deleteConfirmActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fs-space-1);
 }
 
 .generalError {

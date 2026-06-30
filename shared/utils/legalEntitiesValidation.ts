@@ -2,15 +2,12 @@ import type {
   LegalEntityCreateFieldErrors,
   LegalEntityCreatePayload,
 } from '#shared/types/legalEntities'
+import { legalEntityFormSchema } from '#shared/utils/legalEntitiesSchema'
 
 export const LEGAL_ENTITY_DUPLICATE_NAME_MESSAGE =
   'юридическое лицо с таким наименованием уже существует'
 
 export const LEGAL_ENTITY_DUPLICATE_INN_MESSAGE = 'юридическое лицо с таким ИНН уже существует'
-
-export const LEGAL_ENTITY_REQUIRED_NAME_MESSAGE = 'Укажите наименование юридического лица'
-
-export const LEGAL_ENTITY_REQUIRED_INN_MESSAGE = 'Укажите ИНН'
 
 interface ApiValidationErrorResponse {
   message?: string
@@ -61,35 +58,56 @@ export function hasLegalEntityCreateFieldErrors(
   return Boolean(fieldErrors.legal_entity || fieldErrors.inn || fieldErrors.kpp)
 }
 
-export function validateLegalEntityCreateForm(payload: {
-  legal_entity: string
-  inn: string
-}): LegalEntityCreateFieldErrors {
+export function validateLegalEntityFormPayload(
+  payload: LegalEntityCreatePayload,
+): LegalEntityCreateFieldErrors {
+  const result = legalEntityFormSchema.safeParse({
+    legal_entity: payload.legal_entity,
+    inn: payload.inn,
+    kpp: payload.kpp ?? '',
+  })
+
   const fieldErrors = emptyLegalEntityCreateFieldErrors()
 
-  if (!payload.legal_entity.trim()) {
-    fieldErrors.legal_entity = LEGAL_ENTITY_REQUIRED_NAME_MESSAGE
+  if (result.success) {
+    return fieldErrors
   }
 
-  if (!payload.inn.trim()) {
-    fieldErrors.inn = LEGAL_ENTITY_REQUIRED_INN_MESSAGE
+  for (const issue of result.error.issues) {
+    const field = issue.path[0]
+
+    if (field === 'legal_entity' && !fieldErrors.legal_entity) {
+      fieldErrors.legal_entity = issue.message
+    }
+
+    if (field === 'inn' && !fieldErrors.inn) {
+      fieldErrors.inn = issue.message
+    }
+
+    if (field === 'kpp' && !fieldErrors.kpp) {
+      fieldErrors.kpp = issue.message
+    }
   }
 
   return fieldErrors
 }
 
 export function findLegalEntityDuplicateErrors(
-  items: Array<{ legal_entity: string; inn: string }>,
+  items: Array<{ id?: number; legal_entity: string; inn: string }>,
   payload: { legal_entity: string; inn: string },
+  excludeId?: number,
 ): LegalEntityCreateFieldErrors {
   const fieldErrors = emptyLegalEntityCreateFieldErrors()
   const normalizedName = payload.legal_entity.trim().toLowerCase()
   const normalizedInn = payload.inn.trim()
 
-  const hasDuplicateName = items.some(
+  const comparableItems =
+    excludeId === undefined ? items : items.filter((item) => item.id !== excludeId)
+
+  const hasDuplicateName = comparableItems.some(
     (item) => item.legal_entity.trim().toLowerCase() === normalizedName,
   )
-  const hasDuplicateInn = items.some((item) => item.inn.trim() === normalizedInn)
+  const hasDuplicateInn = comparableItems.some((item) => item.inn.trim() === normalizedInn)
 
   if (hasDuplicateName) {
     fieldErrors.legal_entity = LEGAL_ENTITY_DUPLICATE_NAME_MESSAGE

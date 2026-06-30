@@ -60,3 +60,5 @@ export interface LegalEntityCreateFieldErrors {
 export type LegalEntityCreateResult =
   | { ok: true }
   | { ok: false; fieldErrors: LegalEntityCreateFieldErrors; generalError: string | null }
+
+export type LegalEntityDeleteResult = { ok: true } | { ok: false; generalError: string }

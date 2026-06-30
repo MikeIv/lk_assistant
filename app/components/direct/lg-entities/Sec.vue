@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { LegalEntity } from '#shared/types/legalEntities'
+
 const {
   items,
   pagination,
@@ -13,9 +15,18 @@ const {
   toggleSort,
   refresh,
   createLegalEntity,
+  updateLegalEntity,
+  deleteLegalEntity,
 } = useLgEntities()
 
 const isCreateOpen = ref(false)
+const isEditOpen = ref(false)
+const selectedEntity = ref<LegalEntity | null>(null)
+
+function openEdit(item: LegalEntity) {
+  selectedEntity.value = item
+  isEditOpen.value = true
+}
 </script>
 
 <template>
@@ -37,10 +48,18 @@ const isCreateOpen = ref(false)
       @page-change="setPage"
       @per-page-change="setPerPage"
       @sort-change="toggleSort"
+      @row-click="openEdit"
       @create="isCreateOpen = true"
     />
 
     <DirectLgEntitiesCreateModal v-model:open="isCreateOpen" :submit-fn="createLegalEntity" />
+
+    <DirectLgEntitiesEditModal
+      v-model:open="isEditOpen"
+      :entity="selectedEntity"
+      :submit-fn="updateLegalEntity"
+      :delete-fn="deleteLegalEntity"
+    />
   </div>
 </template>
 

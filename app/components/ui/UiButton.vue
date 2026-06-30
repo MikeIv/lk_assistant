@@ -1,5 +1,13 @@
 <script setup lang="ts">
-export type UiButtonVariant = 'primary' | 'inverse' | 'outline' | 'soft' | 'accent' | 'auth'
+export type UiButtonVariant =
+  | 'primary'
+  | 'inverse'
+  | 'outline'
+  | 'soft'
+  | 'accent'
+  | 'auth'
+  | 'success'
+  | 'warning'
 export type UiButtonSize = 'md' | 'sm' | 'chrome' | 'arrow'
 export type UiButtonIconPosition = 'left' | 'right'
 
@@ -292,7 +300,9 @@ const spinnerWrapClass = computed(() => {
 
 .inverse .spinner,
 .accent .spinner,
-.auth .spinner {
+.auth .spinner,
+.success .spinner,
+.warning .spinner {
   border-color: rgb(255 255 255 / 0.25);
   border-top-color: var(--fs-figma-achromatic-white);
 }
@@ -353,14 +363,15 @@ const spinnerWrapClass = computed(() => {
   }
 }
 
-.accent {
-  color: var(--fs-figma-achromatic-white);
-  background-color: var(--fs-color-primary);
-  border-color: rgb(255 255 255 / 0.22);
+/* Общий filled-вариант (accent / success / warning) */
+@mixin filled-button($text, $bg, $border, $border-hover) {
+  color: $text;
+  background-color: $bg;
+  border-color: $border;
 
   &:hover:not(:disabled) {
     filter: brightness(0.94);
-    border-color: rgb(255 255 255 / 0.35);
+    border-color: $border-hover;
   }
 
   &:active:not(:disabled) {
@@ -370,6 +381,15 @@ const spinnerWrapClass = computed(() => {
   &:disabled {
     @include disabled-neutral;
   }
+}
+
+.accent {
+  @include filled-button(
+    var(--fs-figma-achromatic-white),
+    var(--fs-color-primary),
+    rgb(255 255 255 / 0.22),
+    rgb(255 255 255 / 0.35)
+  );
 }
 
 .outline {
@@ -434,6 +454,24 @@ const spinnerWrapClass = computed(() => {
     border-color: var(--fs-color-ui-button-border);
     opacity: 0.55;
   }
+}
+
+.success {
+  @include filled-button(
+    var(--fs-color-ui-button-success-text),
+    var(--fs-color-ui-button-success-bg),
+    var(--fs-color-ui-button-success-border),
+    var(--fs-color-ui-button-success-border-hover)
+  );
+}
+
+.warning {
+  @include filled-button(
+    var(--fs-color-ui-button-warning-text),
+    var(--fs-color-ui-button-warning-bg),
+    var(--fs-color-ui-button-warning-border),
+    var(--fs-color-ui-button-warning-border-hover)
+  );
 }
 
 @keyframes ui-btn-spin {
