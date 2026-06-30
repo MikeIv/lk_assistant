@@ -30,6 +30,7 @@ watch(
 <template>
   <section v-if="currentDirectoryItem" :class="$style.root">
     <UiPromoBanner v-if="developmentBannerProps" v-bind="developmentBannerProps" />
+    <DirectPremisesSec v-if="section === 'premises'" />
     <DirectLgEntitiesSec v-if="section === 'legal-entities'" />
   </section>
 </template>

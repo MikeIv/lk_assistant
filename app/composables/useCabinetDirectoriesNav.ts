@@ -8,6 +8,7 @@ export const directoryNavItems: CabinetDirectoryNavItem[] = [
     label: 'Помещения',
     accent: 'var(--fs-figma-main-building-sport-complex)',
     bannerGradientTo: 'var(--fs-figma-vertical-children)',
+    hasContent: true,
   },
   {
     to: '/directories/legal-entities',
