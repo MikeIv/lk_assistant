@@ -1,6 +1,9 @@
 <script setup lang="ts">
+import type { Premise } from '#shared/types/premises'
+
 const {
   items,
+  roomTypes,
   pagination,
   searchQuery,
   sortKey,
@@ -12,7 +15,19 @@ const {
   setPerPage,
   toggleSort,
   refresh,
+  createPremise,
+  updatePremise,
+  deletePremise,
 } = usePremises()
+
+const isCreateOpen = ref(false)
+const isEditOpen = ref(false)
+const selectedPremise = ref<Premise | null>(null)
+
+function openEdit(item: Premise) {
+  selectedPremise.value = item
+  isEditOpen.value = true
+}
 </script>
 
 <template>
@@ -34,6 +49,22 @@ const {
       @page-change="setPage"
       @per-page-change="setPerPage"
       @sort-change="toggleSort"
+      @row-click="openEdit"
+      @create="isCreateOpen = true"
+    />
+
+    <DirectPremisesCreateModal
+      v-model:open="isCreateOpen"
+      :room-types="roomTypes"
+      :submit-fn="createPremise"
+    />
+
+    <DirectPremisesEditModal
+      v-model:open="isEditOpen"
+      :premise="selectedPremise"
+      :room-types="roomTypes"
+      :submit-fn="updatePremise"
+      :delete-fn="deletePremise"
     />
   </div>
 </template>

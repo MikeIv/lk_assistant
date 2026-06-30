@@ -80,3 +80,25 @@ export interface PremiseCreatePayload {
   floor_bti: string | null
   area_bti: number | null
 }
+
+export interface PremiseCreateFieldErrors {
+  room_type_id: string | null
+  name: string | null
+  floor: string | null
+  area: string | null
+  name_bti: string | null
+  floor_bti: string | null
+  area_bti: string | null
+}
+
+export type PremiseCreateResult =
+  | { ok: true }
+  | { ok: false; fieldErrors: PremiseCreateFieldErrors; generalError: string | null }
+
+export type PremiseDeleteResult = { ok: true } | { ok: false; generalError: string }
+
+export interface PremiseMutationApiResponse {
+  success: boolean
+  message: string
+  payload: PremiseApiResource
+}
