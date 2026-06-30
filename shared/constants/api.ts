@@ -21,6 +21,14 @@ export const API_PATHS = {
       list: '/v1/broker/legal-entities',
       detail: (id: number | string) => `/v1/broker/legal-entities/${id}`,
     },
+    rooms: {
+      list: '/v1/broker/dict/rooms',
+      detail: (id: number | string) => `/v1/broker/dict/rooms/${id}`,
+    },
+    roomTypes: {
+      list: '/v1/broker/dict/room-types',
+      detail: (id: number | string) => `/v1/broker/dict/room-types/${id}`,
+    },
   },
   news: {
     list: '/v1/news',
