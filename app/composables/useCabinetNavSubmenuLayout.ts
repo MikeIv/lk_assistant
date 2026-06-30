@@ -110,16 +110,6 @@ export function useCabinetNavSubmenuLayout(items: readonly CabinetNavItem[]) {
     expandedNavKey.value = null
   }
 
-  function syncExpandedNavFromRoute(path: string) {
-    const submenuParent = items.find(
-      (item) => item.children?.length && (path === item.to || path.startsWith(`${item.to}/`)),
-    )
-    const nextKey = submenuParent?.to ?? null
-    if (expandedNavKey.value !== nextKey) {
-      expandedNavKey.value = nextKey
-    }
-  }
-
   function scheduleLayoutUpdate() {
     void nextTick(() => {
       updateLayoutMetrics()
@@ -159,7 +149,6 @@ export function useCabinetNavSubmenuLayout(items: readonly CabinetNavItem[]) {
     isSubmenuExpanded,
     toggleSubmenu,
     closeSubmenu,
-    syncExpandedNavFromRoute,
     updateLayoutMetrics,
   }
 }

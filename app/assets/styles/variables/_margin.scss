@@ -33,7 +33,7 @@
   @include margin-token('nav-vertical', 28, 40, 78);
 
   /* Между блоком заголовка/подзаголовка и контентом */
-  @include margin-token('title-content', 32, 32, 56);
+  @include margin-token('title-content', 32, 32, 48);
 
   /* Раскрытое бургер-меню и футер */
   @include margin-token('menu-footer', 24, 32, 48);

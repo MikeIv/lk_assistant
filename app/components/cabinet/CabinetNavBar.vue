@@ -17,7 +17,6 @@ const {
   isSubmenuExpanded,
   toggleSubmenu,
   closeSubmenu,
-  syncExpandedNavFromRoute,
   updateLayoutMetrics,
 } = useCabinetNavSubmenuLayout(items)
 
@@ -49,8 +48,8 @@ function toggleCollapsed() {
 
 watch(
   () => route.path,
-  (path) => {
-    syncExpandedNavFromRoute(path)
+  () => {
+    closeSubmenu()
   },
   { immediate: true },
 )
@@ -122,6 +121,7 @@ watch(
                     { [$style.submenuLinkActive]: isChildNavActive(child.to) },
                   ]"
                   :aria-current="isChildNavActive(child.to) ? 'page' : undefined"
+                  @click="closeSubmenu"
                 >
                   {{ child.label }}
                 </NuxtLink>
@@ -278,7 +278,7 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-wrap: nowrap;
   align-items: stretch;
-  gap: rem(4);
+  gap: rem(6);
   width: max-content;
   max-width: 100%;
   min-width: 0;

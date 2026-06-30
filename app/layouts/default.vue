@@ -4,19 +4,21 @@ const { open: footerOpen, close: closeFooter } = useCabinetFooter()
 
 <template>
   <div :class="$style.layout">
-    <header :class="$style.headerWrap">
-      <div :class="$style.shell">
-        <CabinetHeader />
-      </div>
-    </header>
+    <div :class="$style.chromeSticky">
+      <header :class="$style.headerWrap">
+        <div :class="$style.shell">
+          <CabinetHeader />
+        </div>
+      </header>
 
-    <div :class="$style.navWrap">
-      <CabinetNavBar />
+      <div :class="$style.navWrap">
+        <CabinetNavBar />
+      </div>
     </div>
 
     <main :class="$style.main">
       <div :class="$style.content">
-        <div :class="$style.shell">
+        <div :class="[$style.shell, $style.siteShell]">
           <slot />
         </div>
       </div>
@@ -61,53 +63,65 @@ const { open: footerOpen, close: closeFooter } = useCabinetFooter()
 </template>
 
 <style module lang="scss">
-@use '~/assets/styles/tools/functions' as *;
-@use '~/assets/styles/tools/cabinet-page' as cabinet;
+@use '../assets/styles/tools/functions' as *;
+@use '../assets/styles/tools/cabinet-page' as cabinet;
+@use '../assets/styles/variables/z-index' as z;
 
 .layout {
   display: grid;
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto 1fr;
   grid-template-areas:
-    'header'
-    'nav'
+    'chrome'
     'main';
-  height: 100dvh;
-  min-height: 0;
+  min-height: 100dvh;
   overflow-x: clip;
+  overflow-y: auto;
+}
+
+.chromeSticky {
+  grid-area: chrome;
+  position: sticky;
+  top: 0;
+  z-index: z.z('header');
+  overflow: visible;
 }
 
 .headerWrap {
-  grid-area: header;
   min-width: 0;
-  z-index: 10;
   background: var(--fs-color-cabinet-header-glass);
   border-bottom: 1px solid var(--fs-color-cabinet-header-border);
   backdrop-filter: blur(38px);
 }
 
 .navWrap {
-  grid-area: nav;
-  flex-shrink: 0;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  z-index: z.z('cabinet-nav-bar');
   min-width: 0;
-  z-index: 9;
-  background: var(--fs-figma-achromatic-light-gray);
+  pointer-events: none;
 }
 
 .shell {
   @include cabinet.cabinet-shell;
 }
 
+.siteShell {
+  padding-top: var(--fs-space-3);
+}
+
 .main {
   grid-area: main;
   display: flex;
   flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
   background: var(--fs-figma-achromatic-light-gray);
 }
 
 .content {
   @include cabinet.cabinet-main-content;
+  overflow: visible;
+  min-height: auto;
 }
 
 .footerLayer {
