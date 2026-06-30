@@ -131,7 +131,8 @@ watch(
         </div>
       </div>
 
-      <div :class="$style.toggleRow">
+      <div :class="[$style.toggleRow, { [$style.toggleRowCollapsed]: collapsed }]">
+        <span v-if="collapsed" :class="$style.toggleLabel" aria-hidden="true">Меню</span>
         <UiButton
           id="cabinet-nav-collapse-trigger"
           v-bind="arrowToggleBind"
@@ -150,6 +151,7 @@ watch(
 @use 'sass:list';
 @use '~/assets/styles/tools/functions' as *;
 @use '~/assets/styles/tools/mixins' as mq;
+@use '~/assets/styles/tools/typography' as typo;
 @use '~/assets/styles/tools/cabinet-nav-submenu' as nav-submenu;
 @use '~/assets/styles/variables/z-index' as z;
 
@@ -175,7 +177,6 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
 .root {
   --nav-inline-margin: var(--fs-margin-card);
   --nav-toggle-size: #{rem(36)};
-  --nav-toggle-slot: calc(var(--nav-toggle-size) + #{rem(8)});
 
   position: relative;
   z-index: z.z('cabinet-nav-bar');
@@ -199,40 +200,52 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
   container-name: cabinet-nav;
   position: relative;
   box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
   width: 100%;
   min-height: rem(84);
-  padding-right: var(--nav-toggle-slot);
   overflow-x: clip;
 
   @container cabinet-nav (max-width: rem(960)) {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
     min-height: rem(128);
     padding-top: calc(var(--nav-toggle-size) + #{rem(12)});
-    padding-right: 0;
   }
 }
 
 .toggleRow {
-  position: absolute;
-  top: 50%;
-  right: 0;
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
   z-index: z.z('cabinet-nav-toggle');
   box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: var(--fs-space-1);
   padding: rem(4);
   border: 1px solid var(--fs-figma-stroke-light-gray);
   border-radius: rem(12);
   background: var(--fs-figma-achromatic-white);
-  transform: translateY(-50%);
   pointer-events: auto;
 
   @container cabinet-nav (max-width: rem(960)) {
-    top: 0;
-    right: 0;
-    left: auto;
-    transform: none;
+    grid-column: 1;
+    justify-self: end;
+    align-self: start;
   }
+}
+
+.toggleRowCollapsed {
+  padding-inline: var(--fs-space-2) rem(4);
+}
+
+.toggleLabel {
+  @include typo.fs-text-tag;
+  color: var(--fs-color-text);
+  white-space: nowrap;
 }
 
 .toggleRow :global(button) {
@@ -245,11 +258,21 @@ $nav-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .menuHost {
+  grid-column: 2;
+  grid-row: 1;
   display: flex;
   justify-content: center;
-  width: 100%;
+  width: max-content;
+  max-width: 100%;
   min-width: 0;
+  justify-self: center;
   pointer-events: auto;
+
+  @container cabinet-nav (max-width: rem(960)) {
+    grid-column: 1;
+    grid-row: 2;
+    width: 100%;
+  }
 }
 
 .shellWrap {

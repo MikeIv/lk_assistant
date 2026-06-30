@@ -1,6 +1,7 @@
 import type { CabinetSubNavItem } from '#shared/types/cabinetNav'
 import { directoryNavItems } from '~/composables/useCabinetDirectoriesNav'
 import { brokerNavItems } from '~/composables/useCabinetBrokerNav'
+import { tenantNavItems } from '~/composables/useCabinetTenantsNav'
 
 export type { CabinetSubNavItem }
 
@@ -38,6 +39,14 @@ const navItems: CabinetNavItem[] = [
     accent: 'var(--fs-figma-vertical-shop)',
     bannerGradientTo: 'var(--fs-figma-main-building-concert-hall)',
     children: brokerNavItems,
+  },
+  {
+    to: '/tenants',
+    label: 'Арендаторы',
+    icon: 'i-local-nav-users',
+    accent: 'var(--fs-figma-vertical-fitness)',
+    bannerGradientTo: 'var(--fs-figma-vertical-terms)',
+    children: tenantNavItems,
   },
   {
     to: '/directories',
