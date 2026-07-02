@@ -1,5 +1,6 @@
 import { API_PATHS } from '#shared/constants/api'
-import { PREMISES_MOCK_ITEMS, ROOM_TYPES_MOCK_ITEMS } from '#shared/constants/premisesMock'
+import { PREMISES_MOCK_ITEMS } from '#shared/constants/premisesMock'
+import { ROOM_TYPES_MOCK_ITEMS } from '#shared/constants/roomTypesMock'
 import type {
   Premise,
   PremiseCreateFieldErrors,
@@ -10,10 +11,10 @@ import type {
   PremisesListApiResponse,
   PremiseSortDirection,
   PremiseSortKey,
-  RoomType,
-  RoomTypesListApiResponse,
 } from '#shared/types/premises'
-import { normalizePremise, normalizeRoomType } from '#shared/utils/premisesNormalize'
+import type { RoomType, RoomTypesListApiResponse } from '#shared/types/roomTypes'
+import { normalizePremise } from '#shared/utils/premisesNormalize'
+import { normalizeRoomType } from '#shared/utils/roomTypesNormalize'
 import {
   buildPremisesPagination,
   matchesPremiseSearch,

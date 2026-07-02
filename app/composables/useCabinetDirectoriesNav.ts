@@ -11,6 +11,13 @@ export const directoryNavItems: CabinetDirectoryNavItem[] = [
     hasContent: true,
   },
   {
+    to: '/directories/room-types',
+    label: 'Типы помещений',
+    accent: 'var(--fs-figma-main-building-main)',
+    bannerGradientTo: 'var(--fs-figma-vertical-shop)',
+    hasContent: true,
+  },
+  {
     to: '/directories/legal-entities',
     label: 'Юр. лица',
     accent: 'var(--fs-figma-vertical-fitness)',

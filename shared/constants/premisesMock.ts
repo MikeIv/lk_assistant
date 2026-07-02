@@ -1,12 +1,7 @@
-import type { Premise, RoomType } from '#shared/types/premises'
+import type { Premise } from '#shared/types/premises'
+import { ROOM_TYPES_MOCK_ITEMS } from './roomTypesMock'
 
-export const ROOM_TYPES_MOCK_ITEMS: RoomType[] = [
-  { id: 1, name: 'Торговое' },
-  { id: 2, name: 'Офисное' },
-  { id: 3, name: 'Складское' },
-  { id: 4, name: 'Пищевое' },
-  { id: 5, name: 'Сервисное' },
-]
+const PREMISES_ROOM_TYPES = ROOM_TYPES_MOCK_ITEMS.slice(0, 5)
 
 const FLOORS = ['-1', '0', '1', '2', '3', '4', '5'] as const
 
@@ -17,7 +12,7 @@ function formatArea(seed: number): number {
 /** 196 записей — для проверки пагинации и поиска в mock-режиме. */
 export const PREMISES_MOCK_ITEMS: Premise[] = Array.from({ length: 196 }, (_, index) => {
   const id = index + 1
-  const roomType = ROOM_TYPES_MOCK_ITEMS[index % ROOM_TYPES_MOCK_ITEMS.length]!
+  const roomType = PREMISES_ROOM_TYPES[index % PREMISES_ROOM_TYPES.length]!
   const floor = FLOORS[index % FLOORS.length] ?? '1'
   const area = formatArea(id)
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { UiSelectOption } from '#shared/types/tenantData'
-import type { PremiseCreatePayload, PremiseCreateResult, RoomType } from '#shared/types/premises'
+import type { PremiseCreatePayload, PremiseCreateResult } from '#shared/types/premises'
+import type { RoomType } from '#shared/types/roomTypes'
 
 const props = defineProps<{
   roomTypes: RoomType[]

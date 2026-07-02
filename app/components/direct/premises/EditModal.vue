@@ -5,8 +5,8 @@ import type {
   PremiseCreatePayload,
   PremiseCreateResult,
   PremiseDeleteResult,
-  RoomType,
 } from '#shared/types/premises'
+import type { RoomType } from '#shared/types/roomTypes'
 
 const props = defineProps<{
   premise: Premise | null

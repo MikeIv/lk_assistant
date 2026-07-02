@@ -22,11 +22,6 @@ export interface Premise {
   room_type: string | null
 }
 
-export interface RoomType {
-  id: number
-  name: string
-}
-
 export interface PremisesPagination {
   currentPage: number
   lastPage: number
@@ -50,24 +45,11 @@ export interface PremiseApiResource {
   room_type: string | null
 }
 
-export interface RoomTypeApiResource {
-  id: number
-  name: string
-}
-
 export interface PremisesListApiResponse {
   success: boolean
   message: string
   payload: {
     items: PremiseApiResource[]
-  }
-}
-
-export interface RoomTypesListApiResponse {
-  success: boolean
-  message: string
-  payload: {
-    items: RoomTypeApiResource[]
   }
 }
 
