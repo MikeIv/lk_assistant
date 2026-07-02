@@ -29,6 +29,10 @@ export const API_PATHS = {
       list: '/v1/broker/dict/room-types',
       detail: (id: number | string) => `/v1/broker/dict/room-types/${id}`,
     },
+    categories: {
+      list: '/v1/broker/dict/categories',
+      detail: (id: number | string) => `/v1/broker/dict/categories/${id}`,
+    },
   },
   news: {
     list: '/v1/news',

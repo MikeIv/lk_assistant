@@ -18,6 +18,13 @@ export const directoryNavItems: CabinetDirectoryNavItem[] = [
     hasContent: true,
   },
   {
+    to: '/directories/categories',
+    label: 'Категория',
+    accent: 'var(--fs-figma-vertical-children)',
+    bannerGradientTo: 'var(--fs-figma-vertical-entertainments)',
+    hasContent: true,
+  },
+  {
     to: '/directories/legal-entities',
     label: 'Юр. лица',
     accent: 'var(--fs-figma-vertical-fitness)',

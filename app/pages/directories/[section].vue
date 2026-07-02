@@ -32,6 +32,7 @@ watch(
     <UiPromoBanner v-if="developmentBannerProps" v-bind="developmentBannerProps" />
     <DirectPremisesSec v-if="section === 'premises'" />
     <DirectRoomTypesSec v-if="section === 'room-types'" />
+    <DirectCategoriesSec v-if="section === 'categories'" />
     <DirectLgEntitiesSec v-if="section === 'legal-entities'" />
   </section>
 </template>
