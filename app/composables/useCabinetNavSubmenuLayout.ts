@@ -1,5 +1,8 @@
 import type { CabinetNavItem } from '~/composables/useCabinetNav'
-import { buildCabinetNavSubmenuStyleVars } from '#shared/constants/cabinetNavSubmenu'
+import {
+  buildCabinetNavSubmenuStyleVars,
+  getCabinetNavSubmenuPanelBleedPx,
+} from '#shared/constants/cabinetNavSubmenu'
 
 function resolveTriggerControl(anchor: HTMLElement): HTMLElement {
   return anchor.querySelector<HTMLElement>(':scope > a, :scope > button') ?? anchor
@@ -20,9 +23,11 @@ export function useCabinetNavSubmenuLayout(items: readonly CabinetNavItem[]) {
   const shellWrapEl = ref<HTMLElement | null>(null)
   const flyoutEl = ref<HTMLElement | null>(null)
   const triggerWidth = ref(0)
-  const flyoutOffset = ref({ left: 0, top: 0 })
+  const flyoutOffset = ref({ left: 0, top: 0, triggerCenterX: 0 })
 
-  let triggerResizeObserver: ResizeObserver | null = null
+  const panelBleedHalfPx = getCabinetNavSubmenuPanelBleedPx() / 2
+
+  let layoutResizeObserver: ResizeObserver | null = null
 
   const expandedNavItem = computed(() =>
     items.find((item) => item.to === expandedNavKey.value && item.children?.length),
@@ -39,6 +44,7 @@ export function useCabinetNavSubmenuLayout(items: readonly CabinetNavItem[]) {
     return buildCabinetNavSubmenuStyleVars({
       accent: item.accent,
       triggerWidthPx: triggerWidth.value,
+      triggerCenterPx: flyoutOffset.value.triggerCenterX,
       flyoutLeftPx: flyoutOffset.value.left,
       flyoutTopPx: flyoutOffset.value.top,
     })
@@ -59,10 +65,21 @@ export function useCabinetNavSubmenuLayout(items: readonly CabinetNavItem[]) {
     const anchorRect = anchor.getBoundingClientRect()
     const shellRect = shell.getBoundingClientRect()
     const flyoutWidth = flyout?.offsetWidth ?? 0
+    const shellWidth = shellRect.width
     const anchorCenterX = anchorRect.left - shellRect.left + anchorRect.width / 2
+    let flyoutLeft = anchorCenterX - flyoutWidth / 2
+
+    if (flyoutWidth > 0) {
+      flyoutLeft = Math.max(
+        -panelBleedHalfPx,
+        Math.min(flyoutLeft, shellWidth - flyoutWidth + panelBleedHalfPx),
+      )
+    }
+
     const nextOffset = {
-      left: anchorCenterX - flyoutWidth / 2,
+      left: flyoutLeft,
       top: anchorRect.bottom - shellRect.top,
+      triggerCenterX: anchorCenterX - flyoutLeft,
     }
     const nextTriggerWidth = measureTriggerWidth(anchor)
 
@@ -70,32 +87,48 @@ export function useCabinetNavSubmenuLayout(items: readonly CabinetNavItem[]) {
       triggerWidth.value = nextTriggerWidth
     }
 
-    if (flyoutOffset.value.left !== nextOffset.left || flyoutOffset.value.top !== nextOffset.top) {
+    if (
+      flyoutOffset.value.left !== nextOffset.left ||
+      flyoutOffset.value.top !== nextOffset.top ||
+      flyoutOffset.value.triggerCenterX !== nextOffset.triggerCenterX
+    ) {
       flyoutOffset.value = nextOffset
     }
   }
 
-  function bindTriggerRef(el: Element | ComponentPublicInstance | null) {
-    triggerResizeObserver?.disconnect()
-    triggerResizeObserver = null
-
-    const node = el instanceof HTMLElement ? el : null
-    triggerEl.value = node
-
-    if (!node) {
-      return
-    }
-
-    updateLayoutMetrics()
+  function syncLayoutResizeObservers() {
+    layoutResizeObserver?.disconnect()
+    layoutResizeObserver = null
 
     if (typeof ResizeObserver === 'undefined') {
       return
     }
 
-    triggerResizeObserver = new ResizeObserver(() => {
+    const targets: HTMLElement[] = []
+    if (triggerEl.value) {
+      targets.push(resolveTriggerControl(triggerEl.value))
+    }
+    if (flyoutEl.value) {
+      targets.push(flyoutEl.value)
+    }
+
+    if (targets.length === 0) {
+      return
+    }
+
+    layoutResizeObserver = new ResizeObserver(() => {
       updateLayoutMetrics()
     })
-    triggerResizeObserver.observe(resolveTriggerControl(node))
+
+    for (const target of targets) {
+      layoutResizeObserver.observe(target)
+    }
+  }
+
+  function bindTriggerRef(el: Element | ComponentPublicInstance | null) {
+    triggerEl.value = el instanceof HTMLElement ? el : null
+    updateLayoutMetrics()
+    syncLayoutResizeObservers()
   }
 
   function isSubmenuExpanded(item: CabinetNavItem): boolean {
@@ -113,28 +146,35 @@ export function useCabinetNavSubmenuLayout(items: readonly CabinetNavItem[]) {
   function scheduleLayoutUpdate() {
     void nextTick(() => {
       updateLayoutMetrics()
-      requestAnimationFrame(() => {
-        updateLayoutMetrics()
-      })
+      requestAnimationFrame(updateLayoutMetrics)
     })
   }
 
   watch(expandedNavKey, (key) => {
     if (!key) {
       triggerWidth.value = 0
+      syncLayoutResizeObservers()
       return
     }
     scheduleLayoutUpdate()
   })
 
+  watch(flyoutEl, () => {
+    syncLayoutResizeObservers()
+    if (flyoutEl.value) {
+      scheduleLayoutUpdate()
+    }
+  })
+
   onMounted(() => {
     updateLayoutMetrics()
+    syncLayoutResizeObservers()
     window.addEventListener('resize', updateLayoutMetrics, { passive: true })
   })
 
   onUnmounted(() => {
-    triggerResizeObserver?.disconnect()
-    triggerResizeObserver = null
+    layoutResizeObserver?.disconnect()
+    layoutResizeObserver = null
     window.removeEventListener('resize', updateLayoutMetrics)
   })
 

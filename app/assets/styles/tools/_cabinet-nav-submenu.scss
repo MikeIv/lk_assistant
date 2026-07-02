@@ -14,7 +14,7 @@
   flex-direction: column;
   align-items: center;
   width: max-content;
-  max-width: min(100vw, rem(640));
+  max-width: calc(100% + var(--nav-submenu-panel-bleed, 0px));
   margin-top: 0;
   padding-top: var(--nav-bridge-height, #{rem(11)});
   pointer-events: none;
@@ -23,7 +23,7 @@
 @mixin bridge {
   position: absolute;
   top: calc(-1 * var(--nav-bridge-lift, #{rem(1)}));
-  left: 50%;
+  left: var(--nav-trigger-center-x, 50%);
   z-index: z.z('cabinet-nav-submenu-bridge');
   width: calc(var(--nav-trigger-width, 0px) + var(--nav-bridge-bleed, 0px) * 2);
   height: calc(var(--nav-bridge-height, #{rem(11)}) + var(--nav-bridge-lift, #{rem(1)}));
@@ -58,8 +58,8 @@
 @mixin junction-curve-start {
   top: calc(-1 * var(--nav-submenu-corner-radius, #{rem(16)}) - var(--nav-bridge-lift, #{rem(1)}));
   inset-inline-start: calc(
-    50% - var(--nav-trigger-width, 0px) / 2 - var(--nav-submenu-corner-radius, #{rem(16)}) +
-      var(--nav-junction-inset-inline-start, 0px)
+    var(--nav-trigger-center-x, 50%) - var(--nav-trigger-width, 0px) /
+      2 - var(--nav-submenu-corner-radius, #{rem(16)}) + var(--nav-junction-inset-inline-start, 0px)
   );
   transform-origin: 100% 100%;
   @include junction-curve(
@@ -71,8 +71,8 @@
 @mixin junction-curve-end {
   top: calc(-1 * var(--nav-submenu-corner-radius, #{rem(16)}) - var(--nav-bridge-lift, #{rem(1)}));
   inset-inline-end: calc(
-    50% - var(--nav-trigger-width, 0px) / 2 - var(--nav-submenu-corner-radius, #{rem(16)}) +
-      var(--nav-junction-inset-inline-end, 0px)
+    100% - var(--nav-trigger-center-x, 50%) - var(--nav-trigger-width, 0px) /
+      2 - var(--nav-submenu-corner-radius, #{rem(16)}) + var(--nav-junction-inset-inline-end, 0px)
   );
   transform-origin: 0 100%;
   @include junction-curve(
@@ -85,10 +85,13 @@
   position: relative;
   z-index: z.z('cabinet-nav-submenu-panel');
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: rem(8);
+  box-sizing: border-box;
   width: max-content;
+  max-width: 100%;
   min-width: rem(200);
   margin-top: rem(-1);
   padding: rem(10) rem(16) rem(14);
@@ -96,21 +99,11 @@
   background: var(--nav-submenu-accent);
   backdrop-filter: blur(20px);
   box-shadow: var(--fs-shadow-cabinet-nav);
-  overflow-x: auto;
-  overflow-y: hidden;
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-x;
   pointer-events: auto;
-  scrollbar-width: none;
 
   --nav-submenu-link-hover-bg: rgb(255 255 255 / 0.14);
   --nav-submenu-link-active-bg: rgb(255 255 255 / 0.3);
   --nav-submenu-link-active-hover-bg: rgb(255 255 255 / 0.38);
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
 }
 
 @mixin link {

@@ -23,11 +23,25 @@ export const CABINET_NAV_SUBMENU_LAYOUT = {
   filletInnerInsetPx: 1,
   /** Фон кармана fillet — подложка навбара, не shell (иначе белая полоса на тёмном акценте). */
   bridgeBgVar: '--fs-figma-achromatic-light-gray',
+  /**
+   * Временный запас ширины панели: 2× ширина fillet (радиус junction-curve).
+   * Компенсирует визуальный зазор у стыка триггер ↔ submenu.
+   */
+  panelWidthBleedFactor: 2,
 } as const
+
+/** Горизонтальный запас ширины панели (px): cornerRadius × panelWidthBleedFactor. */
+export function getCabinetNavSubmenuPanelBleedPx(
+  layout: typeof CABINET_NAV_SUBMENU_LAYOUT = CABINET_NAV_SUBMENU_LAYOUT,
+): number {
+  return layout.cornerRadiusPx * layout.panelWidthBleedFactor
+}
 
 export interface CabinetNavSubmenuStyleInput {
   accent: string
   triggerWidthPx: number
+  /** Центр триггера относительно левого края flyout (для bridge и junction). */
+  triggerCenterPx: number
   flyoutLeftPx: number
   flyoutTopPx: number
 }
@@ -42,6 +56,7 @@ export function buildCabinetNavSubmenuStyleVars(
     '--nav-submenu-accent': input.accent,
     '--nav-submenu-bridge-bg': `var(${layout.bridgeBgVar})`,
     '--nav-submenu-corner-radius': `${layout.cornerRadiusPx}px`,
+    '--nav-submenu-panel-bleed': `${getCabinetNavSubmenuPanelBleedPx(layout)}px`,
     '--nav-bridge-height': `${layout.bridgeHeightPx}px`,
     '--nav-bridge-lift': `${layout.bridgeLiftPx}px`,
     '--nav-bridge-bleed': `${layout.bridgeBleedPx}px`,
@@ -49,6 +64,7 @@ export function buildCabinetNavSubmenuStyleVars(
     '--nav-junction-inset-inline-end': `${layout.junctionInsetInlineEndPx}px`,
     '--nav-fillet-inner-inset': `${layout.filletInnerInsetPx}px`,
     '--nav-trigger-width': `${input.triggerWidthPx}px`,
+    '--nav-trigger-center-x': `${input.triggerCenterPx}px`,
     '--nav-flyout-left': `${input.flyoutLeftPx}px`,
     '--nav-flyout-top': `${input.flyoutTopPx}px`,
   }
