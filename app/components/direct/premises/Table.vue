@@ -30,13 +30,10 @@ const cssm = useCssModule()
 
 const columns = [
   { key: 'id' as const, label: 'id', align: 'center' as const },
-  { key: 'name' as const, label: 'Номер (аренда)', align: 'start' as const },
+  { key: 'room_type' as const, label: 'Тип помещения', align: 'start' as const },
+  { key: 'name' as const, label: 'Номер помещения', align: 'start' as const },
   { key: 'floor' as const, label: 'Этаж', align: 'center' as const },
   { key: 'area' as const, label: 'Площадь, м²', align: 'center' as const },
-  { key: 'room_type' as const, label: 'Тип помещения', align: 'start' as const },
-  { key: 'name_bti' as const, label: 'Номер БТИ', align: 'center' as const },
-  { key: 'floor_bti' as const, label: 'Этаж БТИ', align: 'center' as const },
-  { key: 'area_bti' as const, label: 'Площадь БТИ, м²', align: 'center' as const },
 ]
 
 const thAlignClass = {
@@ -76,6 +73,23 @@ function formatArea(value: number | null): string {
 
 function formatText(value: string | null): string {
   return value ?? '—'
+}
+
+function cellValue(item: Premise, key: PremiseSortKey): string {
+  switch (key) {
+    case 'id':
+      return String(item.id)
+    case 'name':
+      return item.name
+    case 'floor':
+      return formatText(item.floor)
+    case 'area':
+      return formatArea(item.area)
+    case 'room_type':
+      return formatText(item.room_type)
+    default:
+      return '—'
+  }
 }
 </script>
 
@@ -153,14 +167,13 @@ function formatText(value: string | null): string {
             @click="emit('rowClick', item)"
             @keydown.enter="emit('rowClick', item)"
           >
-            <td :class="[$style.td, tdAlignClass.center]">{{ item.id }}</td>
-            <td :class="[$style.td, tdAlignClass.start]">{{ item.name }}</td>
-            <td :class="[$style.td, tdAlignClass.center]">{{ formatText(item.floor) }}</td>
-            <td :class="[$style.td, tdAlignClass.center]">{{ formatArea(item.area) }}</td>
-            <td :class="[$style.td, tdAlignClass.start]">{{ formatText(item.room_type) }}</td>
-            <td :class="[$style.td, tdAlignClass.center]">{{ formatText(item.name_bti) }}</td>
-            <td :class="[$style.td, tdAlignClass.center]">{{ formatText(item.floor_bti) }}</td>
-            <td :class="[$style.td, tdAlignClass.center]">{{ formatArea(item.area_bti) }}</td>
+            <td
+              v-for="column in columns"
+              :key="column.key"
+              :class="[$style.td, tdAlignClass[column.align]]"
+            >
+              {{ cellValue(item, column.key) }}
+            </td>
           </tr>
         </tbody>
       </table>
@@ -259,7 +272,7 @@ function formatText(value: string | null): string {
 
 .table {
   width: 100%;
-  min-width: rem(1080);
+  min-width: rem(720);
   border-collapse: separate;
   border-spacing: 0;
 
