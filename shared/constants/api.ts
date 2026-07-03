@@ -33,6 +33,10 @@ export const API_PATHS = {
       list: '/v1/broker/dict/categories',
       detail: (id: number | string) => `/v1/broker/dict/categories/${id}`,
     },
+    tenantApplicants: {
+      list: '/v1/broker/tenant-applicants',
+      detail: (id: number | string) => `/v1/broker/tenant-applicants/${id}`,
+    },
   },
   news: {
     list: '/v1/news',

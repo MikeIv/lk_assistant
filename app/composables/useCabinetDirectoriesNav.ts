@@ -50,6 +50,7 @@ export const directoryNavItems: CabinetDirectoryNavItem[] = [
     label: 'Претенденты',
     accent: 'var(--fs-figma-vertical-aqua-park)',
     bannerGradientTo: 'var(--fs-figma-vertical-surfing)',
+    hasContent: true,
   },
 ]
 

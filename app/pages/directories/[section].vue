@@ -34,6 +34,7 @@ watch(
     <DirectRoomTypesSec v-if="section === 'room-types'" />
     <DirectCategoriesSec v-if="section === 'categories'" />
     <DirectLgEntitiesSec v-if="section === 'legal-entities'" />
+    <DirectApplicantsSec v-if="section === 'applicants'" />
   </section>
 </template>
 
