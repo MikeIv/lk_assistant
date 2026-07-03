@@ -1,5 +1,5 @@
 import type { CabinetSubNavItem } from '#shared/types/cabinetNav'
-import { directoryNavItems } from '~/composables/useCabinetDirectoriesNav'
+import { directorySubmenuItems } from '~/composables/useCabinetDirectoriesNav'
 import { brokerNavItems } from '~/composables/useCabinetBrokerNav'
 import { tenantNavItems } from '~/composables/useCabinetTenantsNav'
 
@@ -54,7 +54,7 @@ const navItems: CabinetNavItem[] = [
     icon: 'i-local-nav-data',
     accent: 'var(--fs-figma-vertical-gold-gallery)',
     bannerGradientTo: 'var(--fs-figma-vertical-events)',
-    children: directoryNavItems,
+    children: directorySubmenuItems,
   },
 ]
 

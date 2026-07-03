@@ -19,7 +19,7 @@ const emit = defineEmits<{
   'update:modelValue': [value: string | null]
 }>()
 
-const { wrapperRef, isOpen, toggle, close } = useUiDropdown()
+const { wrapperRef, isOpen, toggle, closeAfterSelection } = useUiDropdown()
 
 const displayValue = computed(() => {
   if (!props.modelValue) {
@@ -40,7 +40,7 @@ function isOptionSelected(option: UiSelectOption): boolean {
 
 function selectOption(option: UiSelectOption) {
   emit('update:modelValue', option.outputValue ?? option.label)
-  close()
+  closeAfterSelection()
 }
 </script>
 
@@ -63,7 +63,7 @@ function selectOption(option: UiSelectOption) {
       />
     </button>
 
-    <ul v-if="isOpen" :class="$style.dropdown" role="listbox">
+    <ul v-if="isOpen" :class="$style.dropdown" role="listbox" @mousedown.prevent>
       <li
         v-for="option in options"
         :key="option.value"

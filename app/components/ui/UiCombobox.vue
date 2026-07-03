@@ -22,7 +22,7 @@ const emit = defineEmits<{
   'update:isCustom': [value: boolean]
 }>()
 
-const { wrapperRef, isOpen, toggle, close } = useUiDropdown()
+const { wrapperRef, isOpen, toggle, closeAfterSelection } = useUiDropdown()
 const inputRef = ref<HTMLInputElement | null>(null)
 
 const isCustomMode = computed({
@@ -48,14 +48,14 @@ async function selectOption(option: UiSelectOption) {
 
   if (option.isCustom) {
     textValue.value = ''
-    close()
+    closeAfterSelection()
     await nextTick()
     inputRef.value?.focus()
     return
   }
 
   textValue.value = option.label
-  close()
+  closeAfterSelection()
 }
 
 function onInputClick() {
@@ -87,7 +87,7 @@ function onInputClick() {
       </button>
     </div>
 
-    <ul v-if="isOpen" :class="$style.dropdown" role="listbox">
+    <ul v-if="isOpen" :class="$style.dropdown" role="listbox" @mousedown.prevent>
       <li
         v-for="option in options"
         :key="option.value"

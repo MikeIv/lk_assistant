@@ -6,4 +6,6 @@ export interface CabinetSubNavItem {
   bannerGradientTo: string
   /** true — на странице свой контент, баннер «раздел в разработке» не показываем */
   hasContent?: boolean
+  /** true — пункт не показываем в flyout-подменю (временно) */
+  hiddenInSubmenu?: boolean
 }

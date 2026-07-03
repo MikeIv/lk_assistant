@@ -84,10 +84,10 @@
 @mixin panel {
   position: relative;
   z-index: z.z('cabinet-nav-submenu-panel');
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(4, max-content);
+  justify-content: start;
+  align-content: start;
   gap: rem(8);
   box-sizing: border-box;
   width: max-content;
@@ -107,9 +107,9 @@
 }
 
 @mixin link {
-  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
+  justify-self: start;
   padding: rem(6) rem(12);
   border-radius: rem(10);
   font-family: var(--fs-font-sans);

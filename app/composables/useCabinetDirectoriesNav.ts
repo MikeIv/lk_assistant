@@ -36,12 +36,14 @@ export const directoryNavItems: CabinetDirectoryNavItem[] = [
     label: 'Бренды',
     accent: 'var(--fs-figma-vertical-entertainments)',
     bannerGradientTo: 'var(--fs-figma-main-building-main)',
+    hiddenInSubmenu: true,
   },
   {
     to: '/directories/contracts',
     label: 'Договоры',
     accent: 'var(--fs-figma-vertical-shop)',
     bannerGradientTo: 'var(--fs-figma-main-building-concert-hall)',
+    hiddenInSubmenu: true,
   },
   {
     to: '/directories/applicants',
@@ -50,6 +52,8 @@ export const directoryNavItems: CabinetDirectoryNavItem[] = [
     bannerGradientTo: 'var(--fs-figma-vertical-surfing)',
   },
 ]
+
+export const directorySubmenuItems = directoryNavItems.filter((item) => !item.hiddenInSubmenu)
 
 export function findDirectoryNavItem(section: string): CabinetDirectoryNavItem | undefined {
   return directoryNavItems.find((item) => item.to === `/directories/${section}`)

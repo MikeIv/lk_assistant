@@ -4,6 +4,8 @@ export function useUiDropdown() {
   const wrapperRef = ref<HTMLElement | null>(null)
   const isOpen = ref(false)
   const instanceId = Symbol('ui-dropdown')
+  /** Сбрасывает повторный toggle от `<label>` после выбора пункта. */
+  let suppressNextToggle = false
 
   function open() {
     window.dispatchEvent(
@@ -18,7 +20,17 @@ export function useUiDropdown() {
     isOpen.value = false
   }
 
+  function closeAfterSelection() {
+    close()
+    suppressNextToggle = true
+  }
+
   function toggle() {
+    if (suppressNextToggle) {
+      suppressNextToggle = false
+      return
+    }
+
     if (isOpen.value) {
       close()
       return
@@ -54,6 +66,7 @@ export function useUiDropdown() {
     isOpen,
     open,
     close,
+    closeAfterSelection,
     toggle,
   }
 }
