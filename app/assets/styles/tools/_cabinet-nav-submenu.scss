@@ -1,4 +1,5 @@
 @use 'functions' as *;
+@use 'mixins' as mq;
 @use '../variables/z-index' as z;
 
 /**
@@ -18,6 +19,11 @@
   margin-top: 0;
   padding-top: var(--nav-bridge-height, #{rem(11)});
   pointer-events: none;
+
+  @include mq.from-desktop {
+    max-width: none;
+    align-items: flex-start;
+  }
 }
 
 @mixin bridge {
@@ -104,6 +110,12 @@
   --nav-submenu-link-hover-bg: rgb(255 255 255 / 0.14);
   --nav-submenu-link-active-bg: rgb(255 255 255 / 0.3);
   --nav-submenu-link-active-hover-bg: rgb(255 255 255 / 0.38);
+
+  @include mq.from-desktop {
+    display: flex;
+    align-items: center;
+    max-width: none;
+  }
 }
 
 @mixin link {
@@ -133,6 +145,10 @@
   &:focus-visible {
     outline: rem(2) solid var(--fs-figma-achromatic-white);
     outline-offset: rem(2);
+  }
+
+  @include mq.from-desktop {
+    flex-shrink: 0;
   }
 }
 
