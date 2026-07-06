@@ -6,12 +6,14 @@ export const brokerNavItems: CabinetSubNavItem[] = [
     label: 'Календарь',
     accent: 'var(--fs-figma-vertical-events)',
     bannerGradientTo: 'var(--fs-figma-vertical-entertainments)',
+    hasContent: true,
   },
   {
     to: '/broker/current',
     label: 'Текущие дела',
     accent: 'var(--fs-figma-vertical-shop)',
     bannerGradientTo: 'var(--fs-figma-main-building-concert-hall)',
+    hasContent: true,
   },
 ]
 

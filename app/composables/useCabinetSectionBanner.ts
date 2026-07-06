@@ -9,7 +9,9 @@ export interface CabinetSectionBannerProps {
   gradientTo: string
 }
 
-type SectionAccentSource = Pick<CabinetNavItem, 'accent' | 'bannerGradientTo'>
+type SectionAccentSource = Pick<CabinetNavItem, 'accent' | 'bannerGradientTo'> & {
+  hasContent?: boolean
+}
 
 function resolveNavItemByPath(
   topItems: CabinetNavItem[],
@@ -46,7 +48,7 @@ export function useCabinetSectionBanner(sectionPath?: string) {
     const path = sectionPath ?? route.path
     const navItem = resolveNavItemByPath(items, path)
 
-    if (!navItem) {
+    if (!navItem || navItem.hasContent) {
       return undefined
     }
 
