@@ -69,10 +69,28 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
   const roomIdModel = createStringFieldModel(roomId)
   const responsibleNameModel = createStringFieldModel(responsibleName)
 
+  function syncApplicantsToForm() {
+    form.setFieldValue('applicants', [...applicants.value], true)
+  }
+
+  function resolveApplicantsError(): string | null {
+    if (applicantsError.value) {
+      return applicantsError.value
+    }
+
+    for (const [key, message] of Object.entries(form.errors.value)) {
+      if (key.startsWith('applicants') && message) {
+        return message
+      }
+    }
+
+    return null
+  }
+
   const formErrors = computed(() => ({
     room_id: form.errors.value.room_id,
     responsible_name: form.errors.value.responsible_name,
-    applicants: applicantsError.value,
+    applicants: resolveApplicantsError(),
   }))
 
   function applyServerFieldErrors(fieldErrors: TenantCaseCreateFieldErrors) {
@@ -127,11 +145,13 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
     }
 
     applicant.negotiations.push({ date: '', info: '' })
+    syncApplicantsToForm()
   }
 
   function removeNegotiation(applicantIndex: number, negotiationIndex: number) {
     const applicant = applicants.value[applicantIndex]
     applicant?.negotiations.splice(negotiationIndex, 1)
+    syncApplicantsToForm()
   }
 
   function toPayload(): TenantCaseCreatePayload {
@@ -157,14 +177,20 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
     }
   }
 
-  function submitForm(callback: () => void | Promise<void>) {
-    form.setFieldValue('applicants', [...applicants.value])
+  function createSubmitHandler(callback: () => void | Promise<void>) {
+    const validatedSubmit = form.handleSubmit(async () => {
+      applicantsError.value = null
+      await callback()
+    })
 
-    return form.handleSubmit(callback)
+    return () => {
+      syncApplicantsToForm()
+      return validatedSubmit()
+    }
   }
 
   return {
-    handleSubmit: submitForm,
+    handleSubmit: createSubmitHandler,
     errors: formErrors,
     resetForm: form.resetForm,
     applyServerFieldErrors,

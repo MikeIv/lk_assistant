@@ -74,6 +74,7 @@ const { open: footerOpen, close: closeFooter } = useCabinetFooter()
     'chrome'
     'main';
   min-height: 100dvh;
+  min-width: 0;
   overflow-x: clip;
   overflow-y: auto;
 }
@@ -105,6 +106,7 @@ const { open: footerOpen, close: closeFooter } = useCabinetFooter()
 
 .shell {
   @include cabinet.cabinet-shell;
+  min-width: 0;
 }
 
 .siteShell {
@@ -115,11 +117,13 @@ const { open: footerOpen, close: closeFooter } = useCabinetFooter()
   grid-area: main;
   display: flex;
   flex-direction: column;
+  min-width: 0;
   background: var(--fs-figma-achromatic-light-gray);
 }
 
 .content {
   @include cabinet.cabinet-main-content;
+  min-width: 0;
   overflow: visible;
   min-height: auto;
 }

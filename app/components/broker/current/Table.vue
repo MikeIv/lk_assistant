@@ -141,8 +141,9 @@ function cellValue(
       <UiButton size="sm" variant="primary" label="Создать" @click="emit('create')" />
     </div>
 
-    <div :class="$style.tableWrapper">
-      <table :class="$style.table">
+    <div :class="$style.tableScroll" tabindex="0" aria-label="Таблица текущих дел, прокрутка по горизонтали">
+      <div :class="$style.tableWrapper">
+        <table :class="$style.table">
         <thead :class="$style.thead">
           <tr>
             <th
@@ -222,6 +223,7 @@ function cellValue(
         <span :class="$style.spinner" />
       </div>
     </div>
+    </div>
 
     <footer :class="$style.footer">
       <p :class="$style.range">
@@ -261,11 +263,12 @@ function cellValue(
 @use '~/assets/styles/variables/resolutions' as bp;
 
 .root {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--fs-space-2);
   width: 100%;
   min-width: 0;
+  overflow: hidden;
   border-radius: rem(20);
   background-color: var(--fs-color-bg);
   box-shadow: var(--fs-shadow-cabinet-nav);
@@ -304,22 +307,30 @@ function cellValue(
   }
 }
 
-.tableWrapper {
-  position: relative;
-  overflow-x: auto;
-  overflow-y: auto;
+.tableScroll {
+  grid-column: 1;
   width: 100%;
   max-width: 100%;
-  background-color: var(--fs-color-bg);
+  min-width: 0;
+  contain: inline-size;
+  overflow-x: auto;
+  overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
 
   scrollbar-width: thin;
   scrollbar-color: var(--fs-figma-stroke-gray) var(--fs-figma-achromatic-light-gray);
 }
 
+.tableWrapper {
+  position: relative;
+  width: fit-content;
+  background-color: var(--fs-color-bg);
+}
+
 .table {
-  width: 100%;
-  min-width: rem(1440);
+  width: max-content;
+  min-width: rem(1680);
+  table-layout: auto;
   border-collapse: separate;
   border-spacing: 0;
 
@@ -341,6 +352,7 @@ function cellValue(
   border-bottom: 1px solid var(--tenant-cases-header-divider);
   border-right: 1px solid var(--tenant-cases-header-divider-soft);
   background-color: var(--tenant-cases-header-bg);
+  white-space: nowrap;
 
   &:last-child {
     border-right: none;
@@ -431,7 +443,8 @@ function cellValue(
 }
 
 .tdMultiline {
-  min-width: rem(180);
+  min-width: rem(220);
+  max-width: rem(320);
   white-space: pre-wrap;
   word-break: break-word;
 }
