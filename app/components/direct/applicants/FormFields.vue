@@ -40,6 +40,32 @@ const categoryOptions = computed<UiSelectOption[]>(() =>
   })),
 )
 
+const legalEntitySearchQuery = ref('')
+
+function tokenizeSearchText(text: string): string[] {
+  return text
+    .toLowerCase()
+    .replace(/[«»"'.,()[\]{}]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+}
+
+const filteredLegalEntities = computed(() => {
+  const queryWords = tokenizeSearchText(legalEntitySearchQuery.value.trim())
+
+  if (!queryWords.length) {
+    return props.legalEntities
+  }
+
+  return props.legalEntities.filter((entity) => {
+    const nameWords = tokenizeSearchText(entity.legal_entity)
+
+    return queryWords.every((queryWord) =>
+      nameWords.some((nameWord) => nameWord.startsWith(queryWord)),
+    )
+  })
+})
+
 function isLegalEntitySelected(id: number): boolean {
   return legalEntityIds.value.includes(id)
 }
@@ -125,24 +151,39 @@ function updateContactField(index: number, field: keyof ApplicantContact, value:
         <span :class="$style.sectionHint">(не более {{ APPLICANTS_MAX_LEGAL_ENTITIES }})</span>
       </legend>
 
-      <div :class="$style.legalEntitiesList">
-        <label
-          v-for="entity in legalEntities"
-          :key="entity.id"
-          :class="$style.legalEntityOption"
-        >
-          <input
-            type="checkbox"
-            :checked="isLegalEntitySelected(entity.id)"
-            :disabled="
-              disabled ||
-              (!isLegalEntitySelected(entity.id) &&
-                legalEntityIds.length >= APPLICANTS_MAX_LEGAL_ENTITIES)
-            "
-            @change="toggleLegalEntity(entity.id)"
+      <div :class="$style.legalEntitiesBlock">
+        <div :class="$style.legalEntitiesSearch">
+          <UiInput
+            v-model="legalEntitySearchQuery"
+            placeholder="Поиск"
+            :disabled="disabled"
+            aria-label="Поиск юридического лица"
           />
-          <span :class="$style.legalEntityLabel">{{ entity.legal_entity }}</span>
-        </label>
+        </div>
+
+        <div :class="$style.legalEntitiesList">
+          <label
+            v-for="entity in filteredLegalEntities"
+            :key="entity.id"
+            :class="$style.legalEntityOption"
+          >
+            <input
+              type="checkbox"
+              :checked="isLegalEntitySelected(entity.id)"
+              :disabled="
+                disabled ||
+                (!isLegalEntitySelected(entity.id) &&
+                  legalEntityIds.length >= APPLICANTS_MAX_LEGAL_ENTITIES)
+              "
+              @change="toggleLegalEntity(entity.id)"
+            />
+            <span :class="$style.legalEntityLabel">{{ entity.legal_entity }}</span>
+          </label>
+
+          <p v-if="!filteredLegalEntities.length" :class="$style.legalEntitiesEmpty">
+            Ничего не найдено
+          </p>
+        </div>
       </div>
 
       <p v-if="errors.legal_entity_ids" :class="$style.fieldError">{{ errors.legal_entity_ids }}</p>
@@ -298,24 +339,44 @@ function updateContactField(index: number, field: keyof ApplicantContact, value:
   color: var(--fs-color-text-muted);
 }
 
-.legalEntitiesList {
+.legalEntitiesBlock {
   display: flex;
   flex-direction: column;
-  gap: rem(8);
-  max-height: rem(180);
-  overflow: auto;
-  padding: var(--fs-space-1);
+  overflow: hidden;
   border: 1px solid var(--fs-color-border);
   border-radius: rem(12);
 }
 
+.legalEntitiesSearch {
+  flex-shrink: 0;
+  padding: var(--fs-space-1);
+  border-bottom: 1px solid var(--fs-color-border);
+}
+
+.legalEntitiesList {
+  display: flex;
+  flex-direction: column;
+  gap: rem(8);
+  max-height: rem(64);
+  overflow-y: auto;
+  padding: var(--fs-space-1);
+}
+
 .legalEntityOption {
   display: flex;
+  flex-shrink: 0;
   align-items: flex-start;
   gap: rem(8);
+  min-height: rem(28);
   font-size: rem(13);
   color: var(--fs-color-text);
   cursor: pointer;
+}
+
+.legalEntitiesEmpty {
+  margin: 0;
+  font-size: rem(13);
+  color: var(--fs-color-text-muted);
 }
 
 .legalEntityLabel {
