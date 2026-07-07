@@ -18,8 +18,12 @@ const props = defineProps<{
     company_group?: string | null
     legal_entity_ids?: string | null
     contacts?: string | null
+    contact_emails?: (string | null)[]
+    contact_phones?: (string | null)[]
   }
   disabled?: boolean
+  validateContactEmailOnBlur?: (index: number) => void
+  validateContactPhoneOnBlur?: (index: number) => void
 }>()
 
 const title = defineModel<string>('title', { required: true })
@@ -184,23 +188,38 @@ function updateContactField(index: number, field: keyof ApplicantContact, value:
 
         <label :class="$style.field">
           <span :class="$style.label">Телефон</span>
-          <UiInput
-            :model-value="contact.phone_number ?? ''"
-            placeholder="Введите телефон"
-            :disabled="disabled"
-            @update:model-value="updateContactField(index, 'phone_number', $event || null)"
-          />
+          <div
+            :class="[$style.inputWrap, errors.contact_phones?.[index] && $style.inputWrapError]"
+          >
+            <UiPhoneInput
+              :model-value="contact.phone_number"
+              :disabled="disabled"
+              @update:model-value="updateContactField(index, 'phone_number', $event)"
+              @blur="validateContactPhoneOnBlur?.(index)"
+            />
+          </div>
+          <p v-if="errors.contact_phones?.[index]" :class="$style.fieldError">
+            {{ errors.contact_phones[index] }}
+          </p>
         </label>
 
         <label :class="$style.field">
           <span :class="$style.label">Email</span>
-          <UiInput
-            :model-value="contact.email ?? ''"
-            placeholder="Введите email"
-            type="email"
-            :disabled="disabled"
-            @update:model-value="updateContactField(index, 'email', $event || null)"
-          />
+          <div
+            :class="[$style.inputWrap, errors.contact_emails?.[index] && $style.inputWrapError]"
+          >
+            <UiInput
+              :model-value="contact.email ?? ''"
+              placeholder="Введите email"
+              type="email"
+              :disabled="disabled"
+              @update:model-value="updateContactField(index, 'email', $event || null)"
+              @blur="validateContactEmailOnBlur?.(index)"
+            />
+          </div>
+          <p v-if="errors.contact_emails?.[index]" :class="$style.fieldError">
+            {{ errors.contact_emails[index] }}
+          </p>
         </label>
       </div>
 

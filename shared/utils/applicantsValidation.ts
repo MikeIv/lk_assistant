@@ -3,8 +3,9 @@ import type {
   ApplicantCreateFieldErrors,
   ApplicantCreatePayload,
 } from '#shared/types/applicants'
-import { applicantFormSchema } from '#shared/utils/applicantsSchema'
+import { applicantContactFormSchema, applicantFormSchema } from '#shared/utils/applicantsSchema'
 import { APPLICANTS_MAX_LEGAL_ENTITIES } from '#shared/utils/applicantsTable'
+import { normalizeRussianPhoneValue } from '#shared/utils/russianPhone'
 
 interface ApiValidationErrorResponse {
   message?: string
@@ -15,7 +16,7 @@ export function normalizeApplicantContact(contact: ApplicantContact): ApplicantC
   const normalized: ApplicantContact = {
     name: contact.name?.trim() ? contact.name.trim() : null,
     position: contact.position?.trim() ? contact.position.trim() : null,
-    phone_number: contact.phone_number?.trim() ? contact.phone_number.trim() : null,
+    phone_number: normalizeRussianPhoneValue(contact.phone_number),
     email: contact.email?.trim() ? contact.email.trim() : null,
   }
 
@@ -51,12 +52,38 @@ export function emptyApplicantCreateFieldErrors(): ApplicantCreateFieldErrors {
     company_group: null,
     legal_entity_ids: null,
     contacts: null,
+    contact_emails: [],
+    contact_phones: [],
   }
 }
 
 function firstFieldError(errors: Record<string, string[]>, field: string): string | null {
   const messages = errors[field]
   return messages?.[0] ?? null
+}
+
+function parseContactFieldErrors(
+  errors: Record<string, string[]>,
+  field: 'email' | 'phone_number',
+): (string | null)[] {
+  const contactFieldErrors: (string | null)[] = []
+  const pattern = new RegExp(`^contacts(?:\\.(\\d+)\\.${field}|\\[(\\d+)\\]\\.${field})$`)
+
+  for (const [key, messages] of Object.entries(errors)) {
+    const match = key.match(pattern)
+    if (!match) {
+      continue
+    }
+
+    const index = Number(match[1] ?? match[2])
+    if (!Number.isFinite(index)) {
+      continue
+    }
+
+    contactFieldErrors[index] = messages?.[0] ?? null
+  }
+
+  return contactFieldErrors
 }
 
 export function parseApplicantCreateFieldErrors(data: unknown): ApplicantCreateFieldErrors {
@@ -73,6 +100,8 @@ export function parseApplicantCreateFieldErrors(data: unknown): ApplicantCreateF
     company_group: firstFieldError(errors, 'company_group'),
     legal_entity_ids: firstFieldError(errors, 'legal_entity_ids'),
     contacts: firstFieldError(errors, 'contacts'),
+    contact_emails: parseContactFieldErrors(errors, 'email'),
+    contact_phones: parseContactFieldErrors(errors, 'phone_number'),
   }
 }
 
@@ -82,8 +111,38 @@ export function hasApplicantCreateFieldErrors(fieldErrors: ApplicantCreateFieldE
     fieldErrors.category_id ||
     fieldErrors.company_group ||
     fieldErrors.legal_entity_ids ||
-    fieldErrors.contacts,
+    fieldErrors.contacts ||
+    fieldErrors.contact_emails.some(Boolean) ||
+    fieldErrors.contact_phones.some(Boolean),
   )
+}
+
+export function validateApplicantContactFieldErrors(
+  contacts: ApplicantContact[] | null,
+  field: 'email' | 'phone_number',
+): (string | null)[] {
+  if (!contacts?.length) {
+    return []
+  }
+
+  const schema = applicantContactFormSchema.shape[field]
+
+  return contacts.map((contact) => {
+    const result = schema.safeParse(contact[field])
+    return result.success ? null : (result.error.issues[0]?.message ?? null)
+  })
+}
+
+export function validateApplicantContactEmails(
+  contacts: ApplicantContact[] | null,
+): (string | null)[] {
+  return validateApplicantContactFieldErrors(contacts, 'email')
+}
+
+export function validateApplicantContactPhones(
+  contacts: ApplicantContact[] | null,
+): (string | null)[] {
+  return validateApplicantContactFieldErrors(contacts, 'phone_number')
 }
 
 export function validateApplicantFormPayload(
@@ -118,6 +177,9 @@ export function validateApplicantFormPayload(
   if (payload.legal_entity_ids && payload.legal_entity_ids.length > APPLICANTS_MAX_LEGAL_ENTITIES) {
     fieldErrors.legal_entity_ids = `Не более ${APPLICANTS_MAX_LEGAL_ENTITIES} юридических лиц`
   }
+
+  fieldErrors.contact_emails = validateApplicantContactEmails(payload.contacts)
+  fieldErrors.contact_phones = validateApplicantContactPhones(payload.contacts)
 
   return fieldErrors
 }

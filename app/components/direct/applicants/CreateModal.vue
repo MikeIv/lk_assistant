@@ -28,6 +28,8 @@ const {
   legalEntityIds,
   contacts,
   formErrors,
+  validateContactEmailOnBlur,
+  validateContactPhoneOnBlur,
 } = useApplicantForm()
 
 watch(open, (isOpen) => {
@@ -95,6 +97,8 @@ const onSubmit = handleSubmit(async () => {
           :company-group-attrs="companyGroupAttrs"
           :errors="formErrors"
           :disabled="isSubmitting"
+          :validate-contact-email-on-blur="validateContactEmailOnBlur"
+          :validate-contact-phone-on-blur="validateContactPhoneOnBlur"
         />
 
         <p v-if="generalError" :class="$style.generalError">{{ generalError }}</p>

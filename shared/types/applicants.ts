@@ -79,6 +79,8 @@ export interface ApplicantCreateFieldErrors {
   company_group: string | null
   legal_entity_ids: string | null
   contacts: string | null
+  contact_emails: (string | null)[]
+  contact_phones: (string | null)[]
 }
 
 export type ApplicantCreateResult =

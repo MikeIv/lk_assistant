@@ -39,6 +39,8 @@ const {
   formErrors,
   setLegalEntityIds,
   setContacts,
+  validateContactEmailOnBlur,
+  validateContactPhoneOnBlur,
 } = useApplicantForm()
 
 watch(
@@ -147,6 +149,8 @@ const isBusy = computed(() => isSubmitting.value || isDeleting.value)
           :company-group-attrs="companyGroupAttrs"
           :errors="formErrors"
           :disabled="isBusy"
+          :validate-contact-email-on-blur="validateContactEmailOnBlur"
+          :validate-contact-phone-on-blur="validateContactPhoneOnBlur"
         />
 
         <div v-if="isDeleteConfirmOpen" :class="$style.deleteConfirm">
