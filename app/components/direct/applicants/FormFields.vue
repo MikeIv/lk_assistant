@@ -99,52 +99,6 @@ function updateContactField(index: number, field: keyof ApplicantContact, value:
 
 <template>
   <div :class="$style.root">
-    <label :class="$style.field">
-      <span :class="$style.label">
-        Бренд / наименование
-        <span :class="$style.required">*</span>
-      </span>
-      <div :class="[$style.inputWrap, errors.title && $style.inputWrapError]">
-        <UiInput
-          v-model="title"
-          v-bind="titleAttrs"
-          placeholder="Введите наименование"
-          :disabled="disabled"
-        />
-      </div>
-      <p v-if="errors.title" :class="$style.fieldError">{{ errors.title }}</p>
-    </label>
-
-    <label :class="$style.field">
-      <span :class="$style.label">
-        Категория
-        <span :class="$style.required">*</span>
-      </span>
-      <div :class="[$style.inputWrap, errors.category_id && $style.inputWrapError]">
-        <UiSelect
-          v-model="categoryId"
-          v-bind="categoryIdAttrs"
-          :options="categoryOptions"
-          placeholder="Выберите категорию"
-          :disabled="disabled"
-        />
-      </div>
-      <p v-if="errors.category_id" :class="$style.fieldError">{{ errors.category_id }}</p>
-    </label>
-
-    <label :class="$style.field">
-      <span :class="$style.label">Группа компаний</span>
-      <div :class="[$style.inputWrap, errors.company_group && $style.inputWrapError]">
-        <UiInput
-          v-model="companyGroup"
-          v-bind="companyGroupAttrs"
-          placeholder="Введите группу компаний"
-          :disabled="disabled"
-        />
-      </div>
-      <p v-if="errors.company_group" :class="$style.fieldError">{{ errors.company_group }}</p>
-    </label>
-
     <fieldset :class="$style.section">
       <legend :class="$style.sectionTitle">
         Юридические лица
@@ -188,6 +142,52 @@ function updateContactField(index: number, field: keyof ApplicantContact, value:
 
       <p v-if="errors.legal_entity_ids" :class="$style.fieldError">{{ errors.legal_entity_ids }}</p>
     </fieldset>
+
+    <label :class="$style.field">
+      <span :class="$style.label">
+        Бренд / наименование
+        <span :class="$style.required">*</span>
+      </span>
+      <div :class="[$style.inputWrap, errors.title && $style.inputWrapError]">
+        <UiInput
+          v-model="title"
+          v-bind="titleAttrs"
+          placeholder="Введите наименование"
+          :disabled="disabled"
+        />
+      </div>
+      <p v-if="errors.title" :class="$style.fieldError">{{ errors.title }}</p>
+    </label>
+
+    <label :class="$style.field">
+      <span :class="$style.label">Группа компаний</span>
+      <div :class="[$style.inputWrap, errors.company_group && $style.inputWrapError]">
+        <UiInput
+          v-model="companyGroup"
+          v-bind="companyGroupAttrs"
+          placeholder="Введите группу компаний"
+          :disabled="disabled"
+        />
+      </div>
+      <p v-if="errors.company_group" :class="$style.fieldError">{{ errors.company_group }}</p>
+    </label>
+
+    <label :class="$style.field">
+      <span :class="$style.label">
+        Категория
+        <span :class="$style.required">*</span>
+      </span>
+      <div :class="[$style.inputWrap, errors.category_id && $style.inputWrapError]">
+        <UiSelect
+          v-model="categoryId"
+          v-bind="categoryIdAttrs"
+          :options="categoryOptions"
+          placeholder="Выберите категорию"
+          :disabled="disabled"
+        />
+      </div>
+      <p v-if="errors.category_id" :class="$style.fieldError">{{ errors.category_id }}</p>
+    </label>
 
     <fieldset :class="$style.section">
       <legend :class="$style.sectionTitle">Контакты</legend>
