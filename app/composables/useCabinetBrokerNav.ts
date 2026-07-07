@@ -9,6 +9,13 @@ export const brokerNavItems: CabinetSubNavItem[] = [
     hasContent: true,
   },
   {
+    to: '/broker/tasks',
+    label: 'Мои задачи',
+    accent: 'var(--fs-figma-vertical-sport)',
+    bannerGradientTo: 'var(--fs-figma-vertical-aqua-park)',
+    hasContent: true,
+  },
+  {
     to: '/broker/current',
     label: 'Текущие дела',
     accent: 'var(--fs-figma-vertical-shop)',
