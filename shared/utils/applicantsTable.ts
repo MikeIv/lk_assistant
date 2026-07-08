@@ -134,4 +134,4 @@ export const APPLICANTS_DEFAULT_SORT_KEY: ApplicantSortKey = 'id'
 
 export const APPLICANTS_DEFAULT_SORT_DIRECTION: ApplicantSortDirection = 'desc'
 
-export const APPLICANTS_MAX_LEGAL_ENTITIES = 5
+export const APPLICANTS_MAX_LEGAL_ENTITIES = 1

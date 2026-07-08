@@ -21,8 +21,8 @@ export const CABINET_NAV_SUBMENU_LAYOUT = {
   junctionInsetInlineEndPx: 0,
   /** Толщина «выреза» в radial-gradient: inner stop = radius - inset. */
   filletInnerInsetPx: 1,
-  /** Фон кармана fillet — подложка навбара, не shell (иначе белая полоса на тёмном акценте). */
-  bridgeBgVar: '--fs-figma-achromatic-light-gray',
+  /** Фон кармана fillet — прозрачный, сквозь скругление виден фон страницы. */
+  bridgeBg: 'transparent',
   /**
    * Временный запас ширины панели: 2× ширина fillet (радиус junction-curve).
    * Компенсирует визуальный зазор у стыка триггер ↔ submenu.
@@ -54,7 +54,7 @@ export function buildCabinetNavSubmenuStyleVars(
 
   return {
     '--nav-submenu-accent': input.accent,
-    '--nav-submenu-bridge-bg': `var(${layout.bridgeBgVar})`,
+    '--nav-submenu-bridge-bg': layout.bridgeBg,
     '--nav-submenu-corner-radius': `${layout.cornerRadiusPx}px`,
     '--nav-submenu-panel-bleed': `${getCabinetNavSubmenuPanelBleedPx(layout)}px`,
     '--nav-bridge-height': `${layout.bridgeHeightPx}px`,

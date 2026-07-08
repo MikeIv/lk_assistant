@@ -52,7 +52,7 @@ watch(
         category_id: String(applicant.category_id),
         company_group: applicant.company_group ?? '',
       })
-      setLegalEntityIds(applicant.legal_entities.map((entity) => entity.id))
+      setLegalEntityIds(applicant.legal_entities[0] ? [applicant.legal_entities[0].id] : [])
       setContacts(applicant.contacts.map((contact) => ({ ...contact })))
       generalError.value = null
       isDeleteConfirmOpen.value = false

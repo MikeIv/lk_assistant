@@ -1,5 +1,8 @@
 <script setup lang="ts">
 const { open: footerOpen, close: closeFooter } = useCabinetFooter()
+const route = useRoute()
+
+const isHomePage = computed(() => route.path === '/')
 </script>
 
 <template>
@@ -16,7 +19,7 @@ const { open: footerOpen, close: closeFooter } = useCabinetFooter()
       </div>
     </div>
 
-    <main :class="$style.main">
+    <main :class="[$style.main, isHomePage && $style.mainHome]">
       <div :class="$style.content">
         <div :class="[$style.shell, $style.siteShell]">
           <slot />
@@ -119,6 +122,15 @@ const { open: footerOpen, close: closeFooter } = useCabinetFooter()
   flex-direction: column;
   min-width: 0;
   background: var(--fs-figma-achromatic-light-gray);
+}
+
+.mainHome {
+  background-color: var(--fs-figma-achromatic-light-gray);
+  background-image: url('/images/base_bg.jpg');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  background-attachment: fixed;
 }
 
 .content {

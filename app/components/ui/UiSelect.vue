@@ -7,11 +7,13 @@ const props = withDefaults(
     options: UiSelectOption[]
     placeholder?: string
     disabled?: boolean
+    searchable?: boolean
   }>(),
   {
     modelValue: null,
     placeholder: 'Не выбрано',
     disabled: false,
+    searchable: false,
   },
 )
 
@@ -19,7 +21,9 @@ const emit = defineEmits<{
   'update:modelValue': [value: string | null]
 }>()
 
-const { wrapperRef, isOpen, toggle, closeAfterSelection } = useUiDropdown()
+const { wrapperRef, isOpen, open, toggle, closeAfterSelection } = useUiDropdown()
+const searchQuery = ref('')
+const inputRef = ref<HTMLInputElement | null>(null)
 
 const displayValue = computed(() => {
   if (!props.modelValue) {
@@ -33,20 +37,127 @@ const displayValue = computed(() => {
   return matched?.label ?? props.modelValue
 })
 
+const visibleOptions = computed(() => {
+  if (!props.searchable) {
+    return props.options
+  }
+
+  const queryWords = tokenizeSearchText(searchQuery.value.trim())
+
+  if (!queryWords.length) {
+    return props.options
+  }
+
+  return props.options.filter((option) => {
+    const labelWords = tokenizeSearchText(option.label)
+
+    return queryWords.every((queryWord) =>
+      labelWords.some((labelWord) => labelWord.startsWith(queryWord)),
+    )
+  })
+})
+
+const searchableInputValue = computed(() => {
+  if (props.searchable && isOpen.value) {
+    return searchQuery.value
+  }
+
+  return displayValue.value
+})
+
+function tokenizeSearchText(text: string): string[] {
+  return text
+    .toLowerCase()
+    .replace(/[«»"'.,()[\]{}]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+}
+
 function isOptionSelected(option: UiSelectOption): boolean {
   const value = option.outputValue ?? option.label
   return props.modelValue === value || props.modelValue === option.label
 }
 
+const SEARCHABLE_CLOSE_OPTIONS = { suppressToggle: false, suppressOpen: true } as const
+
 function selectOption(option: UiSelectOption) {
   emit('update:modelValue', option.outputValue ?? option.label)
-  closeAfterSelection()
+  closeAfterSelection(props.searchable ? SEARCHABLE_CLOSE_OPTIONS : undefined)
 }
+
+function openSearchable() {
+  if (props.disabled || isOpen.value) {
+    return
+  }
+
+  searchQuery.value = ''
+  open()
+
+  nextTick(() => {
+    inputRef.value?.focus()
+  })
+}
+
+function onSearchableInputClick() {
+  openSearchable()
+}
+
+function onSearchableInput(event: Event) {
+  if (props.disabled) {
+    return
+  }
+
+  searchQuery.value = (event.target as HTMLInputElement).value
+
+  if (!isOpen.value) {
+    open()
+  }
+}
+
+watch(isOpen, (opened) => {
+  if (!opened) {
+    searchQuery.value = ''
+  }
+})
 </script>
 
 <template>
   <div ref="wrapperRef" :class="$style.root">
+    <div
+      v-if="searchable"
+      :class="[$style.shell, isOpen && $style.shellOpen, disabled && $style.disabled]"
+    >
+      <input
+        ref="inputRef"
+        :class="[
+          $style.searchInput,
+          (searchableInputValue || isOpen) && $style.searchInputFilled,
+        ]"
+        :value="searchableInputValue"
+        :readonly="!isOpen"
+        :placeholder="placeholder"
+        :disabled="disabled"
+        :aria-expanded="isOpen"
+        @input="onSearchableInput"
+        @click.stop="onSearchableInputClick"
+      />
+      <button
+        type="button"
+        :class="$style.toggle"
+        aria-label="Открыть список"
+        :disabled="disabled"
+        @click.stop="toggle"
+      >
+        <UIcon
+          :name="isOpen ? 'i-arrow-chevron-dropdown-open' : 'i-arrow-chevron-dropdown'"
+          :class="[$style.icon, isOpen && $style.iconOpen]"
+          aria-hidden="true"
+        />
+      </button>
+    </div>
+
     <button
+      v-else
       type="button"
       :class="[$style.shell, isOpen && $style.shellOpen, disabled && $style.disabled]"
       :disabled="disabled"
@@ -65,14 +176,17 @@ function selectOption(option: UiSelectOption) {
 
     <ul v-if="isOpen" :class="$style.dropdown" role="listbox" @mousedown.prevent>
       <li
-        v-for="option in options"
+        v-for="option in visibleOptions"
         :key="option.value"
         :class="[$style.option, isOptionSelected(option) && $style.optionSelected]"
         role="option"
         :aria-selected="isOptionSelected(option)"
-        @click="selectOption(option)"
+        @click.stop="selectOption(option)"
       >
         {{ option.label }}
+      </li>
+      <li v-if="searchable && !visibleOptions.length" :class="$style.emptyOption">
+        Ничего не найдено
       </li>
     </ul>
   </div>
@@ -134,5 +248,41 @@ function selectOption(option: UiSelectOption) {
 
 .optionSelected {
   @include field.ui-dropdown-option-selected;
+}
+
+.searchInput {
+  @include field.ui-dropdown-control-text;
+  flex: 1;
+  cursor: pointer;
+}
+
+.searchInputFilled {
+  color: var(--fs-figma-achromatic-black);
+  cursor: text;
+}
+
+.toggle {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: rem(20);
+  height: rem(20);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.emptyOption {
+  padding: rem(10) rem(12);
+  font-size: rem(13);
+  color: var(--fs-color-text-muted);
 }
 </style>

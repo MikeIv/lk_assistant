@@ -3,7 +3,6 @@ import type { ApplicantContact } from '#shared/types/applicants'
 import type { Category } from '#shared/types/categories'
 import type { LegalEntity } from '#shared/types/legalEntities'
 import type { UiSelectOption } from '#shared/types/tenantData'
-import { APPLICANTS_MAX_LEGAL_ENTITIES } from '#shared/utils/applicantsTable'
 import { createEmptyApplicantContact } from '#shared/utils/applicantsValidation'
 
 const props = defineProps<{
@@ -40,47 +39,21 @@ const categoryOptions = computed<UiSelectOption[]>(() =>
   })),
 )
 
-const legalEntitySearchQuery = ref('')
+const legalEntityOptions = computed<UiSelectOption[]>(() =>
+  props.legalEntities.map((entity) => ({
+    value: String(entity.id),
+    label: entity.legal_entity,
+    outputValue: String(entity.id),
+  })),
+)
 
-function tokenizeSearchText(text: string): string[] {
-  return text
-    .toLowerCase()
-    .replace(/[«»"'.,()[\]{}]/g, ' ')
-    .split(/\s+/)
-    .filter(Boolean)
-}
-
-const filteredLegalEntities = computed(() => {
-  const queryWords = tokenizeSearchText(legalEntitySearchQuery.value.trim())
-
-  if (!queryWords.length) {
-    return props.legalEntities
-  }
-
-  return props.legalEntities.filter((entity) => {
-    const nameWords = tokenizeSearchText(entity.legal_entity)
-
-    return queryWords.every((queryWord) =>
-      nameWords.some((nameWord) => nameWord.startsWith(queryWord)),
-    )
-  })
+const legalEntityId = computed({
+  get: () => (legalEntityIds.value[0] != null ? String(legalEntityIds.value[0]) : ''),
+  set: (value: string) => {
+    const parsed = Number(value)
+    legalEntityIds.value = value && Number.isFinite(parsed) ? [parsed] : []
+  },
 })
-
-function isLegalEntitySelected(id: number): boolean {
-  return legalEntityIds.value.includes(id)
-}
-
-function toggleLegalEntity(id: number) {
-  const next = new Set(legalEntityIds.value)
-
-  if (next.has(id)) {
-    next.delete(id)
-  } else if (next.size < APPLICANTS_MAX_LEGAL_ENTITIES) {
-    next.add(id)
-  }
-
-  legalEntityIds.value = [...next]
-}
 
 function addContact() {
   contacts.value = [...contacts.value, createEmptyApplicantContact()]
@@ -99,49 +72,32 @@ function updateContactField(index: number, field: keyof ApplicantContact, value:
 
 <template>
   <div :class="$style.root">
-    <fieldset :class="$style.section">
-      <legend :class="$style.sectionTitle">
-        Юридические лица
-        <span :class="$style.sectionHint">(не более {{ APPLICANTS_MAX_LEGAL_ENTITIES }})</span>
-      </legend>
-
-      <div :class="$style.legalEntitiesBlock">
-        <div :class="$style.legalEntitiesSearch">
-          <UiInput
-            v-model="legalEntitySearchQuery"
-            placeholder="Поиск"
-            :disabled="disabled"
-            aria-label="Поиск юридического лица"
-          />
-        </div>
-
-        <div :class="$style.legalEntitiesList">
-          <label
-            v-for="entity in filteredLegalEntities"
-            :key="entity.id"
-            :class="$style.legalEntityOption"
-          >
-            <input
-              type="checkbox"
-              :checked="isLegalEntitySelected(entity.id)"
-              :disabled="
-                disabled ||
-                (!isLegalEntitySelected(entity.id) &&
-                  legalEntityIds.length >= APPLICANTS_MAX_LEGAL_ENTITIES)
-              "
-              @change="toggleLegalEntity(entity.id)"
-            />
-            <span :class="$style.legalEntityLabel">{{ entity.legal_entity }}</span>
-          </label>
-
-          <p v-if="!filteredLegalEntities.length" :class="$style.legalEntitiesEmpty">
-            Ничего не найдено
-          </p>
-        </div>
+    <label :class="$style.field">
+      <span :class="$style.label">Группа компаний</span>
+      <div :class="[$style.inputWrap, errors.company_group && $style.inputWrapError]">
+        <UiInput
+          v-model="companyGroup"
+          v-bind="companyGroupAttrs"
+          placeholder="Введите группу компаний"
+          :disabled="disabled"
+        />
       </div>
+      <p v-if="errors.company_group" :class="$style.fieldError">{{ errors.company_group }}</p>
+    </label>
 
+    <div :class="$style.field">
+      <span :class="$style.label">Юридическое лицо</span>
+      <div :class="[$style.inputWrap, errors.legal_entity_ids && $style.inputWrapError]">
+        <UiSelect
+          v-model="legalEntityId"
+          :options="legalEntityOptions"
+          placeholder="Поиск"
+          searchable
+          :disabled="disabled"
+        />
+      </div>
       <p v-if="errors.legal_entity_ids" :class="$style.fieldError">{{ errors.legal_entity_ids }}</p>
-    </fieldset>
+    </div>
 
     <label :class="$style.field">
       <span :class="$style.label">
@@ -157,19 +113,6 @@ function updateContactField(index: number, field: keyof ApplicantContact, value:
         />
       </div>
       <p v-if="errors.title" :class="$style.fieldError">{{ errors.title }}</p>
-    </label>
-
-    <label :class="$style.field">
-      <span :class="$style.label">Группа компаний</span>
-      <div :class="[$style.inputWrap, errors.company_group && $style.inputWrapError]">
-        <UiInput
-          v-model="companyGroup"
-          v-bind="companyGroupAttrs"
-          placeholder="Введите группу компаний"
-          :disabled="disabled"
-        />
-      </div>
-      <p v-if="errors.company_group" :class="$style.fieldError">{{ errors.company_group }}</p>
     </label>
 
     <label :class="$style.field">
@@ -332,55 +275,6 @@ function updateContactField(index: number, field: keyof ApplicantContact, value:
   font-size: rem(13);
   font-weight: 700;
   color: var(--fs-color-text);
-}
-
-.sectionHint {
-  font-weight: 500;
-  color: var(--fs-color-text-muted);
-}
-
-.legalEntitiesBlock {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border: 1px solid var(--fs-color-border);
-  border-radius: rem(12);
-}
-
-.legalEntitiesSearch {
-  flex-shrink: 0;
-  padding: var(--fs-space-1);
-  border-bottom: 1px solid var(--fs-color-border);
-}
-
-.legalEntitiesList {
-  display: flex;
-  flex-direction: column;
-  gap: rem(8);
-  max-height: rem(64);
-  overflow-y: auto;
-  padding: var(--fs-space-1);
-}
-
-.legalEntityOption {
-  display: flex;
-  flex-shrink: 0;
-  align-items: flex-start;
-  gap: rem(8);
-  min-height: rem(28);
-  font-size: rem(13);
-  color: var(--fs-color-text);
-  cursor: pointer;
-}
-
-.legalEntitiesEmpty {
-  margin: 0;
-  font-size: rem(13);
-  color: var(--fs-color-text-muted);
-}
-
-.legalEntityLabel {
-  line-height: 1.35;
 }
 
 .emptyContacts {

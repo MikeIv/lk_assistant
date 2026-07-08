@@ -1,13 +1,25 @@
 const OPEN_EVENT = 'ui-dropdown-open'
 
+export interface UiDropdownCloseAfterSelectionOptions {
+  suppressToggle?: boolean
+  suppressOpen?: boolean
+}
+
 export function useUiDropdown() {
   const wrapperRef = ref<HTMLElement | null>(null)
   const isOpen = ref(false)
   const instanceId = Symbol('ui-dropdown')
   /** Сбрасывает повторный toggle от `<label>` после выбора пункта. */
   let suppressNextToggle = false
+  /** Сбрасывает повторный open от клика по input в searchable-селекте. */
+  let suppressNextOpen = false
 
   function open() {
+    if (suppressNextOpen) {
+      suppressNextOpen = false
+      return
+    }
+
     window.dispatchEvent(
       new CustomEvent(OPEN_EVENT, {
         detail: instanceId,
@@ -20,9 +32,10 @@ export function useUiDropdown() {
     isOpen.value = false
   }
 
-  function closeAfterSelection() {
+  function closeAfterSelection(options?: UiDropdownCloseAfterSelectionOptions) {
     close()
-    suppressNextToggle = true
+    suppressNextToggle = options?.suppressToggle ?? true
+    suppressNextOpen = options?.suppressOpen ?? true
   }
 
   function toggle() {
@@ -35,6 +48,8 @@ export function useUiDropdown() {
       close()
       return
     }
+
+    suppressNextOpen = false
     open()
   }
 
