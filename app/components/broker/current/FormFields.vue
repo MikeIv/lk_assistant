@@ -2,6 +2,7 @@
 import type { Applicant } from '#shared/types/applicants'
 import type { Premise } from '#shared/types/premises'
 import type { UiSelectOption } from '#shared/types/tenantData'
+import { TENANT_CASE_APPLICANT_STATUS_OPTIONS } from '#shared/utils/tenantCasesTable'
 
 const props = defineProps<{
   rooms: Premise[]
@@ -9,13 +10,15 @@ const props = defineProps<{
   disabled?: boolean
   errors: {
     room_id?: string
-    responsible_name?: string
+    tenant_applicant_id?: string
+    status?: string
+    first_contact_date?: string
+    negotiation_info?: string
     applicants?: string | null
   }
 }>()
 
 const roomId = defineModel<string>('roomId', { required: true })
-const responsibleName = defineModel<string>('responsibleName', { required: true })
 const applicants = defineModel<
   Array<{
     tenant_applicant_id: string
@@ -26,12 +29,8 @@ const applicants = defineModel<
   }>
 >('applicants', { required: true })
 
-const emit = defineEmits<{
-  addApplicant: []
-  removeApplicant: [index: number]
-  addNegotiation: [applicantIndex: number]
-  removeNegotiation: [applicantIndex: number, negotiationIndex: number]
-}>()
+const applicant = computed(() => applicants.value[0]!)
+const negotiation = computed(() => applicant.value.negotiations[0]!)
 
 const roomOptions = computed<UiSelectOption[]>(() =>
   props.rooms.map((room) => ({
@@ -42,20 +41,28 @@ const roomOptions = computed<UiSelectOption[]>(() =>
 )
 
 const applicantOptions = computed<UiSelectOption[]>(() =>
-  props.directoryApplicants.map((applicant) => ({
-    value: String(applicant.id),
-    label: applicant.title,
-    outputValue: String(applicant.id),
+  props.directoryApplicants.map((applicantItem) => ({
+    value: String(applicantItem.id),
+    label: applicantItem.title,
+    outputValue: String(applicantItem.id),
   })),
 )
 
 const statusOptions = computed<UiSelectOption[]>(() =>
-  ['переговоры', 'отказ', 'отказ с нашей стороны'].map((status) => ({
+  TENANT_CASE_APPLICANT_STATUS_OPTIONS.map((status) => ({
     value: status,
     label: status,
     outputValue: status,
   })),
 )
+
+function guardDateValue(currentValue: string, event: Event) {
+  const input = event.target as HTMLInputElement
+
+  if (!input.value && currentValue) {
+    input.value = currentValue
+  }
+}
 </script>
 
 <template>
@@ -77,148 +84,93 @@ const statusOptions = computed<UiSelectOption[]>(() =>
     </label>
 
     <label :class="$style.field">
-      <span :class="$style.label">Ответственный</span>
-      <div :class="[$style.inputWrap, errors.responsible_name && $style.inputWrapError]">
-        <UiInput
-          v-model="responsibleName"
-          placeholder="ФИО ответственного"
+      <span :class="$style.label">
+        Претендент
+        <span :class="$style.required">*</span>
+      </span>
+      <div :class="[$style.inputWrap, errors.tenant_applicant_id && $style.inputWrapError]">
+        <UiSelect
+          v-model="applicant.tenant_applicant_id"
+          :options="applicantOptions"
+          placeholder="Выберите претендента"
           :disabled="disabled"
         />
       </div>
-      <p v-if="errors.responsible_name" :class="$style.fieldError">{{ errors.responsible_name }}</p>
+      <p v-if="errors.tenant_applicant_id" :class="$style.fieldError">{{ errors.tenant_applicant_id }}</p>
     </label>
 
-    <div :class="$style.section">
-      <div :class="$style.sectionHeader">
-        <h4 :class="$style.sectionTitle">Претенденты</h4>
-        <UiButton
-          type="button"
-          size="sm"
-          variant="soft"
-          label="Добавить претендента"
-          :disabled="disabled"
-          @click="emit('addApplicant')"
-        />
-      </div>
-
-      <p v-if="errors.applicants" :class="$style.fieldError">{{ errors.applicants }}</p>
-
-      <article
-        v-for="(applicant, applicantIndex) in applicants"
-        :key="applicantIndex"
-        :class="$style.applicantCard"
-      >
-        <div :class="$style.applicantHeader">
-          <h5 :class="$style.applicantTitle">Претендент {{ applicantIndex + 1 }}</h5>
-          <UiButton
-            v-if="applicants.length > 1"
-            type="button"
-            size="sm"
-            variant="soft"
-            label="Удалить"
+    <div :class="$style.dateRow">
+      <label :class="$style.field">
+        <span :class="$style.label">
+          Дата 1го контакта
+          <span :class="$style.required">*</span>
+        </span>
+        <div
+          :class="[
+            $style.dateInputShell,
+            errors.first_contact_date && $style.inputWrapError,
+          ]"
+        >
+          <input
+            v-model="applicant.first_contact_date"
+            :class="$style.dateInput"
+            type="date"
             :disabled="disabled"
-            @click="emit('removeApplicant', applicantIndex)"
+            @change="guardDateValue(applicant.first_contact_date, $event)"
           />
         </div>
+        <p v-if="errors.first_contact_date" :class="$style.fieldError">{{ errors.first_contact_date }}</p>
+      </label>
 
-        <label :class="$style.field">
-          <span :class="$style.label">
-            Претендент
-            <span :class="$style.required">*</span>
-          </span>
-          <UiSelect
-            v-model="applicant.tenant_applicant_id"
-            :options="applicantOptions"
-            placeholder="Выберите претендента"
-            :disabled="disabled"
-          />
-        </label>
-
-        <label :class="$style.field">
-          <span :class="$style.label">
-            Статус
-            <span :class="$style.required">*</span>
-          </span>
+      <label :class="$style.field">
+        <span :class="$style.label">
+          Статус
+          <span :class="$style.required">*</span>
+        </span>
+        <div :class="[$style.inputWrap, errors.status && $style.inputWrapError]">
           <UiSelect
             v-model="applicant.status"
             :options="statusOptions"
-            placeholder="Выберите статус"
+            placeholder="Выберите статус переговоров"
             :disabled="disabled"
           />
-        </label>
+        </div>
+        <p v-if="errors.status" :class="$style.fieldError">{{ errors.status }}</p>
+      </label>
+    </div>
 
-        <div :class="$style.dateRow">
-          <label :class="$style.field">
-            <span :class="$style.label">
-              Дата 1го контакта
-              <span :class="$style.required">*</span>
-            </span>
-            <input
-              v-model="applicant.first_contact_date"
-              :class="$style.dateInput"
-              type="date"
-              :disabled="disabled"
-            />
-          </label>
+    <div :class="$style.negotiations">
+      <span :class="$style.negotiationsTitle">Переговоры</span>
 
-          <label :class="$style.field">
-            <span :class="$style.label">Дата след. контакта</span>
-            <input
-              v-model="applicant.next_contact_date"
-              :class="$style.dateInput"
-              type="date"
-              :disabled="disabled"
-            />
-          </label>
+      <div :class="$style.negotiationRow">
+        <div :class="$style.dateInputShell">
+          <input
+            v-model="negotiation.date"
+            :class="$style.dateInput"
+            type="date"
+            :disabled="disabled"
+            @change="guardDateValue(negotiation.date, $event)"
+          />
         </div>
 
-        <div :class="$style.negotiations">
-          <div :class="$style.sectionHeader">
-            <span :class="$style.negotiationsTitle">Переговоры</span>
-            <UiButton
-              type="button"
-              size="sm"
-              variant="soft"
-              label="Добавить запись"
-              :disabled="disabled"
-              @click="emit('addNegotiation', applicantIndex)"
-            />
-          </div>
-
-          <div
-            v-for="(negotiation, negotiationIndex) in applicant.negotiations"
-            :key="negotiationIndex"
-            :class="$style.negotiationRow"
-          >
-            <input
-              v-model="negotiation.date"
-              :class="$style.dateInput"
-              type="date"
-              :disabled="disabled"
-            />
-            <UiInput
-              v-model="negotiation.info"
-              placeholder="Информация о переговорах"
-              :disabled="disabled"
-            />
-            <UiButton
-              type="button"
-              size="sm"
-              variant="soft"
-              label="×"
-              :disabled="disabled"
-              @click="emit('removeNegotiation', applicantIndex, negotiationIndex)"
-            />
-          </div>
+        <div :class="[$style.infoInputWrap, errors.negotiation_info && $style.inputWrapError]">
+          <UiInput
+            v-model="negotiation.info"
+            placeholder="Введите информацию о переговорах"
+            :disabled="disabled"
+          />
         </div>
-      </article>
+      </div>
+
+      <p v-if="errors.negotiation_info" :class="$style.fieldError">{{ errors.negotiation_info }}</p>
+      <p v-else-if="errors.applicants" :class="$style.fieldError">{{ errors.applicants }}</p>
     </div>
   </div>
 </template>
 
 <style module lang="scss">
 @use '~/assets/styles/tools/functions' as *;
-@use '~/assets/styles/tools/typography' as typo;
+@use '~/assets/styles/tools/form-field' as field;
 
 .root {
   display: flex;
@@ -242,7 +194,8 @@ const statusOptions = computed<UiSelectOption[]>(() =>
   color: var(--fs-color-error);
 }
 
-.inputWrap {
+.inputWrap,
+.infoInputWrap {
   border-radius: rem(12);
   transition: box-shadow 0.16s ease;
 }
@@ -258,49 +211,6 @@ const statusOptions = computed<UiSelectOption[]>(() =>
   color: var(--fs-color-error);
 }
 
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-2);
-}
-
-.sectionHeader {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--fs-space-1);
-}
-
-.sectionTitle {
-  margin: 0;
-
-  @include typo.fs-text-h4;
-}
-
-.applicantCard {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-2);
-  padding: var(--fs-space-2);
-  border: 1px solid var(--fs-figma-stroke-light-gray);
-  border-radius: rem(12);
-  background-color: rgb(244 245 245 / 0.35);
-}
-
-.applicantHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--fs-space-1);
-}
-
-.applicantTitle {
-  margin: 0;
-  font-size: rem(14);
-  font-weight: 600;
-}
-
 .dateRow {
   display: grid;
   grid-template-columns: 1fr;
@@ -311,37 +221,35 @@ const statusOptions = computed<UiSelectOption[]>(() =>
   }
 }
 
-.dateInput {
-  width: 100%;
-  padding: rem(10) rem(14);
-  border: 1px solid var(--fs-color-border);
-  border-radius: rem(12);
-  font: inherit;
-  color: var(--fs-color-text);
-  background-color: var(--fs-color-bg);
+.dateInputShell {
+  @include field.ui-input-control-shell;
+}
 
-  &:focus-visible {
-    outline: 2px solid var(--fs-color-primary);
-    outline-offset: 2px;
-  }
+.dateInput {
+  @include field.ui-control-text;
 }
 
 .negotiations {
   display: flex;
   flex-direction: column;
-  gap: var(--fs-space-1);
+  gap: rem(6);
 }
 
 .negotiationsTitle {
   font-size: rem(13);
   font-weight: 600;
+  color: var(--fs-color-text);
 }
 
 .negotiationRow {
   display: grid;
-  grid-template-columns: rem(150) minmax(0, 1fr) auto;
-  gap: var(--fs-space-1);
-  align-items: center;
+  grid-template-columns: 1fr;
+  gap: var(--fs-space-2);
+  align-items: stretch;
+
+  @media (min-width: rem(560)) {
+    grid-template-columns: minmax(0, rem(180)) minmax(0, 1fr);
+  }
 }
 
 @keyframes tenant-case-field-error-blink {

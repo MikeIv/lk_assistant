@@ -19,17 +19,11 @@ const isDeleteConfirmOpen = ref(false)
 const {
   handleSubmit,
   errors,
-  resetForm,
+  loadTenantCaseForm,
   applyServerFieldErrors,
   toPayload,
   roomId,
-  responsibleName,
   applicants: formApplicants,
-  setApplicantsFromPayload,
-  addApplicant,
-  removeApplicant,
-  addNegotiation,
-  removeNegotiation,
 } = useTenantCaseForm()
 
 async function loadCase() {
@@ -55,14 +49,13 @@ async function loadCase() {
   tenantCase.value = item
 
   const payload = tenantCaseToCreatePayload(item)
-  resetForm({
-    values: {
+  loadTenantCaseForm(
+    {
       room_id: String(payload.room_id),
       responsible_name: payload.responsible_name ?? '',
-      applicants: [],
     },
-  })
-  setApplicantsFromPayload(payload.applicants)
+    payload.applicants,
+  )
   isLoading.value = false
 }
 
@@ -154,16 +147,11 @@ useHead(
       <BrokerCurrentFormFields
         v-else
         v-model:room-id="roomId"
-        v-model:responsible-name="responsibleName"
         v-model:applicants="formApplicants"
         :rooms="rooms"
         :directory-applicants="applicants"
         :errors="errors"
         :disabled="isSubmitting || isDeleting"
-        @add-applicant="addApplicant"
-        @remove-applicant="removeApplicant"
-        @add-negotiation="addNegotiation"
-        @remove-negotiation="removeNegotiation"
       />
 
       <p v-if="generalError" :class="$style.generalError">{{ generalError }}</p>

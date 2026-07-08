@@ -15,29 +15,16 @@ const isSubmitting = ref(false)
 const {
   handleSubmit,
   errors,
-  resetForm,
+  resetTenantCaseForm,
   applyServerFieldErrors,
   toPayload,
   roomId,
-  responsibleName,
   applicants: formApplicants,
-  resetApplicants,
-  addApplicant,
-  removeApplicant,
-  addNegotiation,
-  removeNegotiation,
 } = useTenantCaseForm()
 
 watch(open, (isOpen) => {
   if (isOpen) {
-    resetForm({
-      values: {
-        room_id: '',
-        responsible_name: '',
-        applicants: [],
-      },
-    })
-    resetApplicants()
+    resetTenantCaseForm()
     generalError.value = null
   }
 })
@@ -88,16 +75,11 @@ const onSubmit = handleSubmit(async () => {
         <BrokerCurrentFormFields
           v-else
           v-model:room-id="roomId"
-          v-model:responsible-name="responsibleName"
           v-model:applicants="formApplicants"
           :rooms="rooms"
           :directory-applicants="applicants"
           :errors="errors"
           :disabled="isSubmitting"
-          @add-applicant="addApplicant"
-          @remove-applicant="removeApplicant"
-          @add-negotiation="addNegotiation"
-          @remove-negotiation="removeNegotiation"
         />
 
         <p v-if="generalError" :class="$style.generalError">{{ generalError }}</p>
