@@ -22,7 +22,7 @@ const emit = defineEmits<{
   'update:isCustom': [value: boolean]
 }>()
 
-const { wrapperRef, isOpen, toggle, closeAfterSelection } = useUiDropdown()
+const { wrapperRef, panelRef, panelStyle, isOpen, toggle, closeAfterSelection } = useUiDropdown()
 const inputRef = ref<HTMLInputElement | null>(null)
 
 const isCustomMode = computed({
@@ -87,18 +87,27 @@ function onInputClick() {
       </button>
     </div>
 
-    <ul v-if="isOpen" :class="$style.dropdown" role="listbox" @mousedown.prevent>
-      <li
-        v-for="option in options"
-        :key="option.value"
-        :class="[$style.option, isOptionSelected(option) && $style.optionSelected]"
-        role="option"
-        :aria-selected="isOptionSelected(option)"
-        @click="selectOption(option)"
+    <Teleport to="body">
+      <ul
+        v-if="isOpen"
+        ref="panelRef"
+        :class="$style.dropdown"
+        :style="panelStyle"
+        role="listbox"
+        @mousedown.prevent
       >
-        {{ option.label }}
-      </li>
-    </ul>
+        <li
+          v-for="option in options"
+          :key="option.value"
+          :class="[$style.option, isOptionSelected(option) && $style.optionSelected]"
+          role="option"
+          :aria-selected="isOptionSelected(option)"
+          @click="selectOption(option)"
+        >
+          {{ option.label }}
+        </li>
+      </ul>
+    </Teleport>
   </div>
 </template>
 

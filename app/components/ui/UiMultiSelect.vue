@@ -17,7 +17,7 @@ const emit = defineEmits<{
   'update:modelValue': [value: string | null]
 }>()
 
-const { wrapperRef, isOpen, toggle } = useUiDropdown()
+const { wrapperRef, panelRef, panelStyle, isOpen, toggle } = useUiDropdown()
 
 const selectedValues = computed<string[]>(() => {
   if (!props.modelValue) {
@@ -65,19 +65,28 @@ function toggleOption(option: UiSelectOption) {
       />
     </button>
 
-    <ul v-if="isOpen" :class="$style.dropdown" role="listbox" aria-multiselectable="true">
-      <li
-        v-for="option in options"
-        :key="option.value"
-        :class="[$style.option, isSelected(option) && $style.optionSelected]"
-        role="option"
-        :aria-selected="isSelected(option)"
-        @click="toggleOption(option)"
+    <Teleport to="body">
+      <ul
+        v-if="isOpen"
+        ref="panelRef"
+        :class="$style.dropdown"
+        :style="panelStyle"
+        role="listbox"
+        aria-multiselectable="true"
       >
-        <span :class="[$style.checkbox, isSelected(option) && $style.checkboxChecked]" aria-hidden="true" />
-        <span :class="$style.optionLabel">{{ option.label }}</span>
-      </li>
-    </ul>
+        <li
+          v-for="option in options"
+          :key="option.value"
+          :class="[$style.option, isSelected(option) && $style.optionSelected]"
+          role="option"
+          :aria-selected="isSelected(option)"
+          @click="toggleOption(option)"
+        >
+          <span :class="[$style.checkbox, isSelected(option) && $style.checkboxChecked]" aria-hidden="true" />
+          <span :class="$style.optionLabel">{{ option.label }}</span>
+        </li>
+      </ul>
+    </Teleport>
   </div>
 </template>
 

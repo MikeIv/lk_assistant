@@ -99,7 +99,8 @@
   z-index: z.z('dropdown');
   box-sizing: border-box;
   width: 100%;
-  max-height: rem(240);
+  /* 5 строк option (rem(52)) + вертикальные паддинги rem(8). */
+  max-height: rem(276);
   margin: 0;
   padding: rem(8) rem(12) rem(8) rem(8);
   overflow: auto;

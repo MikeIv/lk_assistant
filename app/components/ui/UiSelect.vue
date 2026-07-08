@@ -21,7 +21,7 @@ const emit = defineEmits<{
   'update:modelValue': [value: string | null]
 }>()
 
-const { wrapperRef, isOpen, open, toggle, closeAfterSelection } = useUiDropdown()
+const { wrapperRef, panelRef, panelStyle, isOpen, open, toggle, closeAfterSelection } = useUiDropdown()
 const searchQuery = ref('')
 const inputRef = ref<HTMLInputElement | null>(null)
 
@@ -174,21 +174,30 @@ watch(isOpen, (opened) => {
       />
     </button>
 
-    <ul v-if="isOpen" :class="$style.dropdown" role="listbox" @mousedown.prevent>
-      <li
-        v-for="option in visibleOptions"
-        :key="option.value"
-        :class="[$style.option, isOptionSelected(option) && $style.optionSelected]"
-        role="option"
-        :aria-selected="isOptionSelected(option)"
-        @click.stop="selectOption(option)"
+    <Teleport to="body">
+      <ul
+        v-if="isOpen"
+        ref="panelRef"
+        :class="$style.dropdown"
+        :style="panelStyle"
+        role="listbox"
+        @mousedown.prevent
       >
-        {{ option.label }}
-      </li>
-      <li v-if="searchable && !visibleOptions.length" :class="$style.emptyOption">
-        Ничего не найдено
-      </li>
-    </ul>
+        <li
+          v-for="option in visibleOptions"
+          :key="option.value"
+          :class="[$style.option, isOptionSelected(option) && $style.optionSelected]"
+          role="option"
+          :aria-selected="isOptionSelected(option)"
+          @click.stop="selectOption(option)"
+        >
+          {{ option.label }}
+        </li>
+        <li v-if="searchable && !visibleOptions.length" :class="$style.emptyOption">
+          Ничего не найдено
+        </li>
+      </ul>
+    </Teleport>
   </div>
 </template>
 
