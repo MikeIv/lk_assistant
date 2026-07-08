@@ -121,6 +121,16 @@ export interface TenantCaseCreatePayload {
   applicants: TenantCaseApplicantPayload[]
 }
 
+/** POST /v1/broker/tenant-cases — плоское тело создания (не applicants[]). */
+export interface TenantCaseStorePayload {
+  room_id: number
+  responsible_name: string | null
+  tenant_applicant_id: number
+  first_contact_date: string
+  negotiation_date: string
+  negotiation_info: string
+}
+
 export interface TenantCaseMutationApiResponse {
   success: boolean
   message: string
@@ -130,6 +140,11 @@ export interface TenantCaseMutationApiResponse {
 export interface TenantCaseCreateFieldErrors {
   room_id: string | null
   responsible_name: string | null
+  tenant_applicant_id: string | null
+  first_contact_date: string | null
+  negotiation_date: string | null
+  negotiation_info: string | null
+  status: string | null
   applicants: string | null
 }
 

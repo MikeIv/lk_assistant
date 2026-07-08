@@ -11,6 +11,7 @@ import type {
   TenantCaseShowApiResponse,
   TenantCaseSortDirection,
   TenantCaseSortKey,
+  TenantCaseStorePayload,
   TenantCasesListApiResponse,
   TenantCasesPagination,
 } from '#shared/types/tenantCases'
@@ -34,7 +35,9 @@ import {
   emptyTenantCaseCreateFieldErrors,
   hasTenantCaseCreateFieldErrors,
   normalizeTenantCaseCreatePayload,
+  normalizeTenantCaseStorePayload,
   parseTenantCaseCreateFieldErrors,
+  storePayloadToCreatePayload,
   validateTenantCaseFormPayload,
 } from '#shared/utils/tenantCasesValidation'
 import { useApiConfig } from '~/composables/useApiConfig'
@@ -306,20 +309,14 @@ export function useTenantCases() {
   }
 
   async function createTenantCase(
-    payload: TenantCaseCreatePayload,
+    payload: TenantCaseStorePayload,
   ): Promise<TenantCaseMutationResult> {
-    const normalizedPayload = normalizeTenantCaseCreatePayload({
-      ...payload,
-      applicants: payload.applicants.map(normalizeTenantCaseApplicantPayload),
-    })
-
-    const clientFieldErrors = validateTenantCaseFormPayload(normalizedPayload)
-    if (hasTenantCaseCreateFieldErrors(clientFieldErrors)) {
-      return validationFailure(clientFieldErrors)
-    }
+    const normalizedPayload = normalizeTenantCaseStorePayload(payload)
 
     try {
       if (isMockMode.value) {
+        const formPayload = storePayloadToCreatePayload(normalizedPayload)
+        const normalizedFormPayload = normalizeTenantCaseCreatePayload(formPayload)
         const nextId =
           Math.max(
             0,
@@ -329,7 +326,7 @@ export function useTenantCases() {
 
         mockExtraItems.value = [
           ...mockExtraItems.value,
-          buildMockTenantCaseFromPayload(nextId, normalizedPayload),
+          buildMockTenantCaseFromPayload(nextId, normalizedFormPayload),
         ]
 
         return { ok: true }
@@ -340,7 +337,7 @@ export function useTenantCases() {
         body: normalizedPayload,
       })
 
-      await fetchItems(currentPage.value, { silent: true })
+      void fetchItems(currentPage.value, { silent: true })
 
       return { ok: true }
     } catch (cause) {

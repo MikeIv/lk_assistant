@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { TenantCaseCreatePayload, TenantCaseMutationResult } from '#shared/types/tenantCases'
+import type { TenantCaseMutationResult, TenantCaseStorePayload } from '#shared/types/tenantCases'
 
 const props = defineProps<{
-  submitFn: (payload: TenantCaseCreatePayload) => Promise<TenantCaseMutationResult>
+  submitFn: (payload: TenantCaseStorePayload) => Promise<TenantCaseMutationResult>
 }>()
 
 const open = defineModel<boolean>('open', { required: true })
@@ -17,15 +17,16 @@ const {
   errors,
   resetTenantCaseForm,
   applyServerFieldErrors,
-  toPayload,
+  toStorePayload,
   roomId,
   applicants: formApplicants,
 } = useTenantCaseForm()
 
 watch(open, (isOpen) => {
+  generalError.value = null
+
   if (isOpen) {
     resetTenantCaseForm()
-    generalError.value = null
   }
 })
 
@@ -38,7 +39,7 @@ const onSubmit = handleSubmit(async () => {
   isSubmitting.value = true
 
   try {
-    const result = await props.submitFn(toPayload())
+    const result = await props.submitFn(toStorePayload())
 
     if (result.ok) {
       close()

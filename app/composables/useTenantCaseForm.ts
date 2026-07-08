@@ -7,6 +7,7 @@ import type {
   TenantCaseCreateFieldErrors,
   TenantCaseCreatePayload,
   TenantCaseNegotiation,
+  TenantCaseStorePayload,
 } from '#shared/types/tenantCases'
 import {
   tenantCaseFormSchema,
@@ -18,6 +19,7 @@ import {
   toTenantCaseApiDateTime,
   toTenantCaseDateInputValue,
 } from '#shared/utils/tenantCasesNormalize'
+import { buildTenantCaseStorePayload } from '#shared/utils/tenantCasesValidation'
 
 const FORM_FIELD_KEYS = ['room_id', 'responsible_name'] as const satisfies ReadonlyArray<
   keyof Pick<TenantCaseCreateFieldErrors, 'room_id' | 'responsible_name'>
@@ -156,9 +158,21 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
     tenant_applicant_id: resolveVisibleFieldError('applicants.0.tenant_applicant_id'),
     status: resolveVisibleFieldError('applicants.0.status'),
     first_contact_date: resolveVisibleFieldError('applicants.0.first_contact_date'),
+    negotiation_date: resolveVisibleFieldError('applicants.0.negotiations.0.date'),
     negotiation_info: resolveVisibleFieldError('applicants.0.negotiations.0.info'),
     applicants: resolveApplicantsError(),
   }))
+
+  const APPLICANT_SERVER_ERROR_MAP = {
+    tenant_applicant_id: 'applicants[0].tenant_applicant_id',
+    first_contact_date: 'applicants[0].first_contact_date',
+    status: 'applicants[0].status',
+    negotiation_date: 'applicants[0].negotiations[0].date',
+    negotiation_info: 'applicants[0].negotiations[0].info',
+  } as const satisfies Record<
+    Exclude<keyof TenantCaseCreateFieldErrors, 'room_id' | 'responsible_name' | 'applicants'>,
+    `applicants[${number}].${string}`
+  >
 
   function applyServerFieldErrors(fieldErrors: TenantCaseCreateFieldErrors) {
     showValidationErrors.value = true
@@ -167,6 +181,13 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
       const message = fieldErrors[field]
       if (message) {
         form.setFieldError(field, message)
+      }
+    }
+
+    for (const [errorKey, formPath] of Object.entries(APPLICANT_SERVER_ERROR_MAP)) {
+      const message = fieldErrors[errorKey as keyof typeof APPLICANT_SERVER_ERROR_MAP]
+      if (message) {
+        form.setFieldError(formPath, message)
       }
     }
 
@@ -202,6 +223,10 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
     })
   }
 
+  function toStorePayload(): TenantCaseStorePayload {
+    return buildTenantCaseStorePayload(toPayload())
+  }
+
   function toPayload(): TenantCaseCreatePayload {
     return {
       room_id: Number(roomId.value),
@@ -222,15 +247,19 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
   }
 
   function createSubmitHandler(callback: () => void | Promise<void>) {
-    const validatedSubmit = form.handleSubmit(async () => {
-      applicantsError.value = null
-      await callback()
-    })
-
     return () => {
-      showValidationErrors.value = true
       syncApplicantsToForm()
-      return validatedSubmit()
+
+      return form.handleSubmit(
+        async () => {
+          applicantsError.value = null
+          clearValidationState()
+          await callback()
+        },
+        () => {
+          showValidationErrors.value = true
+        },
+      )()
     }
   }
 
@@ -241,6 +270,7 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
     loadTenantCaseForm,
     applyServerFieldErrors,
     toPayload,
+    toStorePayload,
     roomId: roomIdModel,
     applicants,
   }

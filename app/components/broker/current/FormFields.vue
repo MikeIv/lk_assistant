@@ -13,6 +13,7 @@ const props = defineProps<{
     tenant_applicant_id?: string
     status?: string
     first_contact_date?: string
+    negotiation_date?: string
     negotiation_info?: string
     applicants?: string | null
   }
@@ -143,7 +144,12 @@ function guardDateValue(currentValue: string, event: Event) {
       <span :class="$style.negotiationsTitle">Переговоры</span>
 
       <div :class="$style.negotiationRow">
-        <div :class="$style.dateInputShell">
+        <div
+          :class="[
+            $style.dateInputShell,
+            errors.negotiation_date && $style.inputWrapError,
+          ]"
+        >
           <input
             v-model="negotiation.date"
             :class="$style.dateInput"
@@ -162,7 +168,8 @@ function guardDateValue(currentValue: string, event: Event) {
         </div>
       </div>
 
-      <p v-if="errors.negotiation_info" :class="$style.fieldError">{{ errors.negotiation_info }}</p>
+      <p v-if="errors.negotiation_date" :class="$style.fieldError">{{ errors.negotiation_date }}</p>
+      <p v-else-if="errors.negotiation_info" :class="$style.fieldError">{{ errors.negotiation_info }}</p>
       <p v-else-if="errors.applicants" :class="$style.fieldError">{{ errors.applicants }}</p>
     </div>
   </div>

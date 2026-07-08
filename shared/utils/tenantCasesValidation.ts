@@ -1,9 +1,13 @@
 import type {
   TenantCaseCreateFieldErrors,
   TenantCaseCreatePayload,
+  TenantCaseStorePayload,
 } from '#shared/types/tenantCases'
 import { tenantCaseFormSchema } from '#shared/utils/tenantCasesSchema'
-import { normalizeTenantCaseApplicantPayload } from '#shared/utils/tenantCasesNormalize'
+import {
+  normalizeTenantCaseApplicantPayload,
+  toTenantCaseApiDateTime,
+} from '#shared/utils/tenantCasesNormalize'
 
 interface ApiValidationErrorResponse {
   message?: string
@@ -20,10 +24,67 @@ export function normalizeTenantCaseCreatePayload(
   }
 }
 
+export function buildTenantCaseStorePayload(
+  payload: TenantCaseCreatePayload,
+): TenantCaseStorePayload {
+  const [applicant] = payload.applicants
+  const [negotiation] = applicant?.negotiations ?? []
+
+  return {
+    room_id: payload.room_id,
+    responsible_name: payload.responsible_name?.trim() ? payload.responsible_name.trim() : null,
+    tenant_applicant_id: applicant?.tenant_applicant_id ?? 0,
+    first_contact_date: toTenantCaseApiDateTime(applicant?.first_contact_date ?? ''),
+    negotiation_date: toTenantCaseApiDateTime(negotiation?.date ?? ''),
+    negotiation_info: negotiation?.info?.trim() ?? '',
+  }
+}
+
+export function normalizeTenantCaseStorePayload(
+  payload: TenantCaseStorePayload,
+): TenantCaseStorePayload {
+  return {
+    room_id: payload.room_id,
+    responsible_name: payload.responsible_name?.trim() ? payload.responsible_name.trim() : null,
+    tenant_applicant_id: payload.tenant_applicant_id,
+    first_contact_date: toTenantCaseApiDateTime(payload.first_contact_date),
+    negotiation_date: toTenantCaseApiDateTime(payload.negotiation_date),
+    negotiation_info: payload.negotiation_info.trim(),
+  }
+}
+
+export function storePayloadToCreatePayload(
+  payload: TenantCaseStorePayload,
+): TenantCaseCreatePayload {
+  return {
+    room_id: payload.room_id,
+    responsible_name: payload.responsible_name,
+    applicants: [
+      {
+        tenant_applicant_id: payload.tenant_applicant_id,
+        status: 'переговоры',
+        first_contact_date: payload.first_contact_date,
+        next_contact_date: null,
+        negotiations: [
+          {
+            date: payload.negotiation_date,
+            info: payload.negotiation_info,
+          },
+        ],
+      },
+    ],
+  }
+}
+
 export function emptyTenantCaseCreateFieldErrors(): TenantCaseCreateFieldErrors {
   return {
     room_id: null,
     responsible_name: null,
+    tenant_applicant_id: null,
+    first_contact_date: null,
+    negotiation_date: null,
+    negotiation_info: null,
+    status: null,
     applicants: null,
   }
 }
@@ -54,12 +115,17 @@ export function parseTenantCaseCreateFieldErrors(data: unknown): TenantCaseCreat
   return {
     room_id: firstFieldError(errors, 'room_id'),
     responsible_name: firstFieldError(errors, 'responsible_name'),
+    tenant_applicant_id: firstFieldError(errors, 'tenant_applicant_id'),
+    first_contact_date: firstFieldError(errors, 'first_contact_date'),
+    negotiation_date: firstFieldError(errors, 'negotiation_date'),
+    negotiation_info: firstFieldError(errors, 'negotiation_info'),
+    status: firstFieldError(errors, 'status'),
     applicants: firstFieldError(errors, 'applicants') ?? firstApplicantsFieldError(errors),
   }
 }
 
 export function hasTenantCaseCreateFieldErrors(fieldErrors: TenantCaseCreateFieldErrors): boolean {
-  return Boolean(fieldErrors.room_id || fieldErrors.responsible_name || fieldErrors.applicants)
+  return Object.values(fieldErrors).some(Boolean)
 }
 
 export function validateTenantCaseFormPayload(
