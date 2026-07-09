@@ -4,6 +4,7 @@ import type {
   TenantCaseApplicant,
   TenantCaseApplicantPayload,
   TenantCaseCreatePayload,
+  TenantCaseKp,
   TenantCaseNegotiation,
   TenantCaseRoom,
   TenantCaseTableRow,
@@ -38,6 +39,28 @@ function formatNegotiationsInfo(negotiations: TenantCaseNegotiation[]): string {
     })
     .filter(Boolean)
     .join('\n')
+}
+
+export function normalizeTenantCaseRoom(
+  room: TenantCaseRoom | null | undefined,
+): TenantCaseRoom | null {
+  if (!room) {
+    return null
+  }
+
+  return {
+    id: room.id,
+    category: room.category ?? '',
+    floor: room.floor ?? '',
+    name: room.name ?? '',
+    area: room.area ?? null,
+  }
+}
+
+export function normalizeTenantCaseKp(kp: TenantCaseKp | null | undefined): TenantCaseKp {
+  return {
+    rows: Array.isArray(kp?.rows) ? kp.rows : [],
+  }
 }
 
 export function buildTenantCaseTableRows(
@@ -79,7 +102,7 @@ export function normalizeTenantCaseApplicant(item: TenantCaseApplicant): TenantC
 }
 
 export function normalizeTenantCase(item: TenantCaseApiResource): TenantCase {
-  const room = item.room ?? null
+  const room = normalizeTenantCaseRoom(item.room)
   const applicants = (item.applicants ?? []).map(normalizeTenantCaseApplicant)
   const tableRows = item.table_rows?.length
     ? item.table_rows
@@ -99,6 +122,7 @@ export function normalizeTenantCase(item: TenantCaseApiResource): TenantCase {
     responsible: item.responsible ?? null,
     applicants,
     table_rows: tableRows,
+    kp: normalizeTenantCaseKp(item.kp),
   }
 }
 
@@ -107,6 +131,7 @@ export function tenantCaseToCreatePayload(tenantCase: TenantCase): TenantCaseCre
     room_id: tenantCase.room_id,
     responsible_name: tenantCase.responsible,
     applicants: tenantCase.applicants.map((applicant) => ({
+      id: applicant.id,
       tenant_applicant_id: applicant.tenant_applicant_id,
       status: applicant.status,
       first_contact_date: applicant.first_contact_date,
@@ -114,6 +139,25 @@ export function tenantCaseToCreatePayload(tenantCase: TenantCase): TenantCaseCre
       negotiations: applicant.negotiations.length ? applicant.negotiations : null,
     })),
   }
+}
+
+/** Show → form load: payload + display fields for card UI. */
+export function tenantCaseApplicantsToFormLoad(applicants: TenantCaseApplicant[]): Array<
+  TenantCaseApplicantPayload & {
+    tenant_applicant: string
+    category: string
+  }
+> {
+  return applicants.map((applicant) => ({
+    id: applicant.id,
+    tenant_applicant_id: applicant.tenant_applicant_id,
+    tenant_applicant: applicant.tenant_applicant,
+    category: applicant.category,
+    status: applicant.status,
+    first_contact_date: applicant.first_contact_date,
+    next_contact_date: applicant.next_contact_date,
+    negotiations: applicant.negotiations,
+  }))
 }
 
 export function flattenTenantCasesForTable(
@@ -210,12 +254,18 @@ export function normalizeTenantCaseApplicantPayload(
   applicant: TenantCaseApplicantPayload,
 ): TenantCaseApplicantPayload {
   return {
+    id: applicant.id ?? null,
     tenant_applicant_id: applicant.tenant_applicant_id,
     status: applicant.status,
     first_contact_date: toTenantCaseApiDateTime(applicant.first_contact_date),
     next_contact_date: applicant.next_contact_date
       ? toTenantCaseApiDateTime(applicant.next_contact_date)
       : null,
-    negotiations: applicant.negotiations?.length ? applicant.negotiations : null,
+    negotiations: applicant.negotiations?.length
+      ? applicant.negotiations.map((item) => ({
+          date: item.date ? toTenantCaseApiDateTime(item.date) : null,
+          info: item.info?.trim() ? item.info.trim() : null,
+        }))
+      : null,
   }
 }

@@ -16,7 +16,6 @@ import {
 import {
   getTenantCaseTodayDateInputValue,
   normalizeTenantCaseApplicantPayload,
-  toTenantCaseApiDateTime,
   toTenantCaseDateInputValue,
 } from '#shared/utils/tenantCasesNormalize'
 import { buildTenantCaseStorePayload } from '#shared/utils/tenantCasesValidation'
@@ -48,7 +47,10 @@ function createEmptyApplicant(): TenantCaseApplicantFormValues {
   const today = getTenantCaseTodayDateInputValue()
 
   return {
+    id: null,
     tenant_applicant_id: '',
+    tenant_applicant: '',
+    category: '',
     status: '',
     first_contact_date: today,
     next_contact_date: '',
@@ -79,7 +81,10 @@ function resolveNestedFieldError(
 }
 
 function mapApplicantFromPayload(
-  applicantPayload: TenantCaseApplicantPayload,
+  applicantPayload: TenantCaseApplicantPayload & {
+    tenant_applicant?: string
+    category?: string
+  },
 ): TenantCaseApplicantFormValues {
   const negotiations = (applicantPayload.negotiations ?? []).map((item) => ({
     date: toTenantCaseDateInputValue(item.date) || getTenantCaseTodayDateInputValue(),
@@ -87,13 +92,16 @@ function mapApplicantFromPayload(
   }))
 
   return {
+    id: applicantPayload.id ?? null,
     tenant_applicant_id: String(applicantPayload.tenant_applicant_id),
+    tenant_applicant: applicantPayload.tenant_applicant ?? '',
+    category: applicantPayload.category ?? '',
     status: applicantPayload.status,
     first_contact_date:
       toTenantCaseDateInputValue(applicantPayload.first_contact_date) ||
       getTenantCaseTodayDateInputValue(),
-    next_contact_date: '',
-    negotiations: negotiations.length > 0 ? [negotiations[0]!] : [createEmptyNegotiation()],
+    next_contact_date: toTenantCaseDateInputValue(applicantPayload.next_contact_date),
+    negotiations: negotiations.length > 0 ? negotiations : [createEmptyNegotiation()],
   }
 }
 
@@ -153,6 +161,7 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
     return null
   }
 
+  /** Flat errors for create UI (applicants[0]); card UI uses `getFieldError`. */
   const formErrors = computed(() => ({
     room_id: resolveVisibleFieldError('room_id'),
     tenant_applicant_id: resolveVisibleFieldError('applicants.0.tenant_applicant_id'),
@@ -207,13 +216,17 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
 
   function loadTenantCaseForm(
     values: TenantCaseFormInitialValues,
-    applicantPayloads: TenantCaseApplicantPayload[],
+    applicantPayloads: Array<
+      TenantCaseApplicantPayload & {
+        tenant_applicant?: string
+        category?: string
+      }
+    >,
   ) {
-    const [firstApplicant] = applicantPayloads
-
-    applicants.value = firstApplicant
-      ? [mapApplicantFromPayload(firstApplicant)]
-      : [createEmptyApplicant()]
+    applicants.value =
+      applicantPayloads.length > 0
+        ? applicantPayloads.map(mapApplicantFromPayload)
+        : [createEmptyApplicant()]
     clearValidationState()
     form.resetForm({
       values: {
@@ -221,6 +234,56 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
         applicants: applicants.value,
       },
     })
+  }
+
+  function addApplicant() {
+    applicants.value = [...applicants.value, createEmptyApplicant()]
+    syncApplicantsToForm()
+  }
+
+  function removeApplicant(index: number) {
+    if (applicants.value.length <= 1) {
+      return
+    }
+
+    applicants.value = applicants.value.filter((_, applicantIndex) => applicantIndex !== index)
+    syncApplicantsToForm()
+  }
+
+  function addNegotiation(applicantIndex: number) {
+    const applicant = applicants.value[applicantIndex]
+
+    if (!applicant) {
+      return
+    }
+
+    const nextApplicants = [...applicants.value]
+    nextApplicants[applicantIndex] = {
+      ...applicant,
+      negotiations: [...applicant.negotiations, createEmptyNegotiation()],
+    }
+    applicants.value = nextApplicants
+    syncApplicantsToForm()
+  }
+
+  function removeNegotiation(applicantIndex: number, negotiationIndex: number) {
+    if (negotiationIndex === 0) {
+      return
+    }
+
+    const applicant = applicants.value[applicantIndex]
+
+    if (!applicant || applicant.negotiations.length <= 1) {
+      return
+    }
+
+    const nextApplicants = [...applicants.value]
+    nextApplicants[applicantIndex] = {
+      ...applicant,
+      negotiations: applicant.negotiations.filter((_, index) => index !== negotiationIndex),
+    }
+    applicants.value = nextApplicants
+    syncApplicantsToForm()
   }
 
   function toStorePayload(): TenantCaseStorePayload {
@@ -233,12 +296,13 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
       responsible_name: responsibleName.value?.trim() ? responsibleName.value.trim() : null,
       applicants: applicants.value.map((applicant) =>
         normalizeTenantCaseApplicantPayload({
+          id: applicant.id ?? null,
           tenant_applicant_id: Number(applicant.tenant_applicant_id),
           status: applicant.status as TenantCaseApplicantStatus,
-          first_contact_date: toTenantCaseApiDateTime(applicant.first_contact_date),
-          next_contact_date: null,
+          first_contact_date: applicant.first_contact_date,
+          next_contact_date: applicant.next_contact_date.trim() || null,
           negotiations: applicant.negotiations.map((item) => ({
-            date: toTenantCaseApiDateTime(item.date),
+            date: item.date,
             info: item.info?.trim() ? item.info.trim() : null,
           })),
         }),
@@ -266,9 +330,14 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
   return {
     handleSubmit: createSubmitHandler,
     errors: formErrors,
+    getFieldError: resolveVisibleFieldError,
     resetTenantCaseForm,
     loadTenantCaseForm,
     applyServerFieldErrors,
+    addApplicant,
+    removeApplicant,
+    addNegotiation,
+    removeNegotiation,
     toPayload,
     toStorePayload,
     roomId: roomIdModel,

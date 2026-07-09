@@ -56,6 +56,7 @@ function buildMockTenantCase(index: number): TenantCase {
   const applicantsCount = index === 17 ? 10 : (index % 4) + 1
   const room = {
     id: String(premise.id),
+    category: premise.room_type ?? '',
     floor: premise.floor ?? '',
     name: premise.name,
     area: premise.area,
@@ -76,6 +77,7 @@ function buildMockTenantCase(index: number): TenantCase {
     responsible,
     applicants,
     table_rows: [],
+    kp: { rows: [] },
   }
 
   tenantCase.table_rows = buildTenantCaseTableRows(id, room, currentTenant, responsible, applicants)

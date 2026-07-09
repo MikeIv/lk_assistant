@@ -34,9 +34,16 @@ export interface TenantCaseApplicant {
 
 export interface TenantCaseRoom {
   id: string
+  /** Тип помещения (OpenAPI `room.category`). */
+  category: string
   floor: string
   name: string
   area: number | null
+}
+
+/** Заглушка КП из show (`kp.rows`); структура строк — отдельным ТЗ. */
+export interface TenantCaseKp {
+  rows: unknown[]
 }
 
 export interface TenantCaseTableRow {
@@ -63,6 +70,7 @@ export interface TenantCase {
   responsible: string | null
   applicants: TenantCaseApplicant[]
   table_rows: TenantCaseTableRow[]
+  kp: TenantCaseKp
 }
 
 export interface TenantCaseTableDisplayRow extends TenantCaseTableRow {
@@ -87,6 +95,7 @@ export interface TenantCaseApiResource {
   responsible: string | null
   applicants?: TenantCaseApplicant[]
   table_rows?: TenantCaseTableRow[]
+  kp?: TenantCaseKp | null
 }
 
 export interface TenantCasesListApiResponse {
@@ -108,6 +117,8 @@ export interface TenantCaseShowApiResponse {
 }
 
 export interface TenantCaseApplicantPayload {
+  /** ID блока в деле; `null` / omit — новый претендент (update). */
+  id?: number | null
   tenant_applicant_id: number
   status: TenantCaseApplicantStatus
   first_contact_date: string
@@ -120,6 +131,9 @@ export interface TenantCaseCreatePayload {
   responsible_name: string | null
   applicants: TenantCaseApplicantPayload[]
 }
+
+/** PUT /v1/broker/tenant-cases/{id} — та же форма, у applicants может быть `id`. */
+export type TenantCaseUpdatePayload = TenantCaseCreatePayload
 
 /** POST /v1/broker/tenant-cases — плоское тело создания (не applicants[]). */
 export interface TenantCaseStorePayload {

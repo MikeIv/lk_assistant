@@ -135,11 +135,15 @@ export function validateTenantCaseFormPayload(
     room_id: String(payload.room_id),
     responsible_name: payload.responsible_name ?? '',
     applicants: payload.applicants.map((applicant) => ({
+      id: applicant.id ?? null,
       tenant_applicant_id: String(applicant.tenant_applicant_id),
       status: applicant.status,
       first_contact_date: applicant.first_contact_date.slice(0, 10),
       next_contact_date: applicant.next_contact_date?.slice(0, 10) ?? '',
-      negotiations: applicant.negotiations ?? [],
+      negotiations: (applicant.negotiations ?? []).map((item) => ({
+        date: item.date?.slice(0, 10) ?? '',
+        info: item.info ?? '',
+      })),
     })),
   })
 
@@ -160,8 +164,41 @@ export function validateTenantCaseFormPayload(
       fieldErrors.responsible_name = issue.message
     }
 
-    if (field === 'applicants' && !fieldErrors.applicants) {
-      fieldErrors.applicants = issue.message
+    if (field === 'applicants') {
+      const applicantIndex = issue.path[1]
+      const applicantField = issue.path[2]
+
+      // Array-level (min length) — only bag error for create UI.
+      if (typeof applicantIndex !== 'number') {
+        if (!fieldErrors.applicants) {
+          fieldErrors.applicants = issue.message
+        }
+        continue
+      }
+
+      if (applicantIndex === 0 && typeof applicantField === 'string') {
+        if (applicantField === 'tenant_applicant_id' && !fieldErrors.tenant_applicant_id) {
+          fieldErrors.tenant_applicant_id = issue.message
+        } else if (applicantField === 'status' && !fieldErrors.status) {
+          fieldErrors.status = issue.message
+        } else if (applicantField === 'first_contact_date' && !fieldErrors.first_contact_date) {
+          fieldErrors.first_contact_date = issue.message
+        } else if (applicantField === 'negotiations') {
+          const negotiationField = issue.path[4]
+
+          if (negotiationField === 'date' && !fieldErrors.negotiation_date) {
+            fieldErrors.negotiation_date = issue.message
+          } else if (negotiationField === 'info' && !fieldErrors.negotiation_info) {
+            fieldErrors.negotiation_info = issue.message
+          }
+        }
+        continue
+      }
+
+      // Nested errors for applicants[1+] — bag until card fieldErrors land.
+      if (!fieldErrors.applicants) {
+        fieldErrors.applicants = issue.message
+      }
     }
   }
 

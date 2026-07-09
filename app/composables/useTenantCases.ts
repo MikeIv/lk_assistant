@@ -12,6 +12,7 @@ import type {
   TenantCaseSortDirection,
   TenantCaseSortKey,
   TenantCaseStorePayload,
+  TenantCaseUpdatePayload,
   TenantCasesListApiResponse,
   TenantCasesPagination,
 } from '#shared/types/tenantCases'
@@ -50,6 +51,7 @@ function buildMockTenantCaseFromPayload(id: number, payload: TenantCaseCreatePay
     PREMISES_MOCK_ITEMS.find((item) => item.id === payload.room_id) ?? PREMISES_MOCK_ITEMS[0]!
   const room = {
     id: String(premise.id),
+    category: premise.room_type ?? '',
     floor: premise.floor ?? '',
     name: premise.name,
     area: premise.area,
@@ -62,7 +64,7 @@ function buildMockTenantCaseFromPayload(id: number, payload: TenantCaseCreatePay
     const contact = applicantRecord?.contacts[0]
 
     return {
-      id: id * 100 + index + 1,
+      id: applicantPayload.id ?? id * 100 + index + 1,
       tenant_applicant_id: applicantPayload.tenant_applicant_id,
       tenant_applicant:
         applicantRecord?.title ?? `Претендент ${applicantPayload.tenant_applicant_id}`,
@@ -83,6 +85,7 @@ function buildMockTenantCaseFromPayload(id: number, payload: TenantCaseCreatePay
     responsible: payload.responsible_name,
     applicants,
     table_rows: [],
+    kp: { rows: [] },
   }
 
   tenantCase.table_rows = buildTenantCaseTableRows(
@@ -347,7 +350,7 @@ export function useTenantCases() {
 
   async function updateTenantCase(
     id: number,
-    payload: TenantCaseCreatePayload,
+    payload: TenantCaseUpdatePayload,
   ): Promise<TenantCaseMutationResult> {
     const normalizedPayload = normalizeTenantCaseCreatePayload({
       ...payload,

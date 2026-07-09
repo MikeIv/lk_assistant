@@ -21,7 +21,13 @@ const tenantCaseNegotiationSchema = z.object({
 })
 
 export const tenantCaseApplicantFormSchema = z.object({
+  /** ID блока в деле; null — новый претендент. */
+  id: z.number().nullable().optional(),
   tenant_applicant_id: z.string().trim().min(1, TENANT_CASE_REQUIRED_APPLICANT_MESSAGE),
+  /** Display-only: имя претендента (collapse / read-only). */
+  tenant_applicant: z.string().optional(),
+  /** Display-only: категория из справочника / show. */
+  category: z.string().optional(),
   status: z
     .string()
     .trim()
@@ -31,7 +37,7 @@ export const tenantCaseApplicantFormSchema = z.object({
     }),
   first_contact_date: z.string().trim().min(1, TENANT_CASE_REQUIRED_FIRST_CONTACT_MESSAGE),
   next_contact_date: z.string(),
-  negotiations: z.array(tenantCaseNegotiationSchema).length(1),
+  negotiations: z.array(tenantCaseNegotiationSchema).min(1),
 })
 
 export const tenantCaseFormSchema = z.object({

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TenantCase } from '#shared/types/tenantCases'
-import { tenantCaseToCreatePayload } from '#shared/utils/tenantCasesNormalize'
+import { tenantCaseApplicantsToFormLoad } from '#shared/utils/tenantCasesNormalize'
 
 const route = useRoute()
 const caseId = computed(() => Number(route.params.id))
@@ -48,13 +48,12 @@ async function loadCase() {
 
   tenantCase.value = item
 
-  const payload = tenantCaseToCreatePayload(item)
   loadTenantCaseForm(
     {
-      room_id: String(payload.room_id),
-      responsible_name: payload.responsible_name ?? '',
+      room_id: String(item.room_id),
+      responsible_name: item.responsible ?? '',
     },
-    payload.applicants,
+    tenantCaseApplicantsToFormLoad(item.applicants),
   )
   isLoading.value = false
 }
