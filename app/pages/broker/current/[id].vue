@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import type { TenantCase } from '#shared/types/tenantCases'
 import { tenantCaseApplicantsToFormLoad } from '#shared/utils/tenantCasesNormalize'
+import type { TenantCaseCardTab } from '~/components/broker/current/CaseTabs.vue'
 
 const route = useRoute()
 const caseId = computed(() => Number(route.params.id))
 
 const { fetchTenantCase, updateTenantCase, deleteTenantCase } = useTenantCases()
-const { rooms, applicants, isLoading: isOptionsLoading } = useTenantCaseFormOptions()
+const { applicants: directoryApplicants, isLoading: isOptionsLoading } = useTenantCaseFormOptions()
 
 const tenantCase = ref<TenantCase | null>(null)
 const loadError = ref<string | null>(null)
@@ -15,16 +16,36 @@ const generalError = ref<string | null>(null)
 const isSubmitting = ref(false)
 const isDeleting = ref(false)
 const isDeleteConfirmOpen = ref(false)
+const isCancelling = ref(false)
+const activeTab = ref<TenantCaseCardTab>('room')
+
+const applicantsTabRef = ref<{ resetCollapseForTabEnter: () => void } | null>(null)
 
 const {
   handleSubmit,
-  errors,
   loadTenantCaseForm,
   applyServerFieldErrors,
+  getFieldError,
+  addApplicant,
+  removeApplicant,
+  addNegotiation,
+  removeNegotiation,
   toPayload,
-  roomId,
   applicants: formApplicants,
 } = useTenantCaseForm()
+
+const isBusy = computed(() => isSubmitting.value || isDeleting.value || isCancelling.value)
+
+function applyCaseToForm(item: TenantCase) {
+  tenantCase.value = item
+  loadTenantCaseForm(
+    {
+      room_id: String(item.room_id),
+      responsible_name: item.responsible ?? '',
+    },
+    tenantCaseApplicantsToFormLoad(item.applicants),
+  )
+}
 
 async function loadCase() {
   if (!Number.isFinite(caseId.value) || caseId.value <= 0) {
@@ -46,21 +67,24 @@ async function loadCase() {
     return
   }
 
-  tenantCase.value = item
-
-  loadTenantCaseForm(
-    {
-      room_id: String(item.room_id),
-      responsible_name: item.responsible ?? '',
-    },
-    tenantCaseApplicantsToFormLoad(item.applicants),
-  )
+  applyCaseToForm(item)
   isLoading.value = false
 }
 
 watch(caseId, () => {
+  activeTab.value = 'room'
   void loadCase()
 }, { immediate: true })
+
+watch(activeTab, (tab) => {
+  if (tab !== 'applicants') {
+    return
+  }
+
+  void nextTick(() => {
+    applicantsTabRef.value?.resetCollapseForTabEnter()
+  })
+})
 
 const onSubmit = handleSubmit(async () => {
   if (!tenantCase.value) {
@@ -80,10 +104,38 @@ const onSubmit = handleSubmit(async () => {
 
     applyServerFieldErrors(result.fieldErrors)
     generalError.value = result.generalError
+    activeTab.value = 'applicants'
   } finally {
     isSubmitting.value = false
   }
 })
+
+async function handleCancel() {
+  if (!tenantCase.value) {
+    return
+  }
+
+  isCancelling.value = true
+  generalError.value = null
+
+  try {
+    const item = await fetchTenantCase(tenantCase.value.id)
+
+    if (!item) {
+      generalError.value = 'Не удалось сбросить данные карточки'
+      return
+    }
+
+    applyCaseToForm(item)
+
+    if (activeTab.value === 'applicants') {
+      await nextTick()
+      applicantsTabRef.value?.resetCollapseForTabEnter()
+    }
+  } finally {
+    isCancelling.value = false
+  }
+}
 
 async function handleDeleteConfirm() {
   if (!tenantCase.value) {
@@ -110,10 +162,9 @@ async function handleDeleteConfirm() {
 
 useHead(
   computed(() => ({
-    title:
-      tenantCase.value?.room?.name != null
-        ? `Дело ${tenantCase.value.room.name} — Текущие дела`
-        : 'Карточка дела — Текущие дела',
+    title: tenantCase.value
+      ? `Дело №${tenantCase.value.id} — Текущие дела`
+      : 'Карточка дела — Текущие дела',
   })),
 )
 </script>
@@ -133,43 +184,60 @@ useHead(
 
     <form v-else-if="tenantCase" :class="$style.form" @submit.prevent="onSubmit">
       <header :class="$style.header">
-        <div>
-          <h3 :class="$style.title">Карточка дела №{{ tenantCase.id }}</h3>
-          <p v-if="tenantCase.current_tenant" :class="$style.subtitle">
-            Текущий арендатор: {{ tenantCase.current_tenant }}
-          </p>
-        </div>
+        <h3 :class="$style.title">Дело №{{ tenantCase.id }}</h3>
       </header>
 
-      <div v-if="isOptionsLoading" :class="$style.state">Загрузка справочников…</div>
+      <BrokerCurrentCaseTabs v-model="activeTab" />
 
-      <BrokerCurrentFormFields
-        v-else
-        v-model:room-id="roomId"
+      <div v-if="isOptionsLoading && activeTab === 'applicants'" :class="$style.state">
+        Загрузка справочников…
+      </div>
+
+      <BrokerCurrentCaseRoomTab v-else-if="activeTab === 'room'" :room="tenantCase.room" />
+
+      <BrokerCurrentCaseApplicantsTab
+        v-else-if="activeTab === 'applicants'"
+        ref="applicantsTabRef"
         v-model:applicants="formApplicants"
-        :rooms="rooms"
-        :directory-applicants="applicants"
-        :errors="errors"
-        :disabled="isSubmitting || isDeleting"
+        :directory-applicants="directoryApplicants"
+        :disabled="isBusy"
+        :get-field-error="getFieldError"
+        @add="addApplicant"
+        @remove="removeApplicant"
+        @add-negotiation="addNegotiation"
+        @remove-negotiation="removeNegotiation"
       />
+
+      <BrokerCurrentCaseKpTab v-else-if="activeTab === 'kp'" />
 
       <p v-if="generalError" :class="$style.generalError">{{ generalError }}</p>
 
       <div :class="$style.actions">
-        <UiButton
-          type="submit"
-          size="sm"
-          variant="success"
-          label="Сохранить"
-          :loading="isSubmitting"
-          :disabled="isSubmitting || isDeleting || isOptionsLoading"
-        />
+        <div :class="$style.actionsLeft">
+          <UiButton
+            type="submit"
+            size="sm"
+            variant="success"
+            label="Сохранить"
+            :loading="isSubmitting"
+            :disabled="isBusy"
+          />
+          <UiButton
+            type="button"
+            size="sm"
+            variant="outline"
+            label="Отменить"
+            :loading="isCancelling"
+            :disabled="isBusy"
+            @click="handleCancel"
+          />
+        </div>
         <UiButton
           type="button"
           size="sm"
-          variant="soft"
-          label="Удалить"
-          :disabled="isSubmitting || isDeleting"
+          variant="warning"
+          label="Удалить дело"
+          :disabled="isBusy"
           @click="isDeleteConfirmOpen = true"
         />
       </div>
@@ -182,13 +250,13 @@ useHead(
         @mousedown.self="isDeleteConfirmOpen = false"
       >
         <div :class="$style.confirmDialog" role="dialog" aria-modal="true">
-          <h4 :class="$style.confirmTitle">Удалить карточку дела?</h4>
+          <h4 :class="$style.confirmTitle">Удалить дело?</h4>
           <p :class="$style.confirmText">Действие нельзя отменить.</p>
           <div :class="$style.confirmActions">
             <UiButton
               type="button"
               size="sm"
-              variant="primary"
+              variant="warning"
               label="Удалить"
               :loading="isDeleting"
               :disabled="isDeleting"
@@ -245,21 +313,12 @@ useHead(
 .header {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--fs-space-2);
 }
 
 .title {
   margin: 0;
 
   @include typo.fs-text-h3;
-}
-
-.subtitle {
-  margin: rem(6) 0 0;
-  color: var(--fs-color-text-muted);
-
-  @include typo.fs-text-body;
 }
 
 .state {
@@ -289,6 +348,14 @@ useHead(
 }
 
 .actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fs-space-1);
+}
+
+.actionsLeft {
   display: flex;
   flex-wrap: wrap;
   gap: var(--fs-space-1);
