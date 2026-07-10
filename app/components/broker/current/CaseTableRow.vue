@@ -15,27 +15,29 @@ defineProps<{
 
 <style module lang="scss">
 @use '~/assets/styles/tools/functions' as *;
-@use '~/assets/styles/tools/ui-kit-card' as card;
 
+/* Как строки в CaseRoomTab: белый фон, две колонки, 14px. */
 .row {
-  @include card.param-row;
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  align-items: center;
+  padding: rem(8) rem(16);
+  border-radius: var(--fs-space-1);
+  background-color: var(--fs-figma-achromatic-white);
 }
 
 .label {
-  flex: 0 1 auto;
-  min-width: rem(120);
-
-  @include card.param-label;
+  font-size: rem(14);
+  line-height: 1.4;
+  color: var(--fs-figma-achromatic-middle-gray);
 }
 
 .value {
   display: flex;
-  flex: 1 1 auto;
   flex-direction: column;
   align-items: stretch;
   justify-content: center;
   min-width: 0;
-  max-width: min(100%, rem(420));
-  margin-inline-start: auto;
 }
 </style>

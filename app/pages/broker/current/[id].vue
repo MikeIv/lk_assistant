@@ -189,28 +189,30 @@ useHead(
 
       <BrokerCurrentCaseTabs v-model="activeTab" />
 
-      <div v-if="isOptionsLoading && activeTab === 'applicants'" :class="$style.state">
-        Загрузка справочников…
+      <div :class="$style.tabBody">
+        <div v-if="isOptionsLoading && activeTab === 'applicants'" :class="$style.state">
+          Загрузка справочников…
+        </div>
+
+        <BrokerCurrentCaseRoomTab v-else-if="activeTab === 'room'" :room="tenantCase.room" />
+
+        <BrokerCurrentCaseApplicantsTab
+          v-else-if="activeTab === 'applicants'"
+          ref="applicantsTabRef"
+          v-model:applicants="formApplicants"
+          :directory-applicants="directoryApplicants"
+          :disabled="isBusy"
+          :get-field-error="getFieldError"
+          @add="addApplicant"
+          @remove="removeApplicant"
+          @add-negotiation="addNegotiation"
+          @remove-negotiation="removeNegotiation"
+        />
+
+        <BrokerCurrentCaseKpTab v-else-if="activeTab === 'kp'" />
+
+        <p v-if="generalError" :class="$style.generalError">{{ generalError }}</p>
       </div>
-
-      <BrokerCurrentCaseRoomTab v-else-if="activeTab === 'room'" :room="tenantCase.room" />
-
-      <BrokerCurrentCaseApplicantsTab
-        v-else-if="activeTab === 'applicants'"
-        ref="applicantsTabRef"
-        v-model:applicants="formApplicants"
-        :directory-applicants="directoryApplicants"
-        :disabled="isBusy"
-        :get-field-error="getFieldError"
-        @add="addApplicant"
-        @remove="removeApplicant"
-        @add-negotiation="addNegotiation"
-        @remove-negotiation="removeNegotiation"
-      />
-
-      <BrokerCurrentCaseKpTab v-else-if="activeTab === 'kp'" />
-
-      <p v-if="generalError" :class="$style.generalError">{{ generalError }}</p>
 
       <div :class="$style.actions">
         <div :class="$style.actionsLeft">
@@ -283,13 +285,17 @@ useHead(
 
 .root {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: var(--fs-space-2);
   width: 100%;
+  min-width: 0;
+  min-height: 0;
 }
 
 .topBar {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
 }
 
@@ -302,8 +308,10 @@ useHead(
 
 .form {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: var(--fs-space-2);
+  min-height: 0;
   padding: var(--fs-space-3);
   border-radius: rem(20);
   background-color: var(--fs-color-bg);
@@ -312,6 +320,7 @@ useHead(
 
 .header {
   display: flex;
+  flex-shrink: 0;
   align-items: flex-start;
 }
 
@@ -319,6 +328,14 @@ useHead(
   margin: 0;
 
   @include typo.fs-text-h3;
+}
+
+.tabBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
 }
 
 .state {
@@ -349,10 +366,12 @@ useHead(
 
 .actions {
   display: flex;
+  flex-shrink: 0;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--fs-space-1);
+  margin-top: auto;
 }
 
 .actionsLeft {

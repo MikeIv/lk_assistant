@@ -113,6 +113,11 @@ const isHomePage = computed(() => route.path === '/')
 }
 
 .siteShell {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
   padding-top: var(--fs-space-3);
 }
 

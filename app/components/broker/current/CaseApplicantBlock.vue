@@ -94,9 +94,13 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
         type="button"
         :class="$style.collapseBtn"
         :aria-expanded="isExpanded"
+        :aria-label="isExpanded ? 'Свернуть' : 'Развернуть'"
         @click="isExpanded = !isExpanded"
       >
-        {{ isExpanded ? 'свернуть' : 'развернуть' }}
+        <UIcon
+          :name="isExpanded ? 'i-arrow-chevron-dropdown-open' : 'i-arrow-chevron-dropdown'"
+          :class="$style.collapseIcon"
+        />
       </button>
     </header>
 
@@ -130,18 +134,8 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
             <span :class="$style.readonlyValue">{{ applicant.first_contact_date || '—' }}</span>
           </template>
           <template v-else>
-            <div
-              :class="[
-                $style.dateInputShell,
-                fieldError('first_contact_date') && $style.inputWrapError,
-              ]"
-            >
-              <input
-                v-model="applicant.first_contact_date"
-                :class="$style.dateInput"
-                type="date"
-                :disabled="disabled"
-              />
+            <div :class="[fieldError('first_contact_date') && $style.inputWrapError]">
+              <UiDateInput v-model="applicant.first_contact_date" :disabled="disabled" />
             </div>
             <p v-if="fieldError('first_contact_date')" :class="$style.fieldError">
               {{ fieldError('first_contact_date') }}
@@ -161,16 +155,11 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
           <div :class="$style.negotiationRow">
             <div
               :class="[
-                $style.dateInputShell,
+                $style.controlWrap,
                 negotiationError(negotiationIndex, 'date') && $style.inputWrapError,
               ]"
             >
-              <input
-                v-model="negotiation.date"
-                :class="$style.dateInput"
-                type="date"
-                :disabled="disabled"
-              />
+              <UiDateInput v-model="negotiation.date" :disabled="disabled" />
             </div>
             <div
               :class="[
@@ -217,31 +206,28 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
         </div>
       </div>
 
-      <div :class="$style.table">
-        <BrokerCurrentCaseTableRow label="Статус переговоров">
-          <div :class="[fieldError('status') && $style.inputWrapError]">
-            <UiSelect
-              v-model="applicant.status"
-              :options="statusOptions"
-              placeholder="Выберите статус переговоров"
-              :disabled="disabled"
-            />
-          </div>
-          <p v-if="fieldError('status')" :class="$style.fieldError">
-            {{ fieldError('status') }}
-          </p>
-        </BrokerCurrentCaseTableRow>
+      <div :class="$style.statusDateRow">
+        <div :class="[$style.table, $style.statusTable]">
+          <BrokerCurrentCaseTableRow label="Статус переговоров">
+            <div :class="[fieldError('status') && $style.inputWrapError]">
+              <UiSelect
+                v-model="applicant.status"
+                :options="statusOptions"
+                placeholder="Выберите статус переговоров"
+                :disabled="disabled"
+              />
+            </div>
+            <p v-if="fieldError('status')" :class="$style.fieldError">
+              {{ fieldError('status') }}
+            </p>
+          </BrokerCurrentCaseTableRow>
+        </div>
 
-        <BrokerCurrentCaseTableRow label="Дата следующего контакта">
-          <div :class="$style.dateInputShell">
-            <input
-              v-model="applicant.next_contact_date"
-              :class="$style.dateInput"
-              type="date"
-              :disabled="disabled"
-            />
-          </div>
-        </BrokerCurrentCaseTableRow>
+        <div :class="[$style.table, $style.nextDateTable]">
+          <BrokerCurrentCaseTableRow label="Дата следующего контакта">
+            <UiDateInput v-model="applicant.next_contact_date" :disabled="disabled" />
+          </BrokerCurrentCaseTableRow>
+        </div>
       </div>
 
       <div v-if="canDelete" :class="$style.footer">
@@ -260,12 +246,11 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
 
 <style module lang="scss">
 @use '~/assets/styles/tools/functions' as *;
-@use '~/assets/styles/tools/form-field' as field;
-@use '~/assets/styles/tools/typography' as typo;
 @use '~/assets/styles/tools/ui-kit-card' as card;
 
 .root {
   @include card.content-card;
+  background-color: var(--fs-figma-achromatic-light-gray);
 }
 
 .header {
@@ -277,19 +262,37 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
 
 .title {
   @include card.content-card-title;
+  font-weight: 700;
 }
 
 .collapseBtn {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: rem(32);
+  height: rem(32);
   margin: 0;
   padding: 0;
   border: 0;
+  border-radius: rem(8);
   background: transparent;
-  color: var(--fs-color-primary);
-  text-decoration: underline;
-  text-underline-offset: rem(2);
+  color: var(--fs-figma-achromatic-dark-gray);
   cursor: pointer;
 
-  @include typo.fs-text-body;
+  &:hover {
+    color: var(--fs-figma-achromatic-black);
+  }
+
+  &:focus-visible {
+    outline: rem(2) solid var(--fs-color-primary);
+    outline-offset: rem(2);
+  }
+}
+
+.collapseIcon {
+  width: rem(16);
+  height: rem(16);
 }
 
 .body {
@@ -299,28 +302,62 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
 }
 
 .table {
+  display: grid;
+  grid-template-columns: max-content minmax(0, rem(420));
+  align-items: center;
+  column-gap: rem(24);
+  row-gap: var(--fs-space-1);
+  width: fit-content;
+  max-width: 100%;
+}
+
+.statusDateRow {
   display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-1);
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--fs-space-1) var(--fs-space-2);
+  width: 100%;
+  max-width: 100%;
+}
+
+.statusTable {
+  flex: 1 1 rem(340);
+  width: auto;
+  min-width: min(100%, rem(300));
+  max-width: rem(560);
+  grid-template-columns: max-content minmax(0, 1fr);
+}
+
+.nextDateTable {
+  flex: 0 1 rem(340);
+  width: auto;
+  min-width: min(100%, rem(300));
+  grid-template-columns: max-content minmax(rem(180), rem(220));
 }
 
 .readonlyValue {
-  align-self: flex-end;
-
-  @include card.param-value;
+  font-size: rem(14);
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--fs-figma-achromatic-black);
 }
 
 .negotiations {
   display: flex;
   flex-direction: column;
   gap: var(--fs-space-1);
+  width: fit-content;
+  max-width: 100%;
   padding: rem(8) rem(16);
   border-radius: var(--fs-space-1);
-  background-color: var(--fs-figma-achromatic-light-gray);
+  background-color: var(--fs-figma-achromatic-white);
 }
 
 .negotiationsTitle {
-  @include card.param-label;
+  font-size: rem(14);
+  line-height: 1.4;
+  font-weight: 700;
+  color: var(--fs-figma-achromatic-black);
 }
 
 .negotiationBlock {
@@ -339,18 +376,10 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
   }
 }
 
-.dateInputShell,
-.infoInputWrap {
+.infoInputWrap,
+.controlWrap {
   border-radius: rem(12);
   background-color: var(--fs-figma-achromatic-white);
-}
-
-.dateInputShell {
-  @include field.ui-input-control-shell;
-}
-
-.dateInput {
-  @include field.ui-control-text;
 }
 
 .inputWrapError {

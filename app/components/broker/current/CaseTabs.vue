@@ -28,10 +28,9 @@ const model = defineModel<TenantCaseCardTab>({ required: true })
 
 <style module lang="scss">
 @use '~/assets/styles/tools/functions' as *;
-@use '~/assets/styles/tools/mixins' as mq;
 @use '~/assets/styles/tools/typography' as typo;
 
-/* Figma UI Kit: Switch mobile (319:295), desktop (133:718); как UiSegmentSwitch / passes. */
+/* Figma UI Kit Switch — компактный вариант (высота таба 38). */
 .root {
   display: inline-flex;
   flex-wrap: wrap;
@@ -50,9 +49,11 @@ const model = defineModel<TenantCaseCardTab>({ required: true })
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: rem(36);
+  box-sizing: border-box;
+  height: rem(38);
+  min-height: rem(38);
   margin: 0;
-  padding: rem(6) rem(14);
+  padding: rem(4) rem(14);
   border: 0;
   border-radius: rem(99);
   background: transparent;
@@ -75,13 +76,6 @@ const model = defineModel<TenantCaseCardTab>({ required: true })
 
   &:hover:not(.tabActive) {
     color: var(--fs-figma-achromatic-black);
-  }
-
-  @include mq.from-desktop {
-    min-height: rem(44);
-    padding: rem(8) rem(20);
-
-    @include typo.fs-text-body;
   }
 }
 
