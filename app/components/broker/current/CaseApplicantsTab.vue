@@ -109,7 +109,7 @@ defineExpose({
 .root {
   display: flex;
   flex-direction: column;
-  gap: var(--fs-space-2);
+  gap: var(--fs-space-3);
 }
 
 .addAction {

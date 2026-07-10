@@ -1,0 +1,46 @@
+@use 'functions' as *;
+@use 'typography' as typo;
+
+/**
+ * Figma Card/Horizontal (5867:2473) — контентная карточка UI Kit «Олимпийский».
+ * Эталон: UiPremisesCard (Grand /premises).
+ */
+@mixin content-card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-3);
+  width: 100%;
+  padding: var(--fs-space-3);
+  border: rem(1) solid var(--fs-figma-stroke-light-gray);
+  border-radius: rem(25);
+  background-color: var(--fs-figma-achromatic-white);
+}
+
+@mixin content-card-title {
+  margin: 0;
+
+  @include typo.fs-text-h4;
+  color: var(--fs-figma-achromatic-black);
+}
+
+@mixin param-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fs-space-2);
+  padding: rem(8) rem(16);
+  border-radius: var(--fs-space-1);
+  background-color: var(--fs-figma-achromatic-light-gray);
+}
+
+@mixin param-label {
+  @include typo.fs-text-body;
+  color: var(--fs-figma-achromatic-middle-gray);
+}
+
+@mixin param-value {
+  @include typo.fs-text-h5-subtitle;
+  color: var(--fs-figma-achromatic-black);
+  text-align: end;
+}

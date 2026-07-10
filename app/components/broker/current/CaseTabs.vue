@@ -28,29 +28,66 @@ const model = defineModel<TenantCaseCardTab>({ required: true })
 
 <style module lang="scss">
 @use '~/assets/styles/tools/functions' as *;
+@use '~/assets/styles/tools/mixins' as mq;
 @use '~/assets/styles/tools/typography' as typo;
 
+/* Figma UI Kit: Switch mobile (319:295), desktop (133:718); как UiSegmentSwitch / passes. */
 .root {
-  display: flex;
+  display: inline-flex;
   flex-wrap: wrap;
-  gap: rem(8);
+  align-items: center;
+  justify-content: flex-start;
+  gap: rem(2);
+  width: fit-content;
+  max-width: 100%;
+  padding: rem(3);
+  border: rem(1) solid var(--fs-figma-stroke-light-gray);
+  border-radius: rem(99);
+  background-color: var(--fs-figma-achromatic-white);
 }
 
 .tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: rem(36);
   margin: 0;
-  padding: rem(10) rem(16);
-  border: 1px solid var(--fs-figma-stroke-light-gray);
-  border-radius: rem(10);
-  background: var(--fs-figma-achromatic-white);
-  color: var(--fs-color-text);
+  padding: rem(6) rem(14);
+  border: 0;
+  border-radius: rem(99);
+  background: transparent;
   cursor: pointer;
+  white-space: nowrap;
+  text-align: center;
 
-  @include typo.fs-text-body;
+  @include typo.fs-text-tag;
+
+  color: var(--fs-figma-achromatic-dark-gray);
+  transition:
+    background-color 0.16s ease,
+    color 0.16s ease,
+    box-shadow 0.16s ease;
+
+  &:focus-visible {
+    outline: rem(2) solid var(--fs-color-primary);
+    outline-offset: rem(2);
+  }
+
+  &:hover:not(.tabActive) {
+    color: var(--fs-figma-achromatic-black);
+  }
+
+  @include mq.from-desktop {
+    min-height: rem(44);
+    padding: rem(8) rem(20);
+
+    @include typo.fs-text-body;
+  }
 }
 
 .tabActive {
-  border-color: var(--fs-figma-achromatic-middle-gray);
-  background: var(--fs-figma-achromatic-light-gray);
-  font-weight: 600;
+  color: var(--fs-figma-achromatic-white);
+  background-color: var(--fs-figma-achromatic-dark-gray);
+  box-shadow: 0 0 rem(5) rgb(0 0 0 / 0.18);
 }
 </style>

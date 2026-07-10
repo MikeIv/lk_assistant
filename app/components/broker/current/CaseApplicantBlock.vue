@@ -104,7 +104,7 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
       <div :class="$style.table">
         <BrokerCurrentCaseTableRow label="Претендент">
           <template v-if="isExisting">
-            <UiInput :model-value="applicant.tenant_applicant || '—'" readonly />
+            <span :class="$style.readonlyValue">{{ applicant.tenant_applicant || '—' }}</span>
           </template>
           <template v-else>
             <div :class="[fieldError('tenant_applicant_id') && $style.inputWrapError]">
@@ -122,12 +122,12 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
         </BrokerCurrentCaseTableRow>
 
         <BrokerCurrentCaseTableRow label="Категория">
-          <UiInput :model-value="categoryDisplay" readonly />
+          <span :class="$style.readonlyValue">{{ categoryDisplay }}</span>
         </BrokerCurrentCaseTableRow>
 
         <BrokerCurrentCaseTableRow label="Дата 1го контакта">
           <template v-if="isExisting">
-            <UiInput :model-value="applicant.first_contact_date" readonly />
+            <span :class="$style.readonlyValue">{{ applicant.first_contact_date || '—' }}</span>
           </template>
           <template v-else>
             <div
@@ -262,15 +262,10 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
 @use '~/assets/styles/tools/functions' as *;
 @use '~/assets/styles/tools/form-field' as field;
 @use '~/assets/styles/tools/typography' as typo;
+@use '~/assets/styles/tools/ui-kit-card' as card;
 
 .root {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-2);
-  padding: var(--fs-space-2);
-  border: 1px solid var(--fs-figma-stroke-light-gray);
-  border-radius: rem(12);
-  background: var(--fs-figma-achromatic-white);
+  @include card.content-card;
 }
 
 .header {
@@ -281,11 +276,7 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
 }
 
 .title {
-  margin: 0;
-  font-weight: 600;
-  color: var(--fs-color-text);
-
-  @include typo.fs-text-body;
+  @include card.content-card-title;
 }
 
 .collapseBtn {
@@ -310,19 +301,26 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
 .table {
   display: flex;
   flex-direction: column;
+  gap: var(--fs-space-1);
+}
+
+.readonlyValue {
+  align-self: flex-end;
+
+  @include card.param-value;
 }
 
 .negotiations {
   display: flex;
   flex-direction: column;
-  gap: rem(8);
+  gap: var(--fs-space-1);
+  padding: rem(8) rem(16);
+  border-radius: var(--fs-space-1);
+  background-color: var(--fs-figma-achromatic-light-gray);
 }
 
 .negotiationsTitle {
-  font-weight: 600;
-  color: var(--fs-color-text);
-
-  @include typo.fs-text-body;
+  @include card.param-label;
 }
 
 .negotiationBlock {
@@ -344,6 +342,7 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
 .dateInputShell,
 .infoInputWrap {
   border-radius: rem(12);
+  background-color: var(--fs-figma-achromatic-white);
 }
 
 .dateInputShell {

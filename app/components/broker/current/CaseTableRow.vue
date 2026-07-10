@@ -15,34 +15,27 @@ defineProps<{
 
 <style module lang="scss">
 @use '~/assets/styles/tools/functions' as *;
-@use '~/assets/styles/tools/typography' as typo;
+@use '~/assets/styles/tools/ui-kit-card' as card;
 
 .row {
-  display: grid;
-  grid-template-columns: minmax(rem(140), rem(220)) minmax(0, 1fr);
-  border: 1px solid var(--fs-figma-stroke-light-gray);
-  border-bottom: 0;
-  background: var(--fs-figma-achromatic-white);
-
-  &:last-child {
-    border-bottom: 1px solid var(--fs-figma-stroke-light-gray);
-  }
+  @include card.param-row;
 }
 
 .label {
-  display: flex;
-  align-items: center;
-  padding: rem(12) rem(14);
-  border-right: 1px solid var(--fs-figma-stroke-light-gray);
-  background: var(--fs-figma-achromatic-light-gray);
-  font-weight: 600;
-  color: var(--fs-color-text);
+  flex: 0 1 auto;
+  min-width: rem(120);
 
-  @include typo.fs-text-body;
+  @include card.param-label;
 }
 
 .value {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
   min-width: 0;
-  padding: rem(8) rem(10);
+  max-width: min(100%, rem(420));
+  margin-inline-start: auto;
 }
 </style>
