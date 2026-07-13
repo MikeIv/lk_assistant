@@ -173,6 +173,16 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
                 :disabled="disabled"
               />
             </div>
+            <button
+              v-if="negotiationIndex > 0"
+              type="button"
+              :class="$style.removeNegotiationBtn"
+              aria-label="Удалить запись"
+              :disabled="disabled"
+              @click="emit('remove-negotiation', negotiationIndex)"
+            >
+              <UIcon name="i-local-trash" :class="$style.removeNegotiationIcon" />
+            </button>
           </div>
 
           <p v-if="negotiationError(negotiationIndex, 'date')" :class="$style.fieldError">
@@ -181,17 +191,6 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
           <p v-else-if="negotiationError(negotiationIndex, 'info')" :class="$style.fieldError">
             {{ negotiationError(negotiationIndex, 'info') }}
           </p>
-
-          <div v-if="negotiationIndex > 0" :class="$style.addAction">
-            <UiButton
-              type="button"
-              size="sm"
-              variant="warning"
-              label="Удалить запись"
-              :disabled="disabled"
-              @click="emit('remove-negotiation', negotiationIndex)"
-            />
-          </div>
         </div>
 
         <div :class="$style.addAction">
@@ -265,28 +264,32 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
   font-weight: 700;
 }
 
-.collapseBtn {
+@mixin icon-action-btn($size) {
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: rem(32);
-  height: rem(32);
+  width: $size;
+  height: $size;
   margin: 0;
   padding: 0;
   border: 0;
   border-radius: rem(8);
   background: transparent;
-  color: var(--fs-figma-achromatic-dark-gray);
   cursor: pointer;
-
-  &:hover {
-    color: var(--fs-figma-achromatic-black);
-  }
 
   &:focus-visible {
     outline: rem(2) solid var(--fs-color-primary);
     outline-offset: rem(2);
+  }
+}
+
+.collapseBtn {
+  @include icon-action-btn(rem(32));
+  color: var(--fs-figma-achromatic-dark-gray);
+
+  &:hover {
+    color: var(--fs-figma-achromatic-black);
   }
 }
 
@@ -318,35 +321,49 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
   gap: var(--fs-space-1) var(--fs-space-2);
   width: 100%;
   max-width: 100%;
+
+  @media (min-width: rem(640)) {
+    flex-wrap: nowrap;
+  }
 }
 
 .statusTable {
-  flex: 1 1 rem(340);
+  flex: 1 1 0;
   width: auto;
-  min-width: min(100%, rem(300));
-  max-width: rem(560);
+  min-width: 0;
+  max-width: none;
   grid-template-columns: max-content minmax(0, 1fr);
+
+  @media (max-width: rem(639)) {
+    flex: 1 1 100%;
+    min-width: min(100%, rem(300));
+    width: 100%;
+  }
 }
 
 .nextDateTable {
-  flex: 0 1 rem(340);
-  width: auto;
+  flex: 0 0 auto;
+  width: fit-content;
   min-width: min(100%, rem(300));
+  margin-left: auto;
   grid-template-columns: max-content minmax(rem(180), rem(220));
 }
 
 .readonlyValue {
+  display: block;
+  width: 100%;
   font-size: rem(14);
   line-height: 1.4;
   font-weight: 600;
   color: var(--fs-figma-achromatic-black);
+  text-align: right;
 }
 
 .negotiations {
   display: flex;
   flex-direction: column;
   gap: var(--fs-space-1);
-  width: fit-content;
+  width: 100%;
   max-width: 100%;
   padding: rem(8) rem(16);
   border-radius: var(--fs-space-1);
@@ -364,16 +381,43 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
   display: flex;
   flex-direction: column;
   gap: rem(8);
+  width: 100%;
 }
 
 .negotiationRow {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--fs-space-1);
+  align-items: center;
+  width: 100%;
 
   @media (min-width: rem(640)) {
-    grid-template-columns: minmax(0, rem(180)) minmax(0, 1fr);
+    grid-template-columns: minmax(0, rem(180)) minmax(0, 1fr) auto;
   }
+}
+
+.removeNegotiationBtn {
+  @include icon-action-btn(rem(52));
+  justify-self: end;
+  color: var(--fs-color-warning);
+
+  @media (min-width: rem(640)) {
+    justify-self: center;
+  }
+
+  &:hover:not(:disabled) {
+    color: color-mix(in srgb, var(--fs-color-warning) 82%, black);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.removeNegotiationIcon {
+  width: rem(32);
+  height: rem(32);
 }
 
 .infoInputWrap,

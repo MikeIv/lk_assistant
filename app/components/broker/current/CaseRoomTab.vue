@@ -12,6 +12,7 @@ const title = computed(() => {
 })
 
 const parameters = computed(() => [
+  { label: 'Номер помещения', value: props.room?.name?.trim() || '—' },
   { label: 'Тип помещения', value: props.room?.category?.trim() || '—' },
   { label: 'Этаж', value: props.room?.floor?.trim() || '—' },
   { label: 'Площадь, м²', value: formatTenantCaseArea(props.room?.area ?? null) },
@@ -23,12 +24,15 @@ const parameters = computed(() => [
     <!-- Временно скрыт по запросу заказчика; aria-label на article сохраняет доступность. -->
     <h3 :class="$style.title">{{ title }}</h3>
 
-    <ul :class="$style.list">
-      <li v-for="parameter in parameters" :key="parameter.label" :class="$style.item">
-        <span :class="$style.label">{{ parameter.label }}</span>
+    <div :class="$style.table">
+      <BrokerCurrentCaseTableRow
+        v-for="parameter in parameters"
+        :key="parameter.label"
+        :label="parameter.label"
+      >
         <span :class="$style.value">{{ parameter.value }}</span>
-      </li>
-    </ul>
+      </BrokerCurrentCaseTableRow>
+    </div>
   </article>
 </template>
 
@@ -46,41 +50,23 @@ const parameters = computed(() => [
   display: none;
 }
 
-.list {
+.table {
   display: grid;
-  grid-template-columns: max-content max-content;
+  grid-template-columns: max-content minmax(0, rem(420));
   align-items: center;
   column-gap: rem(24);
   row-gap: var(--fs-space-1);
   width: fit-content;
   max-width: 100%;
-  margin: 0;
-  padding: 0;
-  list-style: none;
 }
 
-.item {
-  display: grid;
-  grid-template-columns: subgrid;
-  grid-column: 1 / -1;
-  align-items: center;
-  padding: rem(8) rem(16);
-  border-radius: var(--fs-space-1);
-  background-color: var(--fs-figma-achromatic-white);
-}
-
-.label,
 .value {
+  display: block;
+  width: 100%;
   font-size: rem(14);
   line-height: 1.4;
-}
-
-.label {
-  color: var(--fs-figma-achromatic-middle-gray);
-}
-
-.value {
-  color: var(--fs-figma-achromatic-black);
   font-weight: 600;
+  color: var(--fs-figma-achromatic-black);
+  text-align: right;
 }
 </style>
