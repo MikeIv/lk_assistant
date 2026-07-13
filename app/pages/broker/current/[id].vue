@@ -7,7 +7,8 @@ const route = useRoute()
 const caseId = computed(() => Number(route.params.id))
 
 const { fetchTenantCase, updateTenantCase, deleteTenantCase } = useTenantCases()
-const { applicants: directoryApplicants, isLoading: isOptionsLoading } = useTenantCaseFormOptions()
+const { applicants: directoryApplicants, negotiationStatuses, isLoading: isOptionsLoading } =
+  useTenantCaseFormOptions()
 
 const tenantCase = ref<TenantCase | null>(null)
 const loadError = ref<string | null>(null)
@@ -201,6 +202,7 @@ useHead(
           ref="applicantsTabRef"
           v-model:applicants="formApplicants"
           :directory-applicants="directoryApplicants"
+          :negotiation-statuses="negotiationStatuses"
           :disabled="isBusy"
           :get-field-error="getFieldError"
           @add="addApplicant"

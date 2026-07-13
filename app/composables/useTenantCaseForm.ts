@@ -3,7 +3,6 @@ import { useForm } from 'vee-validate'
 
 import type {
   TenantCaseApplicantPayload,
-  TenantCaseApplicantStatus,
   TenantCaseCreateFieldErrors,
   TenantCaseCreatePayload,
   TenantCaseNegotiation,
@@ -52,6 +51,7 @@ function createEmptyApplicant(): TenantCaseApplicantFormValues {
     tenant_applicant: '',
     category: '',
     status: '',
+    negotiation_status_id: '',
     first_contact_date: today,
     next_contact_date: '',
     negotiations: [createEmptyNegotiation()],
@@ -84,6 +84,7 @@ function mapApplicantFromPayload(
   applicantPayload: TenantCaseApplicantPayload & {
     tenant_applicant?: string
     category?: string
+    status?: string
   },
 ): TenantCaseApplicantFormValues {
   const negotiations = (applicantPayload.negotiations ?? []).map((item) => ({
@@ -96,7 +97,8 @@ function mapApplicantFromPayload(
     tenant_applicant_id: String(applicantPayload.tenant_applicant_id),
     tenant_applicant: applicantPayload.tenant_applicant ?? '',
     category: applicantPayload.category ?? '',
-    status: applicantPayload.status,
+    status: applicantPayload.status ?? '',
+    negotiation_status_id: String(applicantPayload.negotiation_status_id),
     first_contact_date:
       toTenantCaseDateInputValue(applicantPayload.first_contact_date) ||
       getTenantCaseTodayDateInputValue(),
@@ -165,7 +167,7 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
   const formErrors = computed(() => ({
     room_id: resolveVisibleFieldError('room_id'),
     tenant_applicant_id: resolveVisibleFieldError('applicants.0.tenant_applicant_id'),
-    status: resolveVisibleFieldError('applicants.0.status'),
+    negotiation_status_id: resolveVisibleFieldError('applicants.0.negotiation_status_id'),
     first_contact_date: resolveVisibleFieldError('applicants.0.first_contact_date'),
     negotiation_date: resolveVisibleFieldError('applicants.0.negotiations.0.date'),
     negotiation_info: resolveVisibleFieldError('applicants.0.negotiations.0.info'),
@@ -175,7 +177,7 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
   const APPLICANT_SERVER_ERROR_MAP = {
     tenant_applicant_id: 'applicants[0].tenant_applicant_id',
     first_contact_date: 'applicants[0].first_contact_date',
-    status: 'applicants[0].status',
+    negotiation_status_id: 'applicants[0].negotiation_status_id',
     negotiation_date: 'applicants[0].negotiations[0].date',
     negotiation_info: 'applicants[0].negotiations[0].info',
   } as const satisfies Record<
@@ -220,6 +222,7 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
       TenantCaseApplicantPayload & {
         tenant_applicant?: string
         category?: string
+        status?: string
       }
     >,
   ) {
@@ -298,7 +301,7 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
         normalizeTenantCaseApplicantPayload({
           id: applicant.id ?? null,
           tenant_applicant_id: Number(applicant.tenant_applicant_id),
-          status: applicant.status as TenantCaseApplicantStatus,
+          negotiation_status_id: Number(applicant.negotiation_status_id),
           first_contact_date: applicant.first_contact_date,
           next_contact_date: applicant.next_contact_date.trim() || null,
           negotiations: applicant.negotiations.map((item) => ({

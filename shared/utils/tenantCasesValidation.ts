@@ -62,7 +62,7 @@ export function storePayloadToCreatePayload(
     applicants: [
       {
         tenant_applicant_id: payload.tenant_applicant_id,
-        status: 'переговоры',
+        negotiation_status_id: 1,
         first_contact_date: payload.first_contact_date,
         next_contact_date: null,
         negotiations: [
@@ -84,7 +84,7 @@ export function emptyTenantCaseCreateFieldErrors(): TenantCaseCreateFieldErrors 
     first_contact_date: null,
     negotiation_date: null,
     negotiation_info: null,
-    status: null,
+    negotiation_status_id: null,
     applicants: null,
   }
 }
@@ -119,7 +119,8 @@ export function parseTenantCaseCreateFieldErrors(data: unknown): TenantCaseCreat
     first_contact_date: firstFieldError(errors, 'first_contact_date'),
     negotiation_date: firstFieldError(errors, 'negotiation_date'),
     negotiation_info: firstFieldError(errors, 'negotiation_info'),
-    status: firstFieldError(errors, 'status'),
+    negotiation_status_id:
+      firstFieldError(errors, 'negotiation_status_id') ?? firstFieldError(errors, 'status'),
     applicants: firstFieldError(errors, 'applicants') ?? firstApplicantsFieldError(errors),
   }
 }
@@ -137,7 +138,7 @@ export function validateTenantCaseFormPayload(
     applicants: payload.applicants.map((applicant) => ({
       id: applicant.id ?? null,
       tenant_applicant_id: String(applicant.tenant_applicant_id),
-      status: applicant.status,
+      negotiation_status_id: String(applicant.negotiation_status_id),
       first_contact_date: applicant.first_contact_date.slice(0, 10),
       next_contact_date: applicant.next_contact_date?.slice(0, 10) ?? '',
       negotiations: (applicant.negotiations ?? []).map((item) => ({
@@ -179,8 +180,11 @@ export function validateTenantCaseFormPayload(
       if (applicantIndex === 0 && typeof applicantField === 'string') {
         if (applicantField === 'tenant_applicant_id' && !fieldErrors.tenant_applicant_id) {
           fieldErrors.tenant_applicant_id = issue.message
-        } else if (applicantField === 'status' && !fieldErrors.status) {
-          fieldErrors.status = issue.message
+        } else if (
+          applicantField === 'negotiation_status_id' &&
+          !fieldErrors.negotiation_status_id
+        ) {
+          fieldErrors.negotiation_status_id = issue.message
         } else if (applicantField === 'first_contact_date' && !fieldErrors.first_contact_date) {
           fieldErrors.first_contact_date = issue.message
         } else if (applicantField === 'negotiations') {

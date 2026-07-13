@@ -7,7 +7,7 @@ const props = defineProps<{
 
 const open = defineModel<boolean>('open', { required: true })
 
-const { rooms, applicants, isLoading: isOptionsLoading } = useTenantCaseFormOptions()
+const { rooms, applicants, negotiationStatuses, isLoading: isOptionsLoading } = useTenantCaseFormOptions()
 
 const generalError = ref<string | null>(null)
 const isSubmitting = ref(false)
@@ -79,6 +79,7 @@ const onSubmit = handleSubmit(async () => {
           v-model:applicants="formApplicants"
           :rooms="rooms"
           :directory-applicants="applicants"
+          :negotiation-statuses="negotiationStatuses"
           :errors="errors"
           :disabled="isSubmitting"
         />

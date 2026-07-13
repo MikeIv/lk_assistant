@@ -1,3 +1,8 @@
+import type {
+  NegotiationStatus,
+  NegotiationStatusApiResource,
+} from '#shared/types/negotiationStatuses'
+
 export type TenantCaseApplicantStatus = 'переговоры' | 'отказ' | 'отказ с нашей стороны'
 
 export type TenantCaseSortKey =
@@ -25,11 +30,29 @@ export interface TenantCaseApplicant {
   tenant_applicant_id: number
   tenant_applicant: string
   category: string
+  /** Отображаемый статус из show (`status`). */
   status: TenantCaseApplicantStatus
+  negotiation_status_id: number
+  negotiation_status: NegotiationStatus | null
   first_contact_date: string
   next_contact_date: string | null
   negotiations: TenantCaseNegotiation[]
   contacts: string
+}
+
+/** Сырой applicant из list/show до нормализации. */
+export interface TenantCaseApplicantApiResource {
+  id: number
+  tenant_applicant_id: number
+  tenant_applicant: string
+  category: string
+  status?: string
+  negotiation_status_id?: number
+  negotiation_status?: NegotiationStatusApiResource | null
+  first_contact_date: string
+  next_contact_date?: string | null
+  negotiations?: TenantCaseNegotiation[]
+  contacts?: string | string[]
 }
 
 export interface TenantCaseRoom {
@@ -93,7 +116,7 @@ export interface TenantCaseApiResource {
   room?: TenantCaseRoom | null
   current_tenant: string
   responsible: string | null
-  applicants?: TenantCaseApplicant[]
+  applicants?: TenantCaseApplicantApiResource[]
   table_rows?: TenantCaseTableRow[]
   kp?: TenantCaseKp | null
 }
@@ -120,7 +143,7 @@ export interface TenantCaseApplicantPayload {
   /** ID блока в деле; `null` / omit — новый претендент (update). */
   id?: number | null
   tenant_applicant_id: number
-  status: TenantCaseApplicantStatus
+  negotiation_status_id: number
   first_contact_date: string
   next_contact_date: string | null
   negotiations: TenantCaseNegotiation[] | null
@@ -132,7 +155,7 @@ export interface TenantCaseCreatePayload {
   applicants: TenantCaseApplicantPayload[]
 }
 
-/** PUT /v1/broker/tenant-cases/{id} — та же форма, у applicants может быть `id`. */
+/** PUT /v1/broker/tenant-cases/{id} — `UpdateTenantCaseRequest`. */
 export type TenantCaseUpdatePayload = TenantCaseCreatePayload
 
 /** POST /v1/broker/tenant-cases — плоское тело создания (не applicants[]). */
@@ -158,7 +181,7 @@ export interface TenantCaseCreateFieldErrors {
   first_contact_date: string | null
   negotiation_date: string | null
   negotiation_info: string | null
-  status: string | null
+  negotiation_status_id: string | null
   applicants: string | null
 }
 

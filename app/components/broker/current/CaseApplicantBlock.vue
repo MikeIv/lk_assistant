@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import type { Applicant } from '#shared/types/applicants'
+import type { NegotiationStatus } from '#shared/types/negotiationStatuses'
 import type { UiSelectOption } from '#shared/types/tenantData'
 import type { TenantCaseApplicantFormValues } from '#shared/utils/tenantCasesSchema'
-import { TENANT_CASE_APPLICANT_STATUS_OPTIONS } from '#shared/utils/tenantCasesTable'
+import { mapNegotiationStatusesToSelectOptions } from '#shared/utils/negotiationStatusesNormalize'
 
 const props = defineProps<{
   index: number
   directoryApplicants: Applicant[]
+  negotiationStatuses: NegotiationStatus[]
   canDelete: boolean
   disabled?: boolean
   getFieldError: (path: string) => string | undefined
@@ -49,11 +51,7 @@ const applicantOptions = computed<UiSelectOption[]>(() =>
 )
 
 const statusOptions = computed<UiSelectOption[]>(() =>
-  TENANT_CASE_APPLICANT_STATUS_OPTIONS.map((status) => ({
-    value: status,
-    label: status,
-    outputValue: status,
-  })),
+  mapNegotiationStatusesToSelectOptions(props.negotiationStatuses),
 )
 
 const categoryDisplay = computed(
@@ -208,16 +206,16 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
       <div :class="$style.statusDateRow">
         <div :class="[$style.table, $style.statusTable]">
           <BrokerCurrentCaseTableRow label="Статус переговоров">
-            <div :class="[fieldError('status') && $style.inputWrapError]">
+            <div :class="[fieldError('negotiation_status_id') && $style.inputWrapError]">
               <UiSelect
-                v-model="applicant.status"
+                v-model="applicant.negotiation_status_id"
                 :options="statusOptions"
                 placeholder="Выберите статус переговоров"
                 :disabled="disabled"
               />
             </div>
-            <p v-if="fieldError('status')" :class="$style.fieldError">
-              {{ fieldError('status') }}
+            <p v-if="fieldError('negotiation_status_id')" :class="$style.fieldError">
+              {{ fieldError('negotiation_status_id') }}
             </p>
           </BrokerCurrentCaseTableRow>
         </div>

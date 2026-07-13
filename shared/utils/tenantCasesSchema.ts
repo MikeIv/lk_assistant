@@ -28,13 +28,9 @@ export const tenantCaseApplicantFormSchema = z.object({
   tenant_applicant: z.string().optional(),
   /** Display-only: категория из справочника / show. */
   category: z.string().optional(),
-  status: z
-    .string()
-    .trim()
-    .min(1, TENANT_CASE_REQUIRED_STATUS_MESSAGE)
-    .refine((value) => isTenantCaseApplicantStatus(value), {
-      message: TENANT_CASE_REQUIRED_STATUS_MESSAGE,
-    }),
+  /** Display-only: статус из show (`status`). */
+  status: z.string().optional(),
+  negotiation_status_id: z.string().trim().min(1, TENANT_CASE_REQUIRED_STATUS_MESSAGE),
   first_contact_date: z.string().trim().min(1, TENANT_CASE_REQUIRED_FIRST_CONTACT_MESSAGE),
   next_contact_date: z.string(),
   negotiations: z.array(tenantCaseNegotiationSchema).min(1),
@@ -58,7 +54,7 @@ export type TenantCaseApplicantFormValues = Omit<
   z.infer<typeof tenantCaseApplicantFormSchema>,
   'status'
 > & {
-  status: string
+  status?: string
 }
 
 export function isTenantCaseApplicantStatus(value: string): value is TenantCaseApplicantStatus {

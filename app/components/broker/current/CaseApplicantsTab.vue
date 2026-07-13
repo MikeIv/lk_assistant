@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import type { Applicant } from '#shared/types/applicants'
+import type { NegotiationStatus } from '#shared/types/negotiationStatuses'
 import type { TenantCaseApplicantFormValues } from '#shared/utils/tenantCasesSchema'
 
 defineProps<{
   directoryApplicants: Applicant[]
+  negotiationStatuses: NegotiationStatus[]
   disabled?: boolean
   getFieldError: (path: string) => string | undefined
 }>()
@@ -82,6 +84,7 @@ defineExpose({
       v-model:applicants="applicants"
       :index="index"
       :directory-applicants="directoryApplicants"
+      :negotiation-statuses="negotiationStatuses"
       :can-delete="canDeleteApplicant"
       :disabled="disabled"
       :get-field-error="getFieldError"

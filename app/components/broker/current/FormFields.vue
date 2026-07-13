@@ -1,17 +1,19 @@
 <script setup lang="ts">
 import type { Applicant } from '#shared/types/applicants'
+import type { NegotiationStatus } from '#shared/types/negotiationStatuses'
 import type { Premise } from '#shared/types/premises'
 import type { UiSelectOption } from '#shared/types/tenantData'
-import { TENANT_CASE_APPLICANT_STATUS_OPTIONS } from '#shared/utils/tenantCasesTable'
+import { mapNegotiationStatusesToSelectOptions } from '#shared/utils/negotiationStatusesNormalize'
 
 const props = defineProps<{
   rooms: Premise[]
   directoryApplicants: Applicant[]
+  negotiationStatuses: NegotiationStatus[]
   disabled?: boolean
   errors: {
     room_id?: string
     tenant_applicant_id?: string
-    status?: string
+    negotiation_status_id?: string
     first_contact_date?: string
     negotiation_date?: string
     negotiation_info?: string
@@ -23,7 +25,7 @@ const roomId = defineModel<string>('roomId', { required: true })
 const applicants = defineModel<
   Array<{
     tenant_applicant_id: string
-    status: string
+    negotiation_status_id: string
     first_contact_date: string
     next_contact_date: string
     negotiations: Array<{ date: string; info: string }>
@@ -50,11 +52,7 @@ const applicantOptions = computed<UiSelectOption[]>(() =>
 )
 
 const statusOptions = computed<UiSelectOption[]>(() =>
-  TENANT_CASE_APPLICANT_STATUS_OPTIONS.map((status) => ({
-    value: status,
-    label: status,
-    outputValue: status,
-  })),
+  mapNegotiationStatusesToSelectOptions(props.negotiationStatuses),
 )
 
 function guardDateValue(currentValue: string, event: Event) {
@@ -128,15 +126,17 @@ function guardDateValue(currentValue: string, event: Event) {
           Статус
           <span :class="$style.required">*</span>
         </span>
-        <div :class="[$style.inputWrap, errors.status && $style.inputWrapError]">
+        <div :class="[$style.inputWrap, errors.negotiation_status_id && $style.inputWrapError]">
           <UiSelect
-            v-model="applicant.status"
+            v-model="applicant.negotiation_status_id"
             :options="statusOptions"
             placeholder="Выберите статус переговоров"
             :disabled="disabled"
           />
         </div>
-        <p v-if="errors.status" :class="$style.fieldError">{{ errors.status }}</p>
+        <p v-if="errors.negotiation_status_id" :class="$style.fieldError">
+          {{ errors.negotiation_status_id }}
+        </p>
       </label>
     </div>
 

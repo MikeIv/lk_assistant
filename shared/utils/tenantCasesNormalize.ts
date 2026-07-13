@@ -2,6 +2,7 @@ import type {
   TenantCase,
   TenantCaseApiResource,
   TenantCaseApplicant,
+  TenantCaseApplicantApiResource,
   TenantCaseApplicantPayload,
   TenantCaseCreatePayload,
   TenantCaseKp,
@@ -9,6 +10,8 @@ import type {
   TenantCaseRoom,
   TenantCaseTableRow,
 } from '#shared/types/tenantCases'
+import { normalizeNegotiationStatus } from '#shared/utils/negotiationStatusesNormalize'
+import { isTenantCaseApplicantStatus } from '#shared/utils/tenantCasesSchema'
 
 function formatDisplayDate(value: string | null): string | null {
   if (!value) {
@@ -87,17 +90,35 @@ export function buildTenantCaseTableRows(
   }))
 }
 
-export function normalizeTenantCaseApplicant(item: TenantCaseApplicant): TenantCaseApplicant {
+function normalizeApplicantContacts(contacts: TenantCaseApplicantApiResource['contacts']): string {
+  if (typeof contacts === 'string') {
+    return contacts
+  }
+
+  return Array.isArray(contacts) ? contacts.join(', ') : ''
+}
+
+export function normalizeTenantCaseApplicant(
+  item: TenantCaseApplicantApiResource,
+): TenantCaseApplicant {
+  const negotiationStatus = item.negotiation_status
+    ? normalizeNegotiationStatus(item.negotiation_status)
+    : null
+  const negotiationStatusId = item.negotiation_status_id ?? negotiationStatus?.id ?? 0
+  const statusLabel = item.status?.trim() || negotiationStatus?.status || 'переговоры'
+
   return {
     id: item.id,
     tenant_applicant_id: item.tenant_applicant_id,
     tenant_applicant: item.tenant_applicant,
     category: item.category,
-    status: item.status,
+    status: isTenantCaseApplicantStatus(statusLabel) ? statusLabel : 'переговоры',
+    negotiation_status_id: negotiationStatusId,
+    negotiation_status: negotiationStatus,
     first_contact_date: item.first_contact_date,
     next_contact_date: item.next_contact_date ?? null,
     negotiations: Array.isArray(item.negotiations) ? item.negotiations : [],
-    contacts: typeof item.contacts === 'string' ? item.contacts : '',
+    contacts: normalizeApplicantContacts(item.contacts),
   }
 }
 
@@ -133,7 +154,7 @@ export function tenantCaseToCreatePayload(tenantCase: TenantCase): TenantCaseCre
     applicants: tenantCase.applicants.map((applicant) => ({
       id: applicant.id,
       tenant_applicant_id: applicant.tenant_applicant_id,
-      status: applicant.status,
+      negotiation_status_id: applicant.negotiation_status_id,
       first_contact_date: applicant.first_contact_date,
       next_contact_date: applicant.next_contact_date,
       negotiations: applicant.negotiations.length ? applicant.negotiations : null,
@@ -146,6 +167,7 @@ export function tenantCaseApplicantsToFormLoad(applicants: TenantCaseApplicant[]
   TenantCaseApplicantPayload & {
     tenant_applicant: string
     category: string
+    status: string
   }
 > {
   return applicants.map((applicant) => ({
@@ -154,6 +176,7 @@ export function tenantCaseApplicantsToFormLoad(applicants: TenantCaseApplicant[]
     tenant_applicant: applicant.tenant_applicant,
     category: applicant.category,
     status: applicant.status,
+    negotiation_status_id: applicant.negotiation_status_id,
     first_contact_date: applicant.first_contact_date,
     next_contact_date: applicant.next_contact_date,
     negotiations: applicant.negotiations,
@@ -256,7 +279,7 @@ export function normalizeTenantCaseApplicantPayload(
   return {
     id: applicant.id ?? null,
     tenant_applicant_id: applicant.tenant_applicant_id,
-    status: applicant.status,
+    negotiation_status_id: applicant.negotiation_status_id,
     first_contact_date: toTenantCaseApiDateTime(applicant.first_contact_date),
     next_contact_date: applicant.next_contact_date
       ? toTenantCaseApiDateTime(applicant.next_contact_date)

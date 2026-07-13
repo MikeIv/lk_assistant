@@ -1,4 +1,5 @@
 import { API_PATHS } from '#shared/constants/api'
+import { NEGOTIATION_STATUSES_MOCK_ITEMS } from '#shared/constants/negotiationStatusesMock'
 import { APPLICANTS_MOCK_ITEMS } from '#shared/constants/applicantsMock'
 import { PREMISES_MOCK_ITEMS } from '#shared/constants/premisesMock'
 import { TENANT_CASES_MOCK_ITEMS } from '#shared/constants/tenantCasesMock'
@@ -62,6 +63,10 @@ function buildMockTenantCaseFromPayload(id: number, payload: TenantCaseCreatePay
       (item) => item.id === applicantPayload.tenant_applicant_id,
     )
     const contact = applicantRecord?.contacts[0]
+    const negotiationStatus =
+      NEGOTIATION_STATUSES_MOCK_ITEMS.find(
+        (item) => item.id === applicantPayload.negotiation_status_id,
+      ) ?? NEGOTIATION_STATUSES_MOCK_ITEMS[0]!
 
     return {
       id: applicantPayload.id ?? id * 100 + index + 1,
@@ -69,7 +74,9 @@ function buildMockTenantCaseFromPayload(id: number, payload: TenantCaseCreatePay
       tenant_applicant:
         applicantRecord?.title ?? `Претендент ${applicantPayload.tenant_applicant_id}`,
       category: applicantRecord?.category_name ?? '—',
-      status: applicantPayload.status,
+      status: negotiationStatus.status as TenantCase['applicants'][number]['status'],
+      negotiation_status_id: applicantPayload.negotiation_status_id,
+      negotiation_status: negotiationStatus,
       first_contact_date: applicantPayload.first_contact_date,
       next_contact_date: applicantPayload.next_contact_date,
       negotiations: applicantPayload.negotiations ?? [],

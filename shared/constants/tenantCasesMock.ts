@@ -1,4 +1,5 @@
-import type { TenantCase, TenantCaseApplicantStatus } from '#shared/types/tenantCases'
+import type { TenantCaseApplicantStatus } from '#shared/types/tenantCases'
+import { NEGOTIATION_STATUSES_MOCK_ITEMS } from '#shared/constants/negotiationStatusesMock'
 import { APPLICANTS_MOCK_ITEMS } from '#shared/constants/applicantsMock'
 import { PREMISES_MOCK_ITEMS } from '#shared/constants/premisesMock'
 import { buildTenantCaseTableRows } from '#shared/utils/tenantCasesNormalize'
@@ -25,6 +26,9 @@ function buildApplicant(index: number, caseId: number, applicantIndex: number) {
   const applicant = APPLICANTS_MOCK_ITEMS[(index + applicantIndex) % APPLICANTS_MOCK_ITEMS.length]!
   const status = STATUSES[(index + applicantIndex) % STATUSES.length]!
   const contact = applicant.contacts[0]
+  const negotiationStatus =
+    NEGOTIATION_STATUSES_MOCK_ITEMS.find((item) => item.status === status) ??
+    NEGOTIATION_STATUSES_MOCK_ITEMS[0]!
 
   return {
     id: caseId * 100 + applicantIndex + 1,
@@ -32,6 +36,8 @@ function buildApplicant(index: number, caseId: number, applicantIndex: number) {
     tenant_applicant: applicant.title,
     category: applicant.category_name ?? '—',
     status,
+    negotiation_status_id: negotiationStatus.id,
+    negotiation_status: negotiationStatus,
     first_contact_date: formatIsoDate(2025, 1 + (index % 6), 5 + (applicantIndex % 20)),
     next_contact_date:
       status === 'переговоры'

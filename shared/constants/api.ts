@@ -37,6 +37,10 @@ export const API_PATHS = {
       list: '/v1/broker/tenant-applicants',
       detail: (id: number | string) => `/v1/broker/tenant-applicants/${id}`,
     },
+    negotiationStatuses: {
+      list: '/v1/broker/dict/negotiation-statuses',
+      detail: (id: number | string) => `/v1/broker/dict/negotiation-statuses/${id}`,
+    },
     tenantCases: {
       list: '/v1/broker/tenant-cases',
       detail: (id: number | string) => `/v1/broker/tenant-cases/${id}`,
