@@ -35,6 +35,7 @@ watch(
     <DirectCategoriesSec v-if="section === 'categories'" />
     <DirectLgEntitiesSec v-if="section === 'legal-entities'" />
     <DirectApplicantsSec v-if="section === 'applicants'" />
+    <DirectNegotiationStatusesSec v-if="section === 'negotiation-statuses'" />
   </section>
 </template>
 

@@ -52,6 +52,13 @@ export const directoryNavItems: CabinetDirectoryNavItem[] = [
     bannerGradientTo: 'var(--fs-figma-vertical-surfing)',
     hasContent: true,
   },
+  {
+    to: '/directories/negotiation-statuses',
+    label: 'Статусы переговоров',
+    accent: 'var(--fs-figma-vertical-fitness)',
+    bannerGradientTo: 'var(--fs-figma-main-building-sport-complex)',
+    hasContent: true,
+  },
 ]
 
 export const directorySubmenuItems = directoryNavItems.filter((item) => !item.hiddenInSubmenu)
