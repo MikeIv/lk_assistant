@@ -11,6 +11,7 @@ import type {
 import {
   tenantCaseFormSchema,
   type TenantCaseApplicantFormValues,
+  type TenantCaseFormValues,
 } from '#shared/utils/tenantCasesSchema'
 import {
   getTenantCaseTodayDateInputValue,
@@ -19,7 +20,7 @@ import {
 } from '#shared/utils/tenantCasesNormalize'
 import {
   buildTenantCaseStorePayload,
-  validateTenantCaseFormFieldPaths,
+  validateTenantCaseFormValuesFieldPaths,
 } from '#shared/utils/tenantCasesValidation'
 
 const FORM_FIELD_KEYS = ['room_id', 'responsible_name'] as const satisfies ReadonlyArray<
@@ -70,17 +71,26 @@ function createStringFieldModel(field: Ref<string | undefined>) {
   })
 }
 
+function fieldPathVariants(path: string): string[] {
+  const dotToBracket = path.replace(/\.(\d+)(?=\.|$)/g, '[$1]')
+  const bracketToDot = path.replace(/\[(\d+)\]/g, '.$1')
+
+  return [...new Set([path, dotToBracket, bracketToDot])]
+}
+
 function resolveNestedFieldError(
   errors: Partial<Record<string, string | undefined>>,
   path: string,
 ): string | undefined {
-  if (errors[path]) {
-    return errors[path]
+  for (const variant of fieldPathVariants(path)) {
+    const message = errors[variant]
+
+    if (message) {
+      return message
+    }
   }
 
-  const bracketPath = path.replace(/\.(\d+)\./g, '[$1].').replace(/\.(\d+)$/, '[$1]')
-
-  return errors[bracketPath]
+  return undefined
 }
 
 function mapApplicantFromPayload(
@@ -145,7 +155,7 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
 
     const errors = form.errors.value as Partial<Record<string, string | undefined>>
 
-    return resolveNestedFieldError(errors, path) ?? errors[path]
+    return resolveNestedFieldError(errors, path)
   }
 
   function resolveApplicantsError(): string | null {
@@ -200,10 +210,9 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
     }
   }
 
-  function applyPayloadValidationFieldPaths(
-    payload: TenantCaseCreatePayload,
-  ): Record<string, string> {
-    const fieldPaths = validateTenantCaseFormFieldPaths(payload)
+  function applyFormValuesValidationFieldPaths(): Record<string, string> {
+    syncApplicantsToForm()
+    const fieldPaths = validateTenantCaseFormValuesFieldPaths(form.values as TenantCaseFormValues)
     applyValidationFieldPaths(fieldPaths)
 
     return fieldPaths
@@ -231,10 +240,10 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
 
   function applyMutationFieldErrors(
     fieldErrors: TenantCaseCreateFieldErrors,
-    payload: TenantCaseCreatePayload,
+    _payload: TenantCaseCreatePayload,
   ) {
     applyServerFieldErrors(fieldErrors)
-    const fieldPaths = applyPayloadValidationFieldPaths(payload)
+    const fieldPaths = applyFormValuesValidationFieldPaths()
 
     if (!applicantsError.value) {
       applicantsError.value = firstApplicantFieldErrorMessage(fieldPaths)
@@ -354,14 +363,10 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
     options?: { onInvalid?: () => void },
   ) {
     return async () => {
-      syncApplicantsToForm()
       showValidationErrors.value = true
+      const fieldPaths = applyFormValuesValidationFieldPaths()
 
-      const result = await form.validate()
-
-      if (!result.valid) {
-        const fieldPaths = applyPayloadValidationFieldPaths(toPayload())
-
+      if (Object.keys(fieldPaths).length > 0) {
         applicantsError.value =
           firstApplicantFieldErrorMessage(fieldPaths) ?? 'Проверьте данные претендентов'
 

@@ -8,12 +8,14 @@ const props = withDefaults(
     placeholder?: string
     disabled?: boolean
     searchable?: boolean
+    invalid?: boolean
   }>(),
   {
     modelValue: null,
     placeholder: 'Не выбрано',
     disabled: false,
     searchable: false,
+    invalid: false,
   },
 )
 
@@ -125,7 +127,12 @@ watch(isOpen, (opened) => {
   <div ref="wrapperRef" :class="$style.root">
     <div
       v-if="searchable"
-      :class="[$style.shell, isOpen && $style.shellOpen, disabled && $style.disabled]"
+      :class="[
+        $style.shell,
+        isOpen && $style.shellOpen,
+        disabled && $style.disabled,
+        invalid && $style.shellError,
+      ]"
     >
       <input
         ref="inputRef"
@@ -159,7 +166,12 @@ watch(isOpen, (opened) => {
     <button
       v-else
       type="button"
-      :class="[$style.shell, isOpen && $style.shellOpen, disabled && $style.disabled]"
+      :class="[
+        $style.shell,
+        isOpen && $style.shellOpen,
+        disabled && $style.disabled,
+        invalid && $style.shellError,
+      ]"
       :disabled="disabled"
       :aria-expanded="isOpen"
       @click.stop="toggle"
@@ -221,6 +233,10 @@ watch(isOpen, (opened) => {
 
 .shellOpen {
   @include field.ui-control-shell-open;
+}
+
+.shellError {
+  @include field.ui-control-shell-error-blink;
 }
 
 .disabled {

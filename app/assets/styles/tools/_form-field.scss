@@ -44,6 +44,29 @@
   border-color: var(--fs-figma-achromatic-middle-gray);
 }
 
+@mixin ui-control-shell-error {
+  border-color: var(--fs-color-error);
+  box-shadow: 0 0 0 1px var(--fs-color-error);
+}
+
+@mixin ui-control-shell-error-blink {
+  @include ui-control-shell-error;
+  animation: ui-control-shell-error-blink 1.2s ease-in-out 2;
+}
+
+@keyframes ui-control-shell-error-blink {
+  0%,
+  100% {
+    border-color: var(--fs-color-error);
+    box-shadow: 0 0 0 1px var(--fs-color-error);
+  }
+
+  50% {
+    border-color: rgb(180 35 24 / 0.55);
+    box-shadow: 0 0 0 1px rgb(180 35 24 / 0.35);
+  }
+}
+
 @mixin ui-control-text {
   @include typo.fs-text-body;
   box-sizing: border-box;

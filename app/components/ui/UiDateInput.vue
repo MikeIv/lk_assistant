@@ -6,11 +6,13 @@ const props = withDefaults(
     id?: string
     disabled?: boolean
     placeholder?: string
+    invalid?: boolean
   }>(),
   {
     id: '',
     disabled: false,
     placeholder: 'дд.мм.гггг',
+    invalid: false,
   },
 )
 
@@ -41,6 +43,7 @@ function openPicker() {
       $style.shell,
       !isFilled && $style.isEmpty,
       props.disabled && $style.isDisabled,
+      props.invalid && $style.shellError,
     ]"
   >
     <input
@@ -77,6 +80,10 @@ function openPicker() {
   position: relative;
   gap: rem(8);
   overflow: visible;
+}
+
+.shellError {
+  @include field.ui-control-shell-error-blink;
 }
 
 .isEmpty .input::-webkit-datetime-edit,

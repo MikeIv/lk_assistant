@@ -7,7 +7,6 @@ defineProps<{
   directoryApplicants: Applicant[]
   negotiationStatuses: NegotiationStatus[]
   disabled?: boolean
-  applicantsError?: string | null
   getFieldError: (path: string) => string | undefined
 }>()
 
@@ -119,8 +118,6 @@ defineExpose({
 
 <template>
   <div :class="$style.root" role="tabpanel">
-    <p v-if="applicantsError" :class="$style.applicantsError">{{ applicantsError }}</p>
-
     <BrokerCurrentCaseApplicantBlock
       v-for="(applicant, index) in applicants"
       :key="applicant.id ?? `new-${index}`"
@@ -162,11 +159,5 @@ defineExpose({
 
 .addAction {
   align-self: flex-start;
-}
-
-.applicantsError {
-  margin: 0;
-  font-size: rem(13);
-  color: var(--fs-color-error);
 }
 </style>

@@ -83,8 +83,16 @@ function fieldError(suffix: string): string | undefined {
   return props.getFieldError(`applicants.${props.index}.${suffix}`)
 }
 
+function hasFieldError(suffix: string): boolean {
+  return Boolean(fieldError(suffix))
+}
+
 function negotiationError(negotiationIndex: number, field: 'date' | 'info'): string | undefined {
   return fieldError(`negotiations.${negotiationIndex}.${field}`)
+}
+
+function hasNegotiationError(negotiationIndex: number, field: 'date' | 'info'): boolean {
+  return Boolean(negotiationError(negotiationIndex, field))
 }
 
 function toggleExpanded() {
@@ -116,12 +124,13 @@ function toggleExpanded() {
             <span :class="$style.readonlyValue">{{ applicant.tenant_applicant || '—' }}</span>
           </template>
           <template v-else>
-            <div :class="[fieldError('tenant_applicant_id') && $style.inputWrapError]">
+            <div :class="$style.inputWrap">
               <UiSelect
                 v-model="applicant.tenant_applicant_id"
                 :options="applicantOptions"
                 placeholder="Выберите претендента"
                 :disabled="disabled"
+                :invalid="hasFieldError('tenant_applicant_id')"
               />
             </div>
             <p v-if="fieldError('tenant_applicant_id')" :class="$style.fieldError">
@@ -139,8 +148,12 @@ function toggleExpanded() {
             <span :class="$style.readonlyValue">{{ applicant.first_contact_date || '—' }}</span>
           </template>
           <template v-else>
-            <div :class="[fieldError('first_contact_date') && $style.inputWrapError]">
-              <UiDateInput v-model="applicant.first_contact_date" :disabled="disabled" />
+            <div :class="$style.inputWrap">
+              <UiDateInput
+                v-model="applicant.first_contact_date"
+                :disabled="disabled"
+                :invalid="hasFieldError('first_contact_date')"
+              />
             </div>
             <p v-if="fieldError('first_contact_date')" :class="$style.fieldError">
               {{ fieldError('first_contact_date') }}
@@ -160,25 +173,34 @@ function toggleExpanded() {
           :class="$style.negotiationBlock"
         >
           <div :class="$style.negotiationRow">
-            <div
-              :class="[
-                $style.controlWrap,
-                negotiationError(negotiationIndex, 'date') && $style.inputWrapError,
-              ]"
-            >
-              <UiDateInput v-model="negotiation.date" :disabled="disabled" />
+            <div :class="$style.negotiationCol">
+              <div :class="$style.controlWrap">
+                <UiDateInput
+                  v-model="negotiation.date"
+                  :disabled="disabled"
+                  :invalid="hasNegotiationError(negotiationIndex, 'date')"
+                />
+              </div>
+              <p v-if="negotiationError(negotiationIndex, 'date')" :class="$style.fieldError">
+                {{ negotiationError(negotiationIndex, 'date') }}
+              </p>
             </div>
-            <div
-              :class="[
-                $style.infoInputWrap,
-                negotiationError(negotiationIndex, 'info') && $style.inputWrapError,
-              ]"
-            >
-              <UiInput
-                v-model="negotiation.info"
-                placeholder="Введите информацию о переговорах"
-                :disabled="disabled"
-              />
+            <div :class="$style.negotiationCol">
+              <div
+                :class="[
+                  $style.infoInputWrap,
+                  negotiationError(negotiationIndex, 'info') && $style.inputWrapError,
+                ]"
+              >
+                <UiInput
+                  v-model="negotiation.info"
+                  placeholder="Введите информацию о переговорах"
+                  :disabled="disabled"
+                />
+              </div>
+              <p v-if="negotiationError(negotiationIndex, 'info')" :class="$style.fieldError">
+                {{ negotiationError(negotiationIndex, 'info') }}
+              </p>
             </div>
             <button
               v-if="negotiationIndex > 0"
@@ -196,13 +218,6 @@ function toggleExpanded() {
               aria-hidden="true"
             />
           </div>
-
-          <p v-if="negotiationError(negotiationIndex, 'date')" :class="$style.fieldError">
-            {{ negotiationError(negotiationIndex, 'date') }}
-          </p>
-          <p v-else-if="negotiationError(negotiationIndex, 'info')" :class="$style.fieldError">
-            {{ negotiationError(negotiationIndex, 'info') }}
-          </p>
         </div>
 
         <div :class="$style.addAction">
@@ -220,12 +235,13 @@ function toggleExpanded() {
       <div :class="$style.statusDateRow">
         <div :class="[$style.table, $style.statusTable]">
           <BrokerCurrentCaseTableRow label="Статус переговоров" :required="showRequiredMarkers">
-            <div :class="[fieldError('negotiation_status_id') && $style.inputWrapError]">
+            <div :class="$style.inputWrap">
               <UiSelect
                 v-model="applicant.negotiation_status_id"
                 :options="statusOptions"
                 placeholder="Выберите статус переговоров"
                 :disabled="disabled"
+                :invalid="hasFieldError('negotiation_status_id')"
               />
             </div>
             <p v-if="fieldError('negotiation_status_id')" :class="$style.fieldError">
@@ -415,12 +431,19 @@ function toggleExpanded() {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--fs-space-1);
-  align-items: center;
+  align-items: start;
   width: 100%;
 
   @media (min-width: rem(640)) {
     grid-template-columns: minmax(0, rem(180)) minmax(0, 1fr) rem(52);
   }
+}
+
+.negotiationCol {
+  display: flex;
+  flex-direction: column;
+  gap: rem(4);
+  min-width: 0;
 }
 
 .removeNegotiationSpacer {
@@ -459,7 +482,8 @@ function toggleExpanded() {
 }
 
 .infoInputWrap,
-.controlWrap {
+.controlWrap,
+.inputWrap {
   border-radius: rem(12);
   background-color: var(--fs-figma-achromatic-white);
 }

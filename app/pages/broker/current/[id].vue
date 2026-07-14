@@ -225,7 +225,6 @@ useHead(
           :directory-applicants="directoryApplicants"
           :negotiation-statuses="negotiationStatuses"
           :disabled="isBusy"
-          :applicants-error="applicantsError"
           :get-field-error="getFieldError"
           @add="addApplicant"
           @remove="removeApplicant"
@@ -239,33 +238,37 @@ useHead(
       </div>
 
       <div :class="$style.actions">
-        <div :class="$style.actionsLeft">
-          <UiButton
-            type="submit"
-            size="sm"
-            variant="success"
-            label="Сохранить"
-            :loading="isSubmitting"
-            :disabled="isBusy"
-          />
+        <p v-if="applicantsError" :class="$style.applicantsError">{{ applicantsError }}</p>
+
+        <div :class="$style.actionsRow">
+          <div :class="$style.actionsLeft">
+            <UiButton
+              type="submit"
+              size="sm"
+              variant="success"
+              label="Сохранить"
+              :loading="isSubmitting"
+              :disabled="isBusy"
+            />
+            <UiButton
+              type="button"
+              size="sm"
+              variant="outline"
+              label="Отменить"
+              :loading="isCancelling"
+              :disabled="isBusy"
+              @click="handleCancel"
+            />
+          </div>
           <UiButton
             type="button"
             size="sm"
-            variant="outline"
-            label="Отменить"
-            :loading="isCancelling"
+            variant="warning"
+            label="Удалить дело"
             :disabled="isBusy"
-            @click="handleCancel"
+            @click="isDeleteConfirmOpen = true"
           />
         </div>
-        <UiButton
-          type="button"
-          size="sm"
-          variant="warning"
-          label="Удалить дело"
-          :disabled="isBusy"
-          @click="isDeleteConfirmOpen = true"
-        />
       </div>
     </form>
 
@@ -391,11 +394,24 @@ useHead(
 .actions {
   display: flex;
   flex-shrink: 0;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--fs-space-1);
+  margin-top: auto;
+}
+
+.applicantsError {
+  margin: 0;
+  font-size: rem(13);
+  color: var(--fs-color-error);
+}
+
+.actionsRow {
+  display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--fs-space-1);
-  margin-top: auto;
 }
 
 .actionsLeft {

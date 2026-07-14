@@ -3,7 +3,7 @@ import type {
   TenantCaseCreatePayload,
   TenantCaseStorePayload,
 } from '#shared/types/tenantCases'
-import { tenantCaseFormSchema } from '#shared/utils/tenantCasesSchema'
+import { tenantCaseFormSchema, type TenantCaseFormValues } from '#shared/utils/tenantCasesSchema'
 import {
   normalizeTenantCaseApplicantPayload,
   toTenantCaseApiDateTime,
@@ -136,8 +136,10 @@ function buildTenantCaseFormSchemaInput(payload: TenantCaseCreatePayload) {
     responsible_name: payload.responsible_name ?? '',
     applicants: payload.applicants.map((applicant) => ({
       id: applicant.id ?? null,
-      tenant_applicant_id: String(applicant.tenant_applicant_id),
-      negotiation_status_id: String(applicant.negotiation_status_id),
+      tenant_applicant_id:
+        applicant.tenant_applicant_id > 0 ? String(applicant.tenant_applicant_id) : '',
+      negotiation_status_id:
+        applicant.negotiation_status_id > 0 ? String(applicant.negotiation_status_id) : '',
       first_contact_date: applicant.first_contact_date.slice(0, 10),
       next_contact_date: applicant.next_contact_date?.slice(0, 10) ?? '',
       negotiations: (applicant.negotiations ?? []).map((item) => ({
@@ -172,16 +174,26 @@ function collectTenantCaseFormFieldErrors(issues: ZodIssue[]): Record<string, st
   return fieldErrors
 }
 
-export function validateTenantCaseFormFieldPaths(
-  payload: TenantCaseCreatePayload,
-): Record<string, string> {
-  const result = tenantCaseFormSchema.safeParse(buildTenantCaseFormSchemaInput(payload))
+function validateTenantCaseSchemaInput(input: TenantCaseFormValues): Record<string, string> {
+  const result = tenantCaseFormSchema.safeParse(input)
 
   if (result.success) {
     return {}
   }
 
   return collectTenantCaseFormFieldErrors(result.error.issues)
+}
+
+export function validateTenantCaseFormFieldPaths(
+  payload: TenantCaseCreatePayload,
+): Record<string, string> {
+  return validateTenantCaseSchemaInput(buildTenantCaseFormSchemaInput(payload))
+}
+
+export function validateTenantCaseFormValuesFieldPaths(
+  values: TenantCaseFormValues,
+): Record<string, string> {
+  return validateTenantCaseSchemaInput(values)
 }
 
 export function validateTenantCaseFormPayload(
