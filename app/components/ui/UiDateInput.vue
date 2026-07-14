@@ -5,15 +5,22 @@ const props = withDefaults(
   defineProps<{
     id?: string
     disabled?: boolean
+    placeholder?: string
   }>(),
   {
     id: '',
     disabled: false,
+    placeholder: 'дд.мм.гггг',
   },
 )
 
 const inputRef = ref<HTMLInputElement | null>(null)
 const inputId = computed(() => props.id || undefined)
+const isFilled = computed(() => model.value.trim().length > 0)
+
+function onInput(event: Event) {
+  model.value = (event.target as HTMLInputElement).value
+}
 
 function openPicker() {
   if (props.disabled || !inputRef.value) {
@@ -29,15 +36,25 @@ function openPicker() {
 </script>
 
 <template>
-  <div :class="[$style.shell, props.disabled && $style.isDisabled]">
+  <div
+    :class="[
+      $style.shell,
+      !isFilled && $style.isEmpty,
+      props.disabled && $style.isDisabled,
+    ]"
+  >
     <input
       :id="inputId"
       ref="inputRef"
-      v-model="model"
       :class="$style.input"
       type="date"
+      :value="model"
       :disabled="props.disabled"
+      @input="onInput"
     />
+    <span v-if="!isFilled" :class="$style.placeholder" aria-hidden="true">
+      {{ props.placeholder }}
+    </span>
     <button
       type="button"
       :class="$style.iconBtn"
@@ -57,8 +74,27 @@ function openPicker() {
 
 .shell {
   @include field.ui-input-control-shell;
+  position: relative;
   gap: rem(8);
   overflow: visible;
+}
+
+.isEmpty .input::-webkit-datetime-edit,
+.isEmpty .input::-webkit-datetime-edit-fields-wrapper,
+.isEmpty .input::-webkit-datetime-edit-day-field,
+.isEmpty .input::-webkit-datetime-edit-month-field,
+.isEmpty .input::-webkit-datetime-edit-year-field {
+  opacity: 0;
+}
+
+.placeholder {
+  @include field.ui-control-text;
+  position: absolute;
+  inset: 0 rem(44) 0 rem(24);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  color: var(--fs-figma-achromatic-middle-gray);
 }
 
 .isDisabled {

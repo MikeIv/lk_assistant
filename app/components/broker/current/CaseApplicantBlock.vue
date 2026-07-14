@@ -27,6 +27,8 @@ const applicant = computed(() => applicants.value[props.index]!)
 
 const isExisting = computed(() => applicant.value.id != null)
 
+const showRequiredMarkers = computed(() => !isExisting.value)
+
 const directoryMatch = computed(() =>
   props.directoryApplicants.find(
     (item) => String(item.id) === applicant.value.tenant_applicant_id,
@@ -84,31 +86,32 @@ function fieldError(suffix: string): string | undefined {
 function negotiationError(negotiationIndex: number, field: 'date' | 'info'): string | undefined {
   return fieldError(`negotiations.${negotiationIndex}.${field}`)
 }
+
+function toggleExpanded() {
+  isExpanded.value = !isExpanded.value
+}
 </script>
 
 <template>
   <section :class="$style.root">
-    <header :class="$style.header">
-      <h4 :class="$style.title">
-        {{ headerTitle }}
-      </h4>
-      <button
-        type="button"
-        :class="$style.collapseBtn"
-        :aria-expanded="isExpanded"
-        :aria-label="isExpanded ? 'Свернуть' : 'Развернуть'"
-        @click="isExpanded = !isExpanded"
-      >
-        <UIcon
-          :name="isExpanded ? 'i-arrow-chevron-dropdown-open' : 'i-arrow-chevron-dropdown'"
-          :class="$style.collapseIcon"
-        />
-      </button>
-    </header>
+    <button
+      type="button"
+      :class="$style.header"
+      :aria-expanded="isExpanded"
+      :aria-label="isExpanded ? `Свернуть: ${headerTitle}` : `Развернуть: ${headerTitle}`"
+      @click="toggleExpanded"
+    >
+      <span :class="$style.title">{{ headerTitle }}</span>
+      <UIcon
+        :name="isExpanded ? 'i-arrow-chevron-dropdown-open' : 'i-arrow-chevron-dropdown'"
+        :class="$style.collapseIcon"
+        aria-hidden="true"
+      />
+    </button>
 
     <div v-show="isExpanded" :class="$style.body">
       <div :class="$style.table">
-        <BrokerCurrentCaseTableRow label="Претендент">
+        <BrokerCurrentCaseTableRow label="Претендент" :required="showRequiredMarkers">
           <template v-if="isExisting">
             <span :class="$style.readonlyValue">{{ applicant.tenant_applicant || '—' }}</span>
           </template>
@@ -131,7 +134,7 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
           <span :class="$style.readonlyValue">{{ categoryDisplay }}</span>
         </BrokerCurrentCaseTableRow>
 
-        <BrokerCurrentCaseTableRow label="Дата 1го контакта">
+        <BrokerCurrentCaseTableRow label="Дата 1го контакта" :required="showRequiredMarkers">
           <template v-if="isExisting">
             <span :class="$style.readonlyValue">{{ applicant.first_contact_date || '—' }}</span>
           </template>
@@ -147,7 +150,9 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
       </div>
 
       <div :class="$style.negotiations">
-        <span :class="$style.negotiationsTitle">Переговоры</span>
+        <span :class="$style.negotiationsTitle">
+          Переговоры<span v-if="showRequiredMarkers" :class="$style.required" aria-hidden="true"> *</span>
+        </span>
 
         <div
           v-for="(negotiation, negotiationIndex) in applicant.negotiations"
@@ -214,7 +219,7 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
 
       <div :class="$style.statusDateRow">
         <div :class="[$style.table, $style.statusTable]">
-          <BrokerCurrentCaseTableRow label="Статус переговоров">
+          <BrokerCurrentCaseTableRow label="Статус переговоров" :required="showRequiredMarkers">
             <div :class="[fieldError('negotiation_status_id') && $style.inputWrapError]">
               <UiSelect
                 v-model="applicant.negotiation_status_id"
@@ -241,7 +246,7 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
           type="button"
           size="sm"
           variant="warning"
-          label="Удалить"
+          label="Удалить претендента"
           :disabled="disabled"
           @click="emit('remove')"
         />
@@ -264,6 +269,24 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
   align-items: center;
   justify-content: space-between;
   gap: var(--fs-space-2);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: rem(8);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+
+  &:focus-visible {
+    outline: rem(2) solid var(--fs-color-primary);
+    outline-offset: rem(2);
+  }
+
+  &:hover .collapseIcon {
+    color: var(--fs-figma-achromatic-black);
+  }
 }
 
 .title {
@@ -291,18 +314,11 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
   }
 }
 
-.collapseBtn {
-  @include icon-action-btn(rem(32));
-  color: var(--fs-figma-achromatic-dark-gray);
-
-  &:hover {
-    color: var(--fs-figma-achromatic-black);
-  }
-}
-
 .collapseIcon {
+  flex-shrink: 0;
   width: rem(16);
   height: rem(16);
+  color: var(--fs-figma-achromatic-dark-gray);
 }
 
 .body {
@@ -382,6 +398,10 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
   line-height: 1.4;
   font-weight: 700;
   color: var(--fs-figma-achromatic-black);
+}
+
+.required {
+  color: var(--fs-color-error);
 }
 
 .negotiationBlock {

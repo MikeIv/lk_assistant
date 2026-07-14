@@ -1,12 +1,15 @@
 <script setup lang="ts">
 defineProps<{
   label: string
+  required?: boolean
 }>()
 </script>
 
 <template>
   <div :class="$style.row">
-    <div :class="$style.label">{{ label }}</div>
+    <div :class="$style.label">
+      {{ label }}<span v-if="required" :class="$style.required" aria-hidden="true"> *</span>
+    </div>
     <div :class="$style.value">
       <slot />
     </div>
@@ -31,6 +34,10 @@ defineProps<{
   font-size: rem(14);
   line-height: 1.4;
   color: var(--fs-figma-achromatic-middle-gray);
+}
+
+.required {
+  color: var(--fs-color-error);
 }
 
 .value {

@@ -90,6 +90,16 @@ watch(
       return
     }
 
+    // Added applicant — collapse existing blocks, expand the new one.
+    if (previousLength != null && length > previousLength) {
+      const newIndex = length - 1
+
+      expandedMap.value = Object.fromEntries(
+        applicants.value.map((_, index) => [index, index === newIndex]),
+      )
+      return
+    }
+
     // Prune stale indexes after delete.
     const next: Record<number, boolean> = {}
     applicants.value.forEach((_, index) => {
