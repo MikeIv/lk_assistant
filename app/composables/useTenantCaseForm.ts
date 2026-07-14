@@ -17,7 +17,10 @@ import {
   normalizeTenantCaseApplicantPayload,
   toTenantCaseDateInputValue,
 } from '#shared/utils/tenantCasesNormalize'
-import { buildTenantCaseStorePayload } from '#shared/utils/tenantCasesValidation'
+import {
+  buildTenantCaseStorePayload,
+  validateTenantCaseFormFieldPaths,
+} from '#shared/utils/tenantCasesValidation'
 
 const FORM_FIELD_KEYS = ['room_id', 'responsible_name'] as const satisfies ReadonlyArray<
   keyof Pick<TenantCaseCreateFieldErrors, 'room_id' | 'responsible_name'>
@@ -185,6 +188,27 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
     `applicants[${number}].${string}`
   >
 
+  function firstApplicantFieldErrorMessage(fieldPaths: Record<string, string>): string | null {
+    return Object.entries(fieldPaths).find(([path]) => path.startsWith('applicants'))?.[1] ?? null
+  }
+
+  function applyValidationFieldPaths(fieldPaths: Record<string, string>) {
+    showValidationErrors.value = true
+
+    for (const [path, message] of Object.entries(fieldPaths)) {
+      form.setFieldError(path as Parameters<typeof form.setFieldError>[0], message)
+    }
+  }
+
+  function applyPayloadValidationFieldPaths(
+    payload: TenantCaseCreatePayload,
+  ): Record<string, string> {
+    const fieldPaths = validateTenantCaseFormFieldPaths(payload)
+    applyValidationFieldPaths(fieldPaths)
+
+    return fieldPaths
+  }
+
   function applyServerFieldErrors(fieldErrors: TenantCaseCreateFieldErrors) {
     showValidationErrors.value = true
 
@@ -203,6 +227,18 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
     }
 
     applicantsError.value = fieldErrors.applicants
+  }
+
+  function applyMutationFieldErrors(
+    fieldErrors: TenantCaseCreateFieldErrors,
+    payload: TenantCaseCreatePayload,
+  ) {
+    applyServerFieldErrors(fieldErrors)
+    const fieldPaths = applyPayloadValidationFieldPaths(payload)
+
+    if (!applicantsError.value) {
+      applicantsError.value = firstApplicantFieldErrorMessage(fieldPaths)
+    }
   }
 
   function resetTenantCaseForm(values: TenantCaseFormInitialValues = EMPTY_FORM_VALUES) {
@@ -313,20 +349,30 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
     }
   }
 
-  function createSubmitHandler(callback: () => void | Promise<void>) {
-    return () => {
+  function createSubmitHandler(
+    callback: () => void | Promise<void>,
+    options?: { onInvalid?: () => void },
+  ) {
+    return async () => {
       syncApplicantsToForm()
+      showValidationErrors.value = true
 
-      return form.handleSubmit(
-        async () => {
-          applicantsError.value = null
-          clearValidationState()
-          await callback()
-        },
-        () => {
-          showValidationErrors.value = true
-        },
-      )()
+      const result = await form.validate()
+
+      if (!result.valid) {
+        const fieldPaths = applyPayloadValidationFieldPaths(toPayload())
+
+        applicantsError.value =
+          firstApplicantFieldErrorMessage(fieldPaths) ?? 'Проверьте данные претендентов'
+
+        options?.onInvalid?.()
+        return false
+      }
+
+      applicantsError.value = null
+
+      await callback()
+      return true
     }
   }
 
@@ -334,9 +380,11 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
     handleSubmit: createSubmitHandler,
     errors: formErrors,
     getFieldError: resolveVisibleFieldError,
+    applicantsError: computed(() => applicantsError.value),
     resetTenantCaseForm,
     loadTenantCaseForm,
     applyServerFieldErrors,
+    applyMutationFieldErrors,
     addApplicant,
     removeApplicant,
     addNegotiation,

@@ -20,12 +20,15 @@ const isDeleteConfirmOpen = ref(false)
 const isCancelling = ref(false)
 const activeTab = ref<TenantCaseCardTab>('room')
 
-const applicantsTabRef = ref<{ resetCollapseForTabEnter: () => void } | null>(null)
+const applicantsTabRef = ref<{
+  resetCollapseForTabEnter: () => void
+  expandApplicantsWithErrors: (getFieldError: (path: string) => string | undefined) => void
+} | null>(null)
 
 const {
   handleSubmit,
   loadTenantCaseForm,
-  applyServerFieldErrors,
+  applyMutationFieldErrors,
   getFieldError,
   addApplicant,
   removeApplicant,
@@ -33,6 +36,7 @@ const {
   removeNegotiation,
   toPayload,
   applicants: formApplicants,
+  applicantsError,
 } = useTenantCaseForm()
 
 const isBusy = computed(() => isSubmitting.value || isDeleting.value || isCancelling.value)
@@ -87,6 +91,12 @@ watch(activeTab, (tab) => {
   })
 })
 
+async function focusApplicantsValidation() {
+  activeTab.value = 'applicants'
+  await nextTick()
+  applicantsTabRef.value?.expandApplicantsWithErrors(getFieldError)
+}
+
 const onSubmit = handleSubmit(async () => {
   if (!tenantCase.value) {
     return
@@ -96,19 +106,30 @@ const onSubmit = handleSubmit(async () => {
   isSubmitting.value = true
 
   try {
-    const result = await updateTenantCase(tenantCase.value.id, toPayload())
+    const payload = toPayload()
+    const result = await updateTenantCase(tenantCase.value.id, payload)
 
     if (result.ok) {
-      await navigateTo('/broker/current')
+      const item = await fetchTenantCase(tenantCase.value.id)
+
+      if (item) {
+        applyCaseToForm(item)
+        activeTab.value = 'applicants'
+        await nextTick()
+        applicantsTabRef.value?.resetCollapseForTabEnter()
+      }
+
       return
     }
 
-    applyServerFieldErrors(result.fieldErrors)
+    applyMutationFieldErrors(result.fieldErrors, payload)
     generalError.value = result.generalError
-    activeTab.value = 'applicants'
+    await focusApplicantsValidation()
   } finally {
     isSubmitting.value = false
   }
+}, {
+  onInvalid: focusApplicantsValidation,
 })
 
 async function handleCancel() {
@@ -204,6 +225,7 @@ useHead(
           :directory-applicants="directoryApplicants"
           :negotiation-statuses="negotiationStatuses"
           :disabled="isBusy"
+          :applicants-error="applicantsError"
           :get-field-error="getFieldError"
           @add="addApplicant"
           @remove="removeApplicant"

@@ -7,6 +7,7 @@ defineProps<{
   directoryApplicants: Applicant[]
   negotiationStatuses: NegotiationStatus[]
   disabled?: boolean
+  applicantsError?: string | null
   getFieldError: (path: string) => string | undefined
 }>()
 
@@ -37,6 +38,35 @@ function setExpanded(index: number, value: boolean) {
     ...expandedMap.value,
     [index]: value,
   }
+}
+
+function applicantHasVisibleError(
+  index: number,
+  getFieldError: (path: string) => string | undefined,
+): boolean {
+  const prefix = `applicants.${index}.`
+  const applicantFields = ['tenant_applicant_id', 'negotiation_status_id', 'first_contact_date'] as const
+
+  if (applicantFields.some((field) => Boolean(getFieldError(`${prefix}${field}`)))) {
+    return true
+  }
+
+  return (applicants.value[index]?.negotiations ?? []).some((_, negotiationIndex) => {
+    const negotiationPrefix = `${prefix}negotiations.${negotiationIndex}.`
+
+    return (
+      Boolean(getFieldError(`${negotiationPrefix}date`))
+      || Boolean(getFieldError(`${negotiationPrefix}info`))
+    )
+  })
+}
+
+function expandApplicantsWithErrors(getFieldError: (path: string) => string | undefined) {
+  applicants.value.forEach((_, index) => {
+    if (applicantHasVisibleError(index, getFieldError)) {
+      setExpanded(index, true)
+    }
+  })
 }
 
 /** Brief: 1 applicant → expanded; several → all collapsed. */
@@ -73,11 +103,14 @@ watch(
 
 defineExpose({
   resetCollapseForTabEnter,
+  expandApplicantsWithErrors,
 })
 </script>
 
 <template>
   <div :class="$style.root" role="tabpanel">
+    <p v-if="applicantsError" :class="$style.applicantsError">{{ applicantsError }}</p>
+
     <BrokerCurrentCaseApplicantBlock
       v-for="(applicant, index) in applicants"
       :key="applicant.id ?? `new-${index}`"
@@ -109,6 +142,8 @@ defineExpose({
 </template>
 
 <style module lang="scss">
+@use '~/assets/styles/tools/functions' as *;
+
 .root {
   display: flex;
   flex-direction: column;
@@ -117,5 +152,11 @@ defineExpose({
 
 .addAction {
   align-self: flex-start;
+}
+
+.applicantsError {
+  margin: 0;
+  font-size: rem(13);
+  color: var(--fs-color-error);
 }
 </style>

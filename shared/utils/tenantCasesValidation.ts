@@ -8,6 +8,7 @@ import {
   normalizeTenantCaseApplicantPayload,
   toTenantCaseApiDateTime,
 } from '#shared/utils/tenantCasesNormalize'
+import type { ZodIssue } from 'zod'
 
 interface ApiValidationErrorResponse {
   message?: string
@@ -129,10 +130,8 @@ export function hasTenantCaseCreateFieldErrors(fieldErrors: TenantCaseCreateFiel
   return Object.values(fieldErrors).some(Boolean)
 }
 
-export function validateTenantCaseFormPayload(
-  payload: TenantCaseCreatePayload,
-): TenantCaseCreateFieldErrors {
-  const result = tenantCaseFormSchema.safeParse({
+function buildTenantCaseFormSchemaInput(payload: TenantCaseCreatePayload) {
+  return {
     room_id: String(payload.room_id),
     responsible_name: payload.responsible_name ?? '',
     applicants: payload.applicants.map((applicant) => ({
@@ -146,13 +145,57 @@ export function validateTenantCaseFormPayload(
         info: item.info ?? '',
       })),
     })),
-  })
+  }
+}
+
+function zodPathToFormFieldPath(path: ReadonlyArray<string | number>): string {
+  return path.reduce<string>((acc, segment, index) => {
+    if (typeof segment === 'number') {
+      return `${acc}[${segment}]`
+    }
+
+    return index === 0 ? segment : `${acc}.${segment}`
+  }, '')
+}
+
+function collectTenantCaseFormFieldErrors(issues: ZodIssue[]): Record<string, string> {
+  const fieldErrors: Record<string, string> = {}
+
+  for (const issue of issues) {
+    const formPath = zodPathToFormFieldPath(issue.path as ReadonlyArray<string | number>)
+
+    if (formPath && !fieldErrors[formPath]) {
+      fieldErrors[formPath] = issue.message
+    }
+  }
+
+  return fieldErrors
+}
+
+export function validateTenantCaseFormFieldPaths(
+  payload: TenantCaseCreatePayload,
+): Record<string, string> {
+  const result = tenantCaseFormSchema.safeParse(buildTenantCaseFormSchemaInput(payload))
+
+  if (result.success) {
+    return {}
+  }
+
+  return collectTenantCaseFormFieldErrors(result.error.issues)
+}
+
+export function validateTenantCaseFormPayload(
+  payload: TenantCaseCreatePayload,
+): TenantCaseCreateFieldErrors {
+  const result = tenantCaseFormSchema.safeParse(buildTenantCaseFormSchemaInput(payload))
 
   const fieldErrors = emptyTenantCaseCreateFieldErrors()
 
   if (result.success) {
     return fieldErrors
   }
+
+  const fieldPaths = collectTenantCaseFormFieldErrors(result.error.issues)
 
   for (const issue of result.error.issues) {
     const field = issue.path[0]
@@ -201,7 +244,8 @@ export function validateTenantCaseFormPayload(
 
       // Nested errors for applicants[1+] — bag until card fieldErrors land.
       if (!fieldErrors.applicants) {
-        fieldErrors.applicants = issue.message
+        const formPath = zodPathToFormFieldPath(issue.path as ReadonlyArray<string | number>)
+        fieldErrors.applicants = fieldPaths[formPath] ?? issue.message
       }
     }
   }

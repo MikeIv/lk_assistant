@@ -33,7 +33,11 @@ const directoryMatch = computed(() =>
   ),
 )
 
-const collapsedTitle = computed(() => {
+const headerTitle = computed(() => {
+  if (!isExisting.value) {
+    return 'Новый претендент'
+  }
+
   const name = applicant.value.tenant_applicant?.trim()
   if (name) {
     return name
@@ -86,7 +90,7 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
   <section :class="$style.root">
     <header :class="$style.header">
       <h4 :class="$style.title">
-        {{ isExpanded ? `Претендент ${index + 1}` : collapsedTitle }}
+        {{ headerTitle }}
       </h4>
       <button
         type="button"
@@ -181,6 +185,11 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
             >
               <UIcon name="i-local-trash" :class="$style.removeNegotiationIcon" />
             </button>
+            <span
+              v-else
+              :class="$style.removeNegotiationSpacer"
+              aria-hidden="true"
+            />
           </div>
 
           <p v-if="negotiationError(negotiationIndex, 'date')" :class="$style.fieldError">
@@ -390,7 +399,18 @@ function negotiationError(negotiationIndex: number, field: 'date' | 'info'): str
   width: 100%;
 
   @media (min-width: rem(640)) {
-    grid-template-columns: minmax(0, rem(180)) minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, rem(180)) minmax(0, 1fr) rem(52);
+  }
+}
+
+.removeNegotiationSpacer {
+  display: none;
+  flex-shrink: 0;
+
+  @media (min-width: rem(640)) {
+    display: block;
+    width: rem(52);
+    height: rem(52);
   }
 }
 
