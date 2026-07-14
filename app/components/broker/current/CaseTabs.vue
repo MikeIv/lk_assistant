@@ -4,7 +4,7 @@ export type TenantCaseCardTab = 'room' | 'applicants' | 'kp'
 const TAB_ITEMS: Array<{ id: TenantCaseCardTab; label: string }> = [
   { id: 'room', label: 'Помещение' },
   { id: 'applicants', label: 'Претенденты' },
-  { id: 'kp', label: 'КП' },
+  { id: 'kp', label: 'Коммерческие предложения' },
 ]
 
 const model = defineModel<TenantCaseCardTab>({ required: true })
