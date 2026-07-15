@@ -30,7 +30,6 @@ const emit = defineEmits<{
   create: []
 }>()
 
-const cssm = useCssModule()
 
 const columns: Array<{
   field: keyof TenantCaseTableRow
@@ -52,8 +51,8 @@ const columns: Array<{
     merged: true,
   },
   { field: 'tenant_applicant', sortKey: 'tenant_applicant', label: 'Претендент', align: 'start' },
-  { field: 'category', sortKey: 'category', label: 'Категория', align: 'start' },
-  { field: 'status', sortKey: 'status', label: 'Статус', align: 'start' },
+  { field: 'category', sortKey: 'category', label: 'Категория', align: 'center' },
+  { field: 'status', sortKey: 'status', label: 'Статус', align: 'center' },
   {
     field: 'first_contact_date',
     sortKey: 'first_contact_date',
@@ -73,20 +72,10 @@ const columns: Array<{
     multiline: true,
   },
   { field: 'contacts', label: 'Контакты', align: 'start', multiline: true },
-  { field: 'responsible', sortKey: 'responsible', label: 'Ответственный', align: 'start' },
+  { field: 'responsible', sortKey: 'responsible', label: 'Ответственный', align: 'center' },
 ]
 
 const displayRows = computed(() => flattenTenantCasesForTable(props.items))
-
-const thAlignClass = {
-  start: cssm.thAlignStart,
-  center: cssm.thAlignCenter,
-} as const
-
-const tdAlignClass = {
-  start: cssm.tdStart,
-  center: cssm.tdCenter,
-} as const
 
 const localSearch = computed({
   get: () => props.searchQuery,
@@ -149,7 +138,7 @@ function cellValue(
             <th
               v-for="column in columns"
               :key="column.field"
-              :class="[$style.th, thAlignClass[column.align]]"
+              :class="$style.th"
             >
               <button
                 v-if="column.sortKey"
@@ -178,7 +167,9 @@ function cellValue(
                   aria-hidden="true"
                 />
               </button>
-              <span v-else :class="$style.headerLabel">{{ column.label }}</span>
+              <div v-else :class="[$style.sortButton, $style.staticHeader]">
+                <span :class="$style.headerLabel">{{ column.label }}</span>
+              </div>
             </th>
           </tr>
         </thead>
@@ -197,7 +188,7 @@ function cellValue(
                 :rowspan="column.merged ? row.rowSpan : undefined"
                 :class="[
                   $style.td,
-                  tdAlignClass[column.align],
+                  column.align === 'start' && $style.tdStart,
                   column.multiline && $style.tdMultiline,
                   column.field === 'current_tenant' && $style.tdTenant,
                 ]"
@@ -352,19 +343,12 @@ function cellValue(
   border-bottom: 1px solid var(--tenant-cases-header-divider);
   border-right: 1px solid var(--tenant-cases-header-divider-soft);
   background-color: var(--tenant-cases-header-bg);
+  color: var(--tenant-cases-header-fg);
   white-space: nowrap;
 
   &:last-child {
     border-right: none;
   }
-}
-
-.thAlignStart {
-  text-align: start;
-}
-
-.thAlignCenter {
-  text-align: center;
 }
 
 .sortButton {
@@ -378,7 +362,7 @@ function cellValue(
   font-size: rem(12);
   font-weight: 600;
   line-height: 1.2;
-  color: var(--tenant-cases-header-fg);
+  color: inherit;
   white-space: nowrap;
   background: transparent;
   cursor: pointer;
@@ -388,6 +372,10 @@ function cellValue(
     outline-offset: 2px;
     border-radius: rem(4);
   }
+}
+
+.staticHeader {
+  cursor: default;
 }
 
 .headerLabel {
@@ -427,7 +415,8 @@ function cellValue(
   font-size: rem(13);
   line-height: 1.35;
   color: var(--fs-color-text);
-  vertical-align: top;
+  text-align: center;
+  vertical-align: middle;
 
   &:last-child {
     border-right: none;
@@ -436,10 +425,6 @@ function cellValue(
 
 .tdStart {
   text-align: start;
-}
-
-.tdCenter {
-  text-align: center;
 }
 
 .tdMultiline {

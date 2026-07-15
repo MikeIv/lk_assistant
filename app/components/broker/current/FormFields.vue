@@ -146,33 +146,37 @@ function guardDateValue(currentValue: string, event: Event) {
       <span :class="$style.negotiationsTitle">Переговоры</span>
 
       <div :class="$style.negotiationRow">
-        <div
-          :class="[
-            $style.dateInputShell,
-            errors.negotiation_date && $style.inputWrapError,
-          ]"
-        >
-          <input
-            v-model="negotiation.date"
-            :class="$style.dateInput"
-            type="date"
-            :disabled="disabled"
-            @change="guardDateValue(negotiation.date, $event)"
-          />
+        <div :class="$style.field">
+          <div
+            :class="[
+              $style.dateInputShell,
+              errors.negotiation_date && $style.inputWrapError,
+            ]"
+          >
+            <input
+              v-model="negotiation.date"
+              :class="$style.dateInput"
+              type="date"
+              :disabled="disabled"
+              @change="guardDateValue(negotiation.date, $event)"
+            />
+          </div>
+          <p v-if="errors.negotiation_date" :class="$style.fieldError">{{ errors.negotiation_date }}</p>
         </div>
 
-        <div :class="[$style.infoInputWrap, errors.negotiation_info && $style.inputWrapError]">
-          <UiInput
-            v-model="negotiation.info"
-            placeholder="Введите информацию о переговорах"
-            :disabled="disabled"
-          />
+        <div :class="$style.field">
+          <div :class="[$style.infoInputWrap, errors.negotiation_info && $style.inputWrapError]">
+            <UiInput
+              v-model="negotiation.info"
+              placeholder="Введите информацию о переговорах"
+              :disabled="disabled"
+            />
+          </div>
+          <p v-if="errors.negotiation_info" :class="$style.fieldError">{{ errors.negotiation_info }}</p>
         </div>
       </div>
 
-      <p v-if="errors.negotiation_date" :class="$style.fieldError">{{ errors.negotiation_date }}</p>
-      <p v-else-if="errors.negotiation_info" :class="$style.fieldError">{{ errors.negotiation_info }}</p>
-      <p v-else-if="errors.applicants" :class="$style.fieldError">{{ errors.applicants }}</p>
+      <p v-if="errors.applicants" :class="$style.fieldError">{{ errors.applicants }}</p>
     </div>
   </div>
 </template>
@@ -254,10 +258,14 @@ function guardDateValue(currentValue: string, event: Event) {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--fs-space-2);
-  align-items: stretch;
+  align-items: start;
 
   @media (min-width: rem(560)) {
     grid-template-columns: minmax(0, rem(180)) minmax(0, 1fr);
+  }
+
+  .field {
+    min-width: 0;
   }
 }
 
