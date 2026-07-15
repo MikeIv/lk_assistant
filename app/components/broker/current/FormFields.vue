@@ -75,7 +75,8 @@ function guardDateValue(currentValue: string, event: Event) {
         <UiSelect
           v-model="roomId"
           :options="roomOptions"
-          placeholder="Выберите помещение"
+          placeholder="Поиск"
+          searchable
           :disabled="disabled"
         />
       </div>
@@ -91,7 +92,8 @@ function guardDateValue(currentValue: string, event: Event) {
         <UiSelect
           v-model="applicant.tenant_applicant_id"
           :options="applicantOptions"
-          placeholder="Выберите претендента"
+          placeholder="Поиск"
+          searchable
           :disabled="disabled"
         />
       </div>
