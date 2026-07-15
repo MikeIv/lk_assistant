@@ -21,13 +21,21 @@ stages:
   tags:
     - docker
 
-build frontend:
+build frontend develop:
   extends: .build_frontend
   environment:
-    name: $CI_COMMIT_BRANCH
+    name: develop
+    url: https://lk-assistant-main.portalrent.ru
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'develop'
+
+build frontend production:
+  extends: .build_frontend
+  environment:
+    name: production
     url: https://brokerolimp.portalrent.ru
   rules:
-    - if: $CI_COMMIT_REF_PROTECTED == 'true'
+    - if: $CI_COMMIT_BRANCH == 'main'
 
 .deploy_frontend:
   stage: deploy
@@ -56,30 +64,55 @@ build frontend:
         -d "{\"channel_id\":\"${MM_GROUP}\",\"message\":\"Загружено [**${CI_PROJECT_NAME} / ${CI_ENVIRONMENT_NAME}**](${CI_ENVIRONMENT_URL})\nВетка: ${CI_COMMIT_BRANCH}\nАвтор: ${CI_COMMIT_AUTHOR}\nПравка: [${CI_COMMIT_TITLE}](${CI_PROJECT_URL}/-/commit/${CI_COMMIT_SHA})\"}" \
         https://mm.grandfs-develop.ru/api/v4/posts > /dev/null
 
-deploy production:
+deploy develop:
   extends: .deploy_frontend
   environment:
-    name: $CI_COMMIT_BRANCH
-    url: https://brokerolimp.portalrent.ru
-    on_stop: destroy frontend
+    name: develop
+    url: https://lk-assistant-main.portalrent.ru
+    on_stop: destroy frontend develop
   needs:
-    - build frontend
+    - build frontend develop
   rules:
-    - if: $CI_COMMIT_REF_PROTECTED == 'true'
+    - if: $CI_COMMIT_BRANCH == 'develop'
   tags:
     - shell
     - grand232
 
-destroy frontend:
-  stage: deploy
+deploy production:
+  extends: .deploy_frontend
   environment:
-    name: $CI_COMMIT_BRANCH
-    action: stop
+    name: production
+    url: https://brokerolimp.portalrent.ru
+    on_stop: destroy frontend production
+  needs:
+    - build frontend production
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'main'
+  tags:
+    - shell
+    - grand232
+
+.destroy_frontend:
+  stage: deploy
   script:
     - ~/devdeployer/deploy.sh stop
-  rules:
-    - if: $CI_COMMIT_REF_PROTECTED == 'true'
   when: manual
   tags:
     - shell
     - grand232
+
+destroy frontend develop:
+  extends: .destroy_frontend
+  environment:
+    name: develop
+    action: stop
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'develop'
+
+destroy frontend production:
+  extends: .destroy_frontend
+  environment:
+    name: production
+    action: stop
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'main'
