@@ -1,2 +1,5 @@
-/** Роль в ЛК арендатора (двухуровневая модель из ТЗ). Источник данных — позже API / сессия. */
+/**
+ * UI-роль ЛК (двухуровневая модель из ТЗ).
+ * Источник: access JWT (`role_id` / `role`) → `cabinetRoleFromJwt`.
+ */
 export type CabinetRole = 'admin' | 'user'

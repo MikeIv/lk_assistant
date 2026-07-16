@@ -1,6 +1,13 @@
 <script setup lang="ts">
-const { isAdmin } = useCabinetRole()
+const { isAdmin, roleLabel } = useCabinetRole()
 const { logout } = useAuth()
+
+const roleTagText = computed(() => {
+  if (roleLabel.value) {
+    return roleLabel.value
+  }
+  return isAdmin.value ? 'Брокер' : 'Пользователь'
+})
 
 const { open: footerOpen, toggle: toggleFooter } = useCabinetFooter()
 
@@ -52,12 +59,10 @@ async function onLogout() {
 
     <div :class="$style.actions">
       <span
-        v-if="isAdmin"
-        :class="[$style.roleTag, $style.roleTagActive]"
+        :class="[$style.roleTag, isAdmin && $style.roleTagActive]"
       >
-        Брокер
+        {{ roleTagText }}
       </span>
-      <span v-else :class="$style.roleTag">Пользователь</span>
 
       <UiButton type="button" variant="primary" size="chrome" disabled title="Позже: профиль">
         Профиль

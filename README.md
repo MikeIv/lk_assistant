@@ -24,7 +24,7 @@
 | `/directories/negotiation-statuses`             | Справочники → Статусы переговоров | CRUD, API + mock fallback                    |
 | `/directories/brands`, `/directories/contracts` | Бренды, Договоры                  | заглушки (скрыты из подменю)                 |
 
-**Auth и роли** — заглушка: [`app/composables/useCabinetRole.ts`](app/composables/useCabinetRole.ts) (`admin` / `user`).
+**Auth и роли** — JWT-сессия; UI-роль из access JWT: [`useCabinetRole`](app/composables/useCabinetRole.ts) (`admin` / `user`).
 
 **Отчёты арендатора** — composables и компоненты в `app/composables/reports/`, `app/components/reports/`; отдельные страницы пока не подключены.
 
