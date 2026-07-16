@@ -1,4 +1,5 @@
 import { AUTH_STORAGE_KEYS } from '#shared/constants/authStorage'
+import { isCrossTabAuthLogoutEvent } from '#shared/utils/authCrossTab'
 
 const ACCESS_TOKEN_STATE_KEY = 'api.accessToken'
 const REMEMBER_STATE_KEY = 'api.remember'
@@ -34,12 +35,6 @@ function clearAuthKeys(storage: Storage): void {
   storageRemove(storage, AUTH_STORAGE_KEYS.refreshToken)
   storageRemove(storage, AUTH_STORAGE_KEYS.remember)
 }
-
-const AUTH_LOCAL_KEYS = new Set<string>([
-  AUTH_STORAGE_KEYS.accessToken,
-  AUTH_STORAGE_KEYS.remember,
-  AUTH_STORAGE_KEYS.refreshToken,
-])
 
 let crossTabListenerBound = false
 
@@ -119,15 +114,7 @@ export function useAuthToken() {
     crossTabListenerBound = true
 
     window.addEventListener('storage', (event) => {
-      if (event.storageArea !== localStorage) {
-        return
-      }
-
-      const clearedAll = event.key === null
-      const authKeyCleared =
-        event.key !== null && AUTH_LOCAL_KEYS.has(event.key) && event.newValue === null
-
-      if (!clearedAll && !authKeyCleared) {
+      if (!isCrossTabAuthLogoutEvent(event, event.storageArea === localStorage)) {
         return
       }
 
