@@ -1,7 +1,24 @@
 <script setup lang="ts">
 const { isAdmin } = useCabinetRole()
+const { logout } = useAuth()
 
 const { open: footerOpen, toggle: toggleFooter } = useCabinetFooter()
+
+const isLoggingOut = ref(false)
+
+async function onLogout() {
+  if (isLoggingOut.value) {
+    return
+  }
+
+  isLoggingOut.value = true
+  try {
+    await logout()
+    await navigateTo('/login', { replace: true })
+  } finally {
+    isLoggingOut.value = false
+  }
+}
 </script>
 
 <template>
@@ -45,7 +62,13 @@ const { open: footerOpen, toggle: toggleFooter } = useCabinetFooter()
       <UiButton type="button" variant="primary" size="chrome" disabled title="Позже: профиль">
         Профиль
       </UiButton>
-      <UiButton type="button" variant="auth" size="chrome" title="Позже: авторизация">
+      <UiButton
+        type="button"
+        variant="auth"
+        size="chrome"
+        :loading="isLoggingOut"
+        @click="onLogout"
+      >
         Выйти
       </UiButton>
     </div>

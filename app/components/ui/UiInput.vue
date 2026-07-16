@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ inheritAttrs: false })
+
 const props = withDefaults(
   defineProps<{
     modelValue?: string
@@ -6,7 +8,9 @@ const props = withDefaults(
     placeholder?: string
     readonly?: boolean
     disabled?: boolean
-    inputmode?: 'text' | 'numeric' | 'decimal'
+    type?: 'text' | 'email' | 'password' | 'search'
+    autocomplete?: string
+    inputmode?: 'text' | 'numeric' | 'decimal' | 'email'
   }>(),
   {
     modelValue: '',
@@ -14,6 +18,8 @@ const props = withDefaults(
     placeholder: '',
     readonly: false,
     disabled: false,
+    type: 'text',
+    autocomplete: '',
     inputmode: 'text',
   },
 )
@@ -23,9 +29,12 @@ const emit = defineEmits<{
   blur: []
 }>()
 
-const inputId = computed(() => props.id || undefined)
+const attrs = useAttrs()
+const slots = useSlots()
 
+const inputId = computed(() => props.id || undefined)
 const hasValue = computed(() => props.modelValue.trim().length > 0)
+const hasTrailing = computed(() => Boolean(slots.trailing))
 
 function onInput(event: Event) {
   emit('update:modelValue', (event.target as HTMLInputElement).value)
@@ -36,29 +45,42 @@ function onInput(event: Event) {
   <div
     :class="[
       $style.shell,
+      hasTrailing && $style.withTrailing,
       (disabled || readonly) && $style.isStatic,
       hasValue && !disabled && !readonly && $style.isFilled,
     ]"
   >
     <input
       :id="inputId"
+      v-bind="attrs"
       :class="$style.input"
+      :type="type"
       :value="modelValue"
       :placeholder="placeholder"
       :readonly="readonly"
       :disabled="disabled"
       :inputmode="inputmode"
+      :autocomplete="autocomplete || undefined"
       @input="onInput"
       @blur="emit('blur')"
     />
+    <div v-if="hasTrailing" :class="$style.trailing">
+      <slot name="trailing" />
+    </div>
   </div>
 </template>
 
 <style module lang="scss">
+@use '~/assets/styles/tools/functions' as *;
 @use '~/assets/styles/tools/form-field' as field;
 
 .shell {
   @include field.ui-control-shell;
+}
+
+.withTrailing {
+  gap: rem(8);
+  padding-right: rem(12);
 }
 
 .isStatic {
@@ -71,5 +93,14 @@ function onInput(event: Event) {
 
 .input {
   @include field.ui-control-text;
+  flex: 1 1 auto;
+  width: auto;
+}
+
+.trailing {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
 }
 </style>

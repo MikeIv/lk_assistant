@@ -129,7 +129,11 @@ export function useAuth() {
       return false
     }
 
-    return refresh()
+    const ok = await refresh()
+    if (!ok) {
+      clearTokens()
+    }
+    return ok
   }
 
   return {
