@@ -143,9 +143,16 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
     form.setFieldValue('applicants', [...applicants.value], false)
   }
 
+  function clearAllFieldErrors() {
+    for (const key of Object.keys(form.errors.value)) {
+      form.setFieldError(key as Parameters<typeof form.setFieldError>[0], undefined)
+    }
+  }
+
   function clearValidationState() {
     applicantsError.value = null
     showValidationErrors.value = false
+    clearAllFieldErrors()
   }
 
   function resolveVisibleFieldError(path: string): string | undefined {
@@ -204,6 +211,7 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
 
   function applyValidationFieldPaths(fieldPaths: Record<string, string>) {
     showValidationErrors.value = true
+    clearAllFieldErrors()
 
     for (const [path, message] of Object.entries(fieldPaths)) {
       form.setFieldError(path as Parameters<typeof form.setFieldError>[0], message)
@@ -217,6 +225,19 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
 
     return fieldPaths
   }
+
+  /** After submit errors are shown, re-validate on applicant edits so filled fields drop highlights. */
+  watch(
+    applicants,
+    () => {
+      if (!showValidationErrors.value) {
+        return
+      }
+
+      applicantsError.value = firstApplicantFieldErrorMessage(applyFormValuesValidationFieldPaths())
+    },
+    { deep: true },
+  )
 
   function applyServerFieldErrors(fieldErrors: TenantCaseCreateFieldErrors) {
     showValidationErrors.value = true
