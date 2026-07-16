@@ -64,6 +64,8 @@ export function useUiDropdown() {
         detail: instanceId,
       }),
     )
+    // Before paint: avoid absolute→fixed jump inside scrollable dialogs.
+    updatePanelPosition()
     isOpen.value = true
   }
 

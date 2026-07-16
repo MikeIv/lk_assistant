@@ -87,21 +87,28 @@ function selectOption(option: UiSelectOption) {
   closeAfterSelection(props.searchable ? SEARCHABLE_CLOSE_OPTIONS : undefined)
 }
 
-function openSearchable() {
+async function openSearchable() {
   if (props.disabled || isOpen.value) {
     return
   }
 
   searchQuery.value = ''
   open()
-
-  nextTick(() => {
-    inputRef.value?.focus()
-  })
+  await nextTick()
+  inputRef.value?.focus({ preventScroll: true })
 }
 
-function onSearchableInputClick() {
-  openSearchable()
+async function onSearchableToggle() {
+  if (props.disabled) {
+    return
+  }
+
+  if (isOpen.value) {
+    toggle()
+    return
+  }
+
+  await openSearchable()
 }
 
 function onSearchableInput(event: Event) {
@@ -129,6 +136,7 @@ watch(isOpen, (opened) => {
       v-if="searchable"
       :class="[
         $style.shell,
+        $style.shellSearchable,
         isOpen && $style.shellOpen,
         disabled && $style.disabled,
         invalid && $style.shellError,
@@ -146,14 +154,14 @@ watch(isOpen, (opened) => {
         :disabled="disabled"
         :aria-expanded="isOpen"
         @input="onSearchableInput"
-        @click.stop="onSearchableInputClick"
+        @click.stop="openSearchable"
       />
       <button
         type="button"
         :class="$style.toggle"
         aria-label="Открыть список"
         :disabled="disabled"
-        @click.stop="toggle"
+        @click.stop="onSearchableToggle"
       >
         <UIcon
           :name="isOpen ? 'i-arrow-chevron-dropdown-open' : 'i-arrow-chevron-dropdown'"
@@ -231,6 +239,10 @@ watch(isOpen, (opened) => {
   font: inherit;
 }
 
+.shellSearchable {
+  cursor: text;
+}
+
 .shellOpen {
   @include field.ui-control-shell-open;
 }
@@ -265,6 +277,7 @@ watch(isOpen, (opened) => {
 
 .dropdown {
   @include field.ui-dropdown-panel;
+  position: fixed;
 }
 
 .option {
@@ -278,12 +291,15 @@ watch(isOpen, (opened) => {
 .searchInput {
   @include field.ui-dropdown-control-text;
   flex: 1;
-  cursor: pointer;
+
+  &,
+  &[readonly] {
+    cursor: text;
+  }
 }
 
 .searchInputFilled {
   color: var(--fs-figma-achromatic-black);
-  cursor: text;
 }
 
 .toggle {
@@ -297,7 +313,7 @@ watch(isOpen, (opened) => {
   padding: 0;
   border: 0;
   background: transparent;
-  cursor: pointer;
+  cursor: default;
   font: inherit;
 
   &:disabled {
