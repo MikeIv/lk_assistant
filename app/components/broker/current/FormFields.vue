@@ -17,23 +17,65 @@ const props = defineProps<{
     first_contact_date?: string
     negotiation_date?: string
     negotiation_info?: string
-    applicants?: string | null
   }
 }>()
 
-const roomId = defineModel<string>('roomId', { required: true })
-const applicants = defineModel<
-  Array<{
-    tenant_applicant_id: string
-    negotiation_status_id: string
-    first_contact_date: string
-    next_contact_date: string
-    negotiations: Array<{ date: string; info: string }>
-  }>
->('applicants', { required: true })
+type ApplicantFormRow = {
+  tenant_applicant_id: string
+  negotiation_status_id: string
+  first_contact_date: string
+  next_contact_date: string
+  negotiations: Array<{ date: string; info: string }>
+}
 
-const applicant = computed(() => applicants.value[0]!)
-const negotiation = computed(() => applicant.value.negotiations[0]!)
+const roomId = defineModel<string>('roomId', { required: true })
+const applicants = defineModel<ApplicantFormRow[]>('applicants', { required: true })
+
+function patchFirstApplicant(patch: Partial<ApplicantFormRow>) {
+  const [first, ...rest] = applicants.value
+
+  if (!first) {
+    return
+  }
+
+  applicants.value = [{ ...first, ...patch }, ...rest]
+}
+
+function patchFirstNegotiation(patch: Partial<ApplicantFormRow['negotiations'][number]>) {
+  const first = applicants.value[0]
+  const negotiation = first?.negotiations[0]
+
+  if (!first || !negotiation) {
+    return
+  }
+
+  patchFirstApplicant({
+    negotiations: [{ ...negotiation, ...patch }, ...first.negotiations.slice(1)],
+  })
+}
+
+/** Replace `applicants[0]` on set so parent validation watch always runs. */
+function firstApplicantStringModel(
+  key: 'tenant_applicant_id' | 'negotiation_status_id' | 'first_contact_date',
+) {
+  return computed({
+    get: () => applicants.value[0]?.[key] ?? '',
+    set: (value: string) => patchFirstApplicant({ [key]: value }),
+  })
+}
+
+function firstNegotiationStringModel(key: 'date' | 'info') {
+  return computed({
+    get: () => applicants.value[0]?.negotiations[0]?.[key] ?? '',
+    set: (value: string) => patchFirstNegotiation({ [key]: value }),
+  })
+}
+
+const tenantApplicantId = firstApplicantStringModel('tenant_applicant_id')
+const negotiationStatusId = firstApplicantStringModel('negotiation_status_id')
+const firstContactDate = firstApplicantStringModel('first_contact_date')
+const negotiationDate = firstNegotiationStringModel('date')
+const negotiationInfo = firstNegotiationStringModel('info')
 
 const roomOptions = computed<UiSelectOption[]>(() =>
   props.rooms.map((room) => ({
@@ -90,7 +132,7 @@ function guardDateValue(currentValue: string, event: Event) {
       </span>
       <div :class="[$style.inputWrap, errors.tenant_applicant_id && $style.inputWrapError]">
         <UiSelect
-          v-model="applicant.tenant_applicant_id"
+          v-model="tenantApplicantId"
           :options="applicantOptions"
           placeholder="Поиск"
           searchable
@@ -113,11 +155,11 @@ function guardDateValue(currentValue: string, event: Event) {
           ]"
         >
           <input
-            v-model="applicant.first_contact_date"
+            v-model="firstContactDate"
             :class="$style.dateInput"
             type="date"
             :disabled="disabled"
-            @change="guardDateValue(applicant.first_contact_date, $event)"
+            @change="guardDateValue(firstContactDate, $event)"
           />
         </div>
         <p v-if="errors.first_contact_date" :class="$style.fieldError">{{ errors.first_contact_date }}</p>
@@ -130,7 +172,7 @@ function guardDateValue(currentValue: string, event: Event) {
         </span>
         <div :class="[$style.inputWrap, errors.negotiation_status_id && $style.inputWrapError]">
           <UiSelect
-            v-model="applicant.negotiation_status_id"
+            v-model="negotiationStatusId"
             :options="statusOptions"
             placeholder="Выберите статус переговоров"
             :disabled="disabled"
@@ -154,11 +196,11 @@ function guardDateValue(currentValue: string, event: Event) {
             ]"
           >
             <input
-              v-model="negotiation.date"
+              v-model="negotiationDate"
               :class="$style.dateInput"
               type="date"
               :disabled="disabled"
-              @change="guardDateValue(negotiation.date, $event)"
+              @change="guardDateValue(negotiationDate, $event)"
             />
           </div>
           <p v-if="errors.negotiation_date" :class="$style.fieldError">{{ errors.negotiation_date }}</p>
@@ -167,7 +209,7 @@ function guardDateValue(currentValue: string, event: Event) {
         <div :class="$style.field">
           <div :class="[$style.infoInputWrap, errors.negotiation_info && $style.inputWrapError]">
             <UiInput
-              v-model="negotiation.info"
+              v-model="negotiationInfo"
               placeholder="Введите информацию о переговорах"
               :disabled="disabled"
             />
@@ -175,8 +217,6 @@ function guardDateValue(currentValue: string, event: Event) {
           <p v-if="errors.negotiation_info" :class="$style.fieldError">{{ errors.negotiation_info }}</p>
         </div>
       </div>
-
-      <p v-if="errors.applicants" :class="$style.fieldError">{{ errors.applicants }}</p>
     </div>
   </div>
 </template>
