@@ -35,6 +35,14 @@ function clearAuthKeys(storage: Storage): void {
   storageRemove(storage, AUTH_STORAGE_KEYS.remember)
 }
 
+const AUTH_LOCAL_KEYS = new Set<string>([
+  AUTH_STORAGE_KEYS.accessToken,
+  AUTH_STORAGE_KEYS.remember,
+  AUTH_STORAGE_KEYS.refreshToken,
+])
+
+let crossTabListenerBound = false
+
 /**
  * Access JWT для `Authorization: Bearer`.
  * Refresh — только HttpOnly cookie `refresh_token` (не в JS-storage).
@@ -100,11 +108,42 @@ export function useAuthToken() {
     clearAuthKeys(sessionStorage)
   }
 
+  /**
+   * Logout в другой вкладке (localStorage) → сброс in-memory сессии.
+   * sessionStorage кросс-табово не синхронизируется (ограничение платформы).
+   */
+  function bindCrossTabLogout(onLogout: () => void) {
+    if (!import.meta.client || crossTabListenerBound) {
+      return
+    }
+    crossTabListenerBound = true
+
+    window.addEventListener('storage', (event) => {
+      if (event.storageArea !== localStorage) {
+        return
+      }
+
+      const clearedAll = event.key === null
+      const authKeyCleared =
+        event.key !== null && AUTH_LOCAL_KEYS.has(event.key) && event.newValue === null
+
+      if (!clearedAll && !authKeyCleared) {
+        return
+      }
+
+      accessToken.value = null
+      remember.value = false
+      hydrated.value = true
+      onLogout()
+    })
+  }
+
   return {
     accessToken: readonly(accessToken),
     remember: readonly(remember),
     hydrateFromStorage,
     persistTokens,
     clearTokens,
+    bindCrossTabLogout,
   }
 }

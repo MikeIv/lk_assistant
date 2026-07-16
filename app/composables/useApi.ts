@@ -1,5 +1,5 @@
-import { joinApiUrl, normalizeApiBaseUrl } from '#shared/utils/normalizeApiBaseUrl'
-import { useAuth } from '~/composables/useAuth'
+import { normalizeApiBaseUrl } from '#shared/utils/normalizeApiBaseUrl'
+import { redirectToLogin, useAuth } from '~/composables/useAuth'
 import { useAuthToken } from '~/composables/useAuthToken'
 import type { AsyncData, UseFetchOptions } from 'nuxt/app'
 import type { FetchError, FetchOptions } from 'ofetch'
@@ -32,6 +32,7 @@ function isBrokerAuthPath(path: string): boolean {
 /**
  * Императивный HTTP-клиент (`ofetch`) с `baseURL` из `runtimeConfig.public.apiBase`.
  * Bearer access token из {@link useAuthToken}; при 401 — silent refresh и один повтор запроса.
+ * Безопасен для защищённых данных (тот же 401-путь, что у {@link useApiFetch}).
  */
 export function useApi() {
   const baseURL = normalizeApiBaseUrl(useRuntimeConfig().public.apiBase)
@@ -53,18 +54,31 @@ export function useApi() {
     },
   })
 
+  async function recoverFromUnauthorized(request: string): Promise<boolean> {
+    if (!import.meta.client || isBrokerAuthPath(request)) {
+      return false
+    }
+
+    const refreshed = await refresh()
+    if (!refreshed) {
+      clearTokens()
+      await redirectToLogin()
+      return false
+    }
+
+    return true
+  }
+
   async function apiFetch<T = unknown>(request: string, options?: FetchOptions): Promise<T> {
     try {
       return await rawFetch<T>(request, options as never)
     } catch (error) {
-      if (!isUnauthorized(error) || isBrokerAuthPath(request) || !import.meta.client) {
+      if (!isUnauthorized(error)) {
         throw error
       }
 
-      const refreshed = await refresh()
-      if (!refreshed) {
-        clearTokens()
-        await navigateTo('/login')
+      const canRetry = await recoverFromUnauthorized(request)
+      if (!canRetry) {
         throw error
       }
 
@@ -76,32 +90,17 @@ export function useApi() {
 }
 
 /**
- * Реактивный `useFetch` к тому же API, что и {@link useApi}: URL собирается из `apiBase` + путь.
- * Второй аргумент — без `baseURL` и без дженерика на `UseFetchOptions` (ограничение типов Nuxt 4);
- * тип ответа задаётся параметром `T` у возвращаемого `AsyncData<T, …>`.
- * Silent refresh при 401 — в императивном {@link useApi}.
+ * Реактивный `useFetch` к тому же API и с тем же 401 → refresh → retry, что {@link useApi}.
+ * Путь — относительный (как у `useApi`); `baseURL` берётся из клиента.
  */
 export function useApiFetch<T = unknown>(
   path: MaybeRefOrGetter<string>,
-  options?: Omit<UseFetchOptions<unknown>, 'baseURL'>,
+  options?: Omit<UseFetchOptions<unknown>, 'baseURL' | '$fetch'>,
 ): AsyncData<T, FetchError | null> {
-  const config = useRuntimeConfig()
-  const { accessToken, hydrateFromStorage } = useAuthToken()
-  const userOnRequest = options?.onRequest
+  const api = useApi()
 
-  hydrateFromStorage()
-
-  const request = computed(() => joinApiUrl(config.public.apiBase, String(toValue(path))))
-
-  return useFetch(request, {
+  return useFetch(path, {
     ...options,
-    credentials: 'include',
-    onRequest(ctx) {
-      withApiAuthHeaders(ctx.options, accessToken.value)
-
-      if (typeof userOnRequest === 'function') {
-        userOnRequest(ctx)
-      }
-    },
+    $fetch: api as typeof $fetch,
   }) as AsyncData<T, FetchError | null>
 }

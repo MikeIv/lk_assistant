@@ -1,13 +1,39 @@
 import { API_PATHS } from '#shared/constants/api'
 import type { ApiSuccessResponse, LoginRequest, LoginResponse } from '#shared/types/api'
+import { isAccessTokenExpired } from '#shared/utils/jwtPayload'
 import { normalizeApiBaseUrl } from '#shared/utils/normalizeApiBaseUrl'
 import { useAuthToken } from '~/composables/useAuthToken'
 import type { FetchError } from 'ofetch'
 
 let refreshInFlight: Promise<boolean> | null = null
+let redirectToLoginInFlight: Promise<void> | null = null
 
 function isFetchError(error: unknown): error is FetchError {
   return Boolean(error && typeof error === 'object' && 'response' in error)
+}
+
+/** Один redirect на /login при параллельных 401 / cross-tab logout. */
+export async function redirectToLogin(): Promise<void> {
+  if (!import.meta.client) {
+    return
+  }
+
+  if (redirectToLoginInFlight) {
+    return redirectToLoginInFlight
+  }
+
+  redirectToLoginInFlight = (async () => {
+    try {
+      const path = useRouter().currentRoute.value.path
+      if (path !== '/login') {
+        await navigateTo('/login', { replace: true })
+      }
+    } finally {
+      redirectToLoginInFlight = null
+    }
+  })()
+
+  return redirectToLoginInFlight
 }
 
 /**
@@ -17,9 +43,20 @@ function isFetchError(error: unknown): error is FetchError {
  */
 export function useAuth() {
   const baseURL = normalizeApiBaseUrl(useRuntimeConfig().public.apiBase)
-  const { accessToken, remember, hydrateFromStorage, persistTokens, clearTokens } = useAuthToken()
+  const {
+    accessToken,
+    remember,
+    hydrateFromStorage,
+    persistTokens,
+    clearTokens,
+    bindCrossTabLogout,
+  } = useAuthToken()
 
   const isAuthenticated = computed(() => Boolean(accessToken.value))
+
+  bindCrossTabLogout(() => {
+    void redirectToLogin()
+  })
 
   function authFetch<T>(
     path: string,
@@ -113,13 +150,14 @@ export function useAuth() {
   }
 
   /**
-   * Восстановить access: из storage или через cookie-refresh.
-   * Без access всегда пробуем refresh (cookie может быть валидна без JS-токенов).
+   * Восстановить access: валидный JWT из storage или cookie-refresh.
+   * Истёкший access не считается сессией — сразу refresh.
    */
   async function ensureSession(): Promise<boolean> {
     hydrateFromStorage()
 
-    if (accessToken.value) {
+    const token = accessToken.value
+    if (token && !isAccessTokenExpired(token)) {
       return true
     }
 
