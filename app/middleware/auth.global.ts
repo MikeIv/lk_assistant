@@ -1,17 +1,14 @@
 export default defineNuxtRouteMiddleware(async (to) => {
-  const { ensureSession, isAuthenticated, hydrateFromStorage, accessToken, refreshToken } =
-    useAuth()
+  const { ensureSession, isAuthenticated, hydrateFromStorage, accessToken } = useAuth()
+  const { remember } = useAuthToken()
 
   hydrateFromStorage()
 
   const isLoginPage = to.path === '/login'
-  const hasStoredSession = Boolean(accessToken.value || refreshToken.value)
 
-  if (isLoginPage && !hasStoredSession) {
-    return
-  }
-
-  if (hasStoredSession) {
+  // Cookie-refresh: защищённые маршруты всегда; login — если есть access или «Запомнить меня».
+  // Чистый аноним на /login — без лишнего 419.
+  if (accessToken.value || remember.value || !isLoginPage) {
     await ensureSession()
   }
 

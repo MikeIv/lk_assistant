@@ -12,12 +12,12 @@ function isFetchError(error: unknown): error is FetchError {
 
 /**
  * Сессия брокера: login / logout / refresh / ensureSession.
+ * Refresh — HttpOnly cookie `refresh_token` (POST без body, `credentials: 'include'`).
  * Auth-запросы идут через сырой `$fetch` (без 401-retry из {@link useApi}), чтобы не зациклиться.
  */
 export function useAuth() {
   const baseURL = normalizeApiBaseUrl(useRuntimeConfig().public.apiBase)
-  const { accessToken, refreshToken, remember, hydrateFromStorage, persistTokens, clearTokens } =
-    useAuthToken()
+  const { accessToken, remember, hydrateFromStorage, persistTokens, clearTokens } = useAuthToken()
 
   const isAuthenticated = computed(() => Boolean(accessToken.value))
 
@@ -36,10 +36,9 @@ export function useAuth() {
     })
   }
 
-  function applyTokens(payload: LoginResponse, rememberMe: boolean) {
+  function applyAccessToken(payload: LoginResponse, rememberMe: boolean) {
     persistTokens({
       accessToken: payload.access_token,
-      refreshToken: payload.refresh_token,
       remember: rememberMe,
     })
   }
@@ -57,16 +56,13 @@ export function useAuth() {
       },
     )
 
-    applyTokens(response.payload, rememberMe)
+    // refresh_token в JSON игнорируем — бэкенд кладёт его в HttpOnly cookie.
+    applyAccessToken(response.payload, rememberMe)
   }
 
+  /** Silent refresh через HttpOnly cookie (без JS-хранения refresh). */
   async function refresh(): Promise<boolean> {
     hydrateFromStorage()
-
-    const token = refreshToken.value
-    if (!token) {
-      return false
-    }
 
     if (refreshInFlight) {
       return refreshInFlight
@@ -78,11 +74,10 @@ export function useAuth() {
           API_PATHS.broker.auth.refresh,
           {
             method: 'POST',
-            body: { refresh_token: token },
           },
         )
 
-        applyTokens(response.payload, remember.value)
+        applyAccessToken(response.payload, remember.value)
         return true
       } catch (error) {
         if (import.meta.dev && isFetchError(error)) {
@@ -117,16 +112,15 @@ export function useAuth() {
     }
   }
 
-  /** Восстановить access через refresh, если в storage есть refresh_token. */
+  /**
+   * Восстановить access: из storage или через cookie-refresh.
+   * Без access всегда пробуем refresh (cookie может быть валидна без JS-токенов).
+   */
   async function ensureSession(): Promise<boolean> {
     hydrateFromStorage()
 
     if (accessToken.value) {
       return true
-    }
-
-    if (!refreshToken.value) {
-      return false
     }
 
     const ok = await refresh()
@@ -138,7 +132,6 @@ export function useAuth() {
 
   return {
     accessToken,
-    refreshToken,
     isAuthenticated,
     login,
     logout,
