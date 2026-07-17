@@ -50,7 +50,7 @@
 }
 
 @mixin cabinet-section-title {
-  margin: 0;
+  margin: var(--fs-space-1) 0 0;
 
   @include typo.fs-text-h3;
 }
