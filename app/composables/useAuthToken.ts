@@ -36,7 +36,15 @@ function clearAuthKeys(storage: Storage): void {
   storageRemove(storage, AUTH_STORAGE_KEYS.remember)
 }
 
-let crossTabListenerBound = false
+let crossTabListener: ((event: StorageEvent) => void) | null = null
+
+/** Сброс модульного storage-listener между Vitest-кейсами. */
+export function resetCrossTabLogoutForTests() {
+  if (import.meta.client && crossTabListener) {
+    window.removeEventListener('storage', crossTabListener)
+  }
+  crossTabListener = null
+}
 
 /**
  * Access JWT для `Authorization: Bearer`.
@@ -108,12 +116,11 @@ export function useAuthToken() {
    * sessionStorage кросс-табово не синхронизируется (ограничение платформы).
    */
   function bindCrossTabLogout(onLogout: () => void) {
-    if (!import.meta.client || crossTabListenerBound) {
+    if (!import.meta.client || crossTabListener) {
       return
     }
-    crossTabListenerBound = true
 
-    window.addEventListener('storage', (event) => {
+    crossTabListener = (event) => {
       if (!isCrossTabAuthLogoutEvent(event, event.storageArea === localStorage)) {
         return
       }
@@ -122,7 +129,8 @@ export function useAuthToken() {
       remember.value = false
       hydrated.value = true
       onLogout()
-    })
+    }
+    window.addEventListener('storage', crossTabListener)
   }
 
   return {

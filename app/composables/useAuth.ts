@@ -8,6 +8,12 @@ import type { FetchError } from 'ofetch'
 let refreshInFlight: Promise<boolean> | null = null
 let redirectToLoginInFlight: Promise<void> | null = null
 
+/** Сброс in-flight промисов между Vitest-кейсами. */
+export function resetAuthInFlightForTests() {
+  refreshInFlight = null
+  redirectToLoginInFlight = null
+}
+
 function isFetchError(error: unknown): error is FetchError {
   return Boolean(error && typeof error === 'object' && 'response' in error)
 }

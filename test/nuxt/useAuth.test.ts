@@ -130,4 +130,50 @@ describe('useAuth', () => {
     )
     expect(accessToken.value).toBeNull()
   })
+
+  it('logout without token skips API and still clears session', async () => {
+    const { accessToken } = useAuthToken()
+    const { logout } = useAuth()
+    await logout()
+
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(accessToken.value).toBeNull()
+  })
+
+  it('refresh with remember=true writes new access to localStorage', async () => {
+    const { persistTokens } = useAuthToken()
+    persistTokens({
+      accessToken: makeAccessToken({ exp: Math.floor(Date.now() / 1000) - 10 }),
+      remember: true,
+    })
+
+    const nextAccess = makeAccessToken({ sub: 'remember-refresh' })
+    fetchMock.mockResolvedValueOnce(loginSuccess(nextAccess))
+
+    const { refresh } = useAuth()
+    await expect(refresh()).resolves.toBe(true)
+
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBe(nextAccess)
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.remember)).toBe('1')
+    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull()
+  })
+
+  it('isolates refreshInFlight so a later refresh can hit the network again', async () => {
+    const { persistTokens } = useAuthToken()
+    persistTokens({
+      accessToken: makeAccessToken({ exp: Math.floor(Date.now() / 1000) - 10 }),
+      remember: false,
+    })
+
+    fetchMock.mockRejectedValueOnce({ response: { status: 401 } })
+
+    const { refresh } = useAuth()
+    await expect(refresh()).resolves.toBe(false)
+
+    const nextAccess = makeAccessToken({ sub: 'second-flight' })
+    fetchMock.mockResolvedValueOnce(loginSuccess(nextAccess))
+
+    await expect(refresh()).resolves.toBe(true)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
 })

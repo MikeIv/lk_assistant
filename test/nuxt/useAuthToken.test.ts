@@ -1,5 +1,5 @@
 import { AUTH_STORAGE_KEYS } from '#shared/constants/authStorage'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { resetAuthClientState } from './resetAuthClientState'
 import { useAuthToken } from '~/composables/useAuthToken'
 
@@ -68,5 +68,85 @@ describe('useAuthToken', () => {
     expect(localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull()
     expect(localStorage.getItem(AUTH_STORAGE_KEYS.remember)).toBeNull()
     expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull()
+  })
+})
+
+describe('useAuthToken.bindCrossTabLogout', () => {
+  beforeEach(() => {
+    resetAuthClientState()
+  })
+
+  it('clears in-memory session and calls onLogout on localStorage auth clear', () => {
+    const onLogout = vi.fn()
+    const { persistTokens, bindCrossTabLogout, accessToken, remember } = useAuthToken()
+    persistTokens({ accessToken: 'tab-access', remember: true })
+    bindCrossTabLogout(onLogout)
+
+    window.dispatchEvent(
+      new StorageEvent('storage', {
+        key: AUTH_STORAGE_KEYS.accessToken,
+        newValue: null,
+        storageArea: localStorage,
+      }),
+    )
+
+    expect(accessToken.value).toBeNull()
+    expect(remember.value).toBe(false)
+    expect(onLogout).toHaveBeenCalledTimes(1)
+  })
+
+  it('ignores unrelated storage keys', () => {
+    const onLogout = vi.fn()
+    const { persistTokens, bindCrossTabLogout, accessToken } = useAuthToken()
+    persistTokens({ accessToken: 'keep-me', remember: true })
+    bindCrossTabLogout(onLogout)
+
+    window.dispatchEvent(
+      new StorageEvent('storage', {
+        key: 'other',
+        newValue: null,
+        storageArea: localStorage,
+      }),
+    )
+
+    expect(accessToken.value).toBe('keep-me')
+    expect(onLogout).not.toHaveBeenCalled()
+  })
+
+  it('ignores sessionStorage events', () => {
+    const onLogout = vi.fn()
+    const { persistTokens, bindCrossTabLogout, accessToken } = useAuthToken()
+    persistTokens({ accessToken: 'session-keep', remember: false })
+    bindCrossTabLogout(onLogout)
+
+    window.dispatchEvent(
+      new StorageEvent('storage', {
+        key: AUTH_STORAGE_KEYS.accessToken,
+        newValue: null,
+        storageArea: sessionStorage,
+      }),
+    )
+
+    expect(accessToken.value).toBe('session-keep')
+    expect(onLogout).not.toHaveBeenCalled()
+  })
+
+  it('binds the storage listener only once', () => {
+    const onLogout = vi.fn()
+    const { persistTokens, bindCrossTabLogout } = useAuthToken()
+    persistTokens({ accessToken: 'once', remember: true })
+
+    bindCrossTabLogout(onLogout)
+    bindCrossTabLogout(onLogout)
+
+    window.dispatchEvent(
+      new StorageEvent('storage', {
+        key: AUTH_STORAGE_KEYS.accessToken,
+        newValue: null,
+        storageArea: localStorage,
+      }),
+    )
+
+    expect(onLogout).toHaveBeenCalledTimes(1)
   })
 })

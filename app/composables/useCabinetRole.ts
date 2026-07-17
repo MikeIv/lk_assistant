@@ -7,7 +7,13 @@ const ROLE_STATE_KEY = 'cabinet-role'
 const ROLE_LABEL_STATE_KEY = 'cabinet-role-label'
 const FULL_NAME_STATE_KEY = 'cabinet-full-name'
 
-let roleWatchBound = false
+let stopRoleWatch: ReturnType<typeof watch> | null = null
+
+/** Сброс watch на accessToken между Vitest-кейсами. */
+export function resetCabinetRoleWatchForTests() {
+  stopRoleWatch?.()
+  stopRoleWatch = null
+}
 
 /**
  * Роль ЛК из access JWT (`role_id` / `role`).
@@ -39,9 +45,8 @@ export function useCabinetRole() {
 
   syncFromAccessToken()
 
-  if (import.meta.client && !roleWatchBound) {
-    roleWatchBound = true
-    watch(accessToken, () => {
+  if (import.meta.client && !stopRoleWatch) {
+    stopRoleWatch = watch(accessToken, () => {
       syncFromAccessToken()
     })
   }

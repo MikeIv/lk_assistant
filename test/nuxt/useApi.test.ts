@@ -15,7 +15,15 @@ const { authFetchMock, apiFetchMock, navigateToMock } = vi.hoisted(() => ({
 vi.stubGlobal(
   '$fetch',
   Object.assign(authFetchMock, {
-    create: vi.fn(() => apiFetchMock),
+    create: vi.fn(
+      (defaults: { onRequest?: (ctx: { options: Record<string, unknown> }) => void }) => {
+        return (request: string, options: Record<string, unknown> = {}) => {
+          const nextOptions = { ...options }
+          defaults?.onRequest?.({ options: nextOptions })
+          return apiFetchMock(request, nextOptions)
+        }
+      },
+    ),
   }),
 )
 
@@ -82,5 +90,73 @@ describe('useApi 401 recovery', () => {
 
     expect(accessToken.value).toBeNull()
     expect(navigateToMock).toHaveBeenCalledWith('/login', { replace: true })
+  })
+
+  it('rethrows second 401 after successful refresh without redirect', async () => {
+    const { persistTokens } = useAuthToken()
+    persistTokens({ accessToken: makeAccessToken(), remember: false })
+
+    apiFetchMock
+      .mockRejectedValueOnce(unauthorizedError())
+      .mockRejectedValueOnce(unauthorizedError())
+    authFetchMock.mockResolvedValueOnce(loginSuccess(makeAccessToken({ sub: 'after-refresh' })))
+
+    const api = useApi()
+    await expect(api('/v1/broker/legal-entities')).rejects.toMatchObject({
+      response: { status: 401 },
+    })
+
+    expect(apiFetchMock).toHaveBeenCalledTimes(2)
+    expect(navigateToMock).not.toHaveBeenCalled()
+  })
+
+  it('dedupes redirectToLogin when parallel requests fail refresh', async () => {
+    const { persistTokens } = useAuthToken()
+    persistTokens({ accessToken: makeAccessToken(), remember: false })
+
+    apiFetchMock.mockRejectedValue(unauthorizedError())
+    authFetchMock.mockRejectedValue(unauthorizedError())
+
+    const api = useApi()
+    await Promise.allSettled([api('/v1/broker/legal-entities'), api('/v1/broker/counterparties')])
+
+    expect(navigateToMock).toHaveBeenCalledTimes(1)
+    expect(navigateToMock).toHaveBeenCalledWith('/login', { replace: true })
+  })
+
+  it('passes non-401 errors through without refresh or redirect', async () => {
+    const { persistTokens } = useAuthToken()
+    persistTokens({ accessToken: makeAccessToken(), remember: false })
+
+    apiFetchMock.mockRejectedValueOnce({
+      response: { status: 500 },
+      statusCode: 500,
+      data: { message: 'boom' },
+    })
+
+    const api = useApi()
+    await expect(api('/v1/broker/legal-entities')).rejects.toMatchObject({
+      response: { status: 500 },
+    })
+
+    expect(authFetchMock).not.toHaveBeenCalled()
+    expect(apiFetchMock).toHaveBeenCalledTimes(1)
+    expect(navigateToMock).not.toHaveBeenCalled()
+  })
+
+  it('retries with Authorization Bearer from refreshed access token', async () => {
+    const { persistTokens } = useAuthToken()
+    const stale = makeAccessToken({ sub: 'stale' })
+    const fresh = makeAccessToken({ sub: 'fresh' })
+    persistTokens({ accessToken: stale, remember: false })
+
+    apiFetchMock.mockRejectedValueOnce(unauthorizedError()).mockResolvedValueOnce({ ok: true })
+    authFetchMock.mockResolvedValueOnce(loginSuccess(fresh))
+
+    const api = useApi()
+    await expect(api('/v1/broker/legal-entities')).resolves.toEqual({ ok: true })
+
+    const retryHeaders = apiFetchMock.mock.calls[1]?.[1]?.headers as Headers
+    expect(retryHeaders.get('Authorization')).toBe(`Bearer ${fresh}`)
   })
 })
