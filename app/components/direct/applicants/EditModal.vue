@@ -201,6 +201,7 @@ const isBusy = computed(() => isSubmitting.value || isDeleting.value)
             size="sm"
             variant="warning"
             label="Удалить"
+            :class="$style.deleteAction"
             :disabled="isBusy"
             @click="isDeleteConfirmOpen = true"
           />
@@ -314,5 +315,9 @@ const isBusy = computed(() => isSubmitting.value || isDeleting.value)
   flex-wrap: wrap;
   gap: var(--fs-space-1);
   margin-top: var(--fs-space-1);
+}
+
+.deleteAction {
+  margin-left: auto;
 }
 </style>
