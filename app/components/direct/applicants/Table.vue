@@ -30,9 +30,9 @@ const cssm = useCssModule()
 
 const columns = [
   { key: 'id' as const, label: 'id', align: 'center' as const },
-  { key: 'title' as const, label: 'Бренд / наименование', align: 'start' as const },
-  { key: 'company_group' as const, label: 'Группа компаний', align: 'start' as const },
   { key: 'category_id' as const, label: 'Категория', align: 'start' as const },
+  { key: 'company_group' as const, label: 'Группа компаний', align: 'start' as const },
+  { key: 'title' as const, label: 'Бренд', align: 'start' as const },
 ]
 
 const thAlignClass = {
@@ -146,9 +146,9 @@ function categoryLabel(item: Applicant): string {
             @keydown.enter="emit('rowClick', item)"
           >
             <td :class="[$style.td, tdAlignClass.center]">{{ item.id }}</td>
-            <td :class="[$style.td, tdAlignClass.start]">{{ item.title }}</td>
-            <td :class="[$style.td, tdAlignClass.start]">{{ item.company_group ?? '—' }}</td>
             <td :class="[$style.td, tdAlignClass.start]">{{ categoryLabel(item) }}</td>
+            <td :class="[$style.td, tdAlignClass.start]">{{ item.company_group ?? '—' }}</td>
+            <td :class="[$style.td, tdAlignClass.start]">{{ item.title }}</td>
           </tr>
         </tbody>
       </table>

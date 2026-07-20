@@ -101,14 +101,14 @@ function updateContactField(index: number, field: keyof ApplicantContact, value:
 
     <label :class="$style.field">
       <span :class="$style.label">
-        Бренд / наименование
+        Бренд
         <span :class="$style.required">*</span>
       </span>
       <div :class="[$style.inputWrap, errors.title && $style.inputWrapError]">
         <UiInput
           v-model="title"
           v-bind="titleAttrs"
-          placeholder="Введите наименование"
+          placeholder="Введите бренд"
           :disabled="disabled"
         />
       </div>
@@ -135,88 +135,90 @@ function updateContactField(index: number, field: keyof ApplicantContact, value:
     <fieldset :class="$style.section">
       <legend :class="$style.sectionTitle">Контакты</legend>
 
-      <div v-if="!contacts.length" :class="$style.emptyContacts">Контакты не добавлены</div>
+      <div :class="$style.sectionBody">
+        <div v-if="!contacts.length" :class="$style.emptyContacts">Контакты не добавлены</div>
 
-      <div v-for="(contact, index) in contacts" :key="index" :class="$style.contactCard">
-        <div :class="$style.contactHeader">
-          <span :class="$style.contactTitle">Контакт {{ index + 1 }}</span>
-          <button
-            type="button"
-            :class="$style.removeContact"
-            :disabled="disabled"
-            @click="removeContact(index)"
-          >
-            Удалить
-          </button>
+        <div v-for="(contact, index) in contacts" :key="index" :class="$style.contactCard">
+          <div :class="$style.contactHeader">
+            <span :class="$style.contactTitle">Контакт {{ index + 1 }}</span>
+            <UiButton
+              type="button"
+              size="sm"
+              variant="warning"
+              label="Удалить"
+              :disabled="disabled"
+              @click="removeContact(index)"
+            />
+          </div>
+
+          <label :class="$style.field">
+            <span :class="$style.label">ФИО</span>
+            <UiInput
+              :model-value="contact.name ?? ''"
+              placeholder="Введите ФИО"
+              :disabled="disabled"
+              @update:model-value="updateContactField(index, 'name', $event || null)"
+            />
+          </label>
+
+          <label :class="$style.field">
+            <span :class="$style.label">Должность</span>
+            <UiInput
+              :model-value="contact.position ?? ''"
+              placeholder="Введите должность"
+              :disabled="disabled"
+              @update:model-value="updateContactField(index, 'position', $event || null)"
+            />
+          </label>
+
+          <label :class="$style.field">
+            <span :class="$style.label">Телефон</span>
+            <div
+              :class="[$style.inputWrap, errors.contact_phones?.[index] && $style.inputWrapError]"
+            >
+              <UiPhoneInput
+                :model-value="contact.phone_number"
+                :disabled="disabled"
+                @update:model-value="updateContactField(index, 'phone_number', $event)"
+                @blur="validateContactPhoneOnBlur?.(index)"
+              />
+            </div>
+            <p v-if="errors.contact_phones?.[index]" :class="$style.fieldError">
+              {{ errors.contact_phones[index] }}
+            </p>
+          </label>
+
+          <label :class="$style.field">
+            <span :class="$style.label">Email</span>
+            <div
+              :class="[$style.inputWrap, errors.contact_emails?.[index] && $style.inputWrapError]"
+            >
+              <UiInput
+                :model-value="contact.email ?? ''"
+                placeholder="Введите email"
+                type="email"
+                :disabled="disabled"
+                @update:model-value="updateContactField(index, 'email', $event || null)"
+                @blur="validateContactEmailOnBlur?.(index)"
+              />
+            </div>
+            <p v-if="errors.contact_emails?.[index]" :class="$style.fieldError">
+              {{ errors.contact_emails[index] }}
+            </p>
+          </label>
         </div>
 
-        <label :class="$style.field">
-          <span :class="$style.label">ФИО</span>
-          <UiInput
-            :model-value="contact.name ?? ''"
-            placeholder="Введите ФИО"
-            :disabled="disabled"
-            @update:model-value="updateContactField(index, 'name', $event || null)"
-          />
-        </label>
+        <UiButton
+          type="button"
+          size="sm"
+          variant="soft"
+          label="Добавить контакт"
+          :disabled="disabled"
+          @click="addContact"
+        />
 
-        <label :class="$style.field">
-          <span :class="$style.label">Должность</span>
-          <UiInput
-            :model-value="contact.position ?? ''"
-            placeholder="Введите должность"
-            :disabled="disabled"
-            @update:model-value="updateContactField(index, 'position', $event || null)"
-          />
-        </label>
-
-        <label :class="$style.field">
-          <span :class="$style.label">Телефон</span>
-          <div
-            :class="[$style.inputWrap, errors.contact_phones?.[index] && $style.inputWrapError]"
-          >
-            <UiPhoneInput
-              :model-value="contact.phone_number"
-              :disabled="disabled"
-              @update:model-value="updateContactField(index, 'phone_number', $event)"
-              @blur="validateContactPhoneOnBlur?.(index)"
-            />
-          </div>
-          <p v-if="errors.contact_phones?.[index]" :class="$style.fieldError">
-            {{ errors.contact_phones[index] }}
-          </p>
-        </label>
-
-        <label :class="$style.field">
-          <span :class="$style.label">Email</span>
-          <div
-            :class="[$style.inputWrap, errors.contact_emails?.[index] && $style.inputWrapError]"
-          >
-            <UiInput
-              :model-value="contact.email ?? ''"
-              placeholder="Введите email"
-              type="email"
-              :disabled="disabled"
-              @update:model-value="updateContactField(index, 'email', $event || null)"
-              @blur="validateContactEmailOnBlur?.(index)"
-            />
-          </div>
-          <p v-if="errors.contact_emails?.[index]" :class="$style.fieldError">
-            {{ errors.contact_emails[index] }}
-          </p>
-        </label>
+        <p v-if="errors.contacts" :class="$style.fieldError">{{ errors.contacts }}</p>
       </div>
-
-      <UiButton
-        type="button"
-        size="sm"
-        variant="soft"
-        label="Добавить контакт"
-        :disabled="disabled"
-        @click="addContact"
-      />
-
-      <p v-if="errors.contacts" :class="$style.fieldError">{{ errors.contacts }}</p>
     </fieldset>
   </div>
 </template>
@@ -263,18 +265,24 @@ function updateContactField(index: number, field: keyof ApplicantContact, value:
 }
 
 .section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-2);
   margin: 0;
   padding: 0;
   border: none;
 }
 
 .sectionTitle {
+  padding: 0;
+  margin: 0;
   font-size: rem(13);
   font-weight: 700;
   color: var(--fs-color-text);
+}
+
+.sectionBody {
+  margin-top: rem(6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--fs-space-2);
 }
 
 .emptyContacts {
@@ -302,22 +310,6 @@ function updateContactField(index: number, field: keyof ApplicantContact, value:
 .contactTitle {
   font-size: rem(13);
   font-weight: 600;
-}
-
-.removeContact {
-  padding: 0;
-  border: none;
-  font: inherit;
-  font-size: rem(12);
-  color: var(--fs-color-error);
-  text-decoration: underline;
-  background: transparent;
-  cursor: pointer;
-
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
 }
 
 @keyframes applicants-field-error-blink {
