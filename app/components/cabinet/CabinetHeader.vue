@@ -11,9 +11,10 @@ const roleTagText = computed(() => {
 
 const { open: footerOpen, toggle: toggleFooter } = useCabinetFooter()
 
+const isLogoutConfirmOpen = ref(false)
 const isLoggingOut = ref(false)
 
-async function onLogout() {
+async function confirmLogout() {
   if (isLoggingOut.value) {
     return
   }
@@ -21,6 +22,7 @@ async function onLogout() {
   isLoggingOut.value = true
   try {
     await logout()
+    isLogoutConfirmOpen.value = false
     await navigateTo('/login', { replace: true })
   } finally {
     isLoggingOut.value = false
@@ -71,12 +73,22 @@ async function onLogout() {
         type="button"
         variant="auth"
         size="chrome"
-        :loading="isLoggingOut"
-        @click="onLogout"
+        :disabled="isLoggingOut"
+        @click="isLogoutConfirmOpen = true"
       >
         Выйти
       </UiButton>
     </div>
+
+    <UiConfirmPopup
+      v-model="isLogoutConfirmOpen"
+      message="Вы собираетесь закончить сессию"
+      confirm-label="Выйти"
+      cancel-label="Остаться"
+      confirm-variant="auth"
+      :loading="isLoggingOut"
+      @confirm="confirmLogout"
+    />
   </header>
 </template>
 
