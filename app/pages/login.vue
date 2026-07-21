@@ -10,16 +10,7 @@ useSeoMeta({
 })
 
 const { login } = useAuth()
-const {
-  handleSubmit,
-  errors,
-  email,
-  emailAttrs,
-  password,
-  passwordAttrs,
-  remember,
-  rememberAttrs,
-} = useLoginForm()
+const { handleSubmit, errors, email, emailAttrs, password, passwordAttrs } = useLoginForm()
 
 const generalError = ref<string | null>(null)
 const isSubmitting = ref(false)
@@ -33,7 +24,7 @@ const onSubmit = handleSubmit(async (values) => {
     await login({
       email: values.email,
       password: values.password,
-      remember: values.remember,
+      remember: true,
     })
     await navigateTo('/', { replace: true })
   } catch (error) {
@@ -50,7 +41,7 @@ const onSubmit = handleSubmit(async (values) => {
       <UIcon name="i-local-logo-tablet" :class="$style.logo" aria-hidden="true" />
     </div>
 
-    <h1 :class="$style.title">Войдите в свой аккаунт</h1>
+    <h1 :class="$style.title">Войдите в аккаунт</h1>
 
     <p v-if="generalError" id="login-general-error" :class="$style.generalError" role="alert">
       {{ generalError }}
@@ -70,9 +61,13 @@ const onSubmit = handleSubmit(async (values) => {
         inputmode="email"
         :disabled="isSubmitting"
         :aria-invalid="Boolean(errors.email) || undefined"
-        :aria-describedby="errors.email ? 'login-email-error' : undefined"
+        aria-describedby="login-email-error"
       />
-      <span v-if="errors.email" id="login-email-error" :class="$style.fieldError" role="alert">
+      <span
+        id="login-email-error"
+        :class="$style.fieldError"
+        :role="errors.email ? 'alert' : undefined"
+      >
         {{ errors.email }}
       </span>
     </div>
@@ -90,7 +85,7 @@ const onSubmit = handleSubmit(async (values) => {
         autocomplete="current-password"
         :disabled="isSubmitting"
         :aria-invalid="Boolean(errors.password) || undefined"
-        :aria-describedby="errors.password ? 'login-password-error' : undefined"
+        aria-describedby="login-password-error"
       >
         <template #trailing>
           <button
@@ -109,26 +104,13 @@ const onSubmit = handleSubmit(async (values) => {
         </template>
       </UiInput>
       <span
-        v-if="errors.password"
         id="login-password-error"
         :class="$style.fieldError"
-        role="alert"
+        :role="errors.password ? 'alert' : undefined"
       >
         {{ errors.password }}
       </span>
     </div>
-
-    <label :class="$style.remember">
-      <input
-        v-bind="rememberAttrs"
-        v-model="remember"
-        type="checkbox"
-        :class="$style.rememberInput"
-        :disabled="isSubmitting"
-      />
-      <span :class="[$style.checkbox, remember && $style.checkboxChecked]" aria-hidden="true" />
-      <span :class="$style.rememberText">Запомнить меня</span>
-    </label>
 
     <UiButton type="submit" variant="auth" :class="$style.submit" :loading="isSubmitting">
       Войти
@@ -165,7 +147,8 @@ const onSubmit = handleSubmit(async (values) => {
 }
 
 .title {
-  margin: 0;
+  // gap + margin → 2× между лого и заголовком
+  margin: var(--fs-space-3) 0 0;
   text-align: center;
 
   @include typo.fs-text-h2;
@@ -201,6 +184,7 @@ const onSubmit = handleSubmit(async (values) => {
 
 .fieldError {
   margin: 0;
+  min-height: 1.3em;
   font-size: rem(12);
   line-height: 1.3;
   color: var(--fs-color-error);
@@ -235,70 +219,6 @@ const onSubmit = handleSubmit(async (values) => {
   display: block;
   width: rem(22);
   height: rem(22);
-}
-
-.remember {
-  display: inline-flex;
-  align-items: center;
-  gap: rem(10);
-  width: fit-content;
-  cursor: pointer;
-  user-select: none;
-}
-
-.rememberInput {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-  border: 0;
-
-  &:focus-visible + .checkbox {
-    outline: rem(2) solid var(--fs-color-primary);
-    outline-offset: rem(2);
-  }
-
-  &:disabled + .checkbox {
-    opacity: 0.5;
-  }
-}
-
-.checkbox {
-  box-sizing: border-box;
-  flex-shrink: 0;
-  width: rem(18);
-  height: rem(18);
-  border: 1px solid var(--fs-figma-stroke-gray);
-  border-radius: rem(4);
-  background-color: var(--fs-figma-achromatic-white);
-}
-
-.checkboxChecked {
-  position: relative;
-  border-color: var(--fs-figma-system-button-gray);
-  background-color: var(--fs-figma-system-button-gray);
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: rem(2);
-    left: rem(5);
-    width: rem(5);
-    height: rem(9);
-    border: solid var(--fs-figma-achromatic-white);
-    border-width: 0 rem(2) rem(2) 0;
-    transform: rotate(45deg);
-  }
-}
-
-.rememberText {
-  font-size: rem(14);
-  line-height: 1.3;
-  color: var(--fs-color-text);
 }
 
 .submit {

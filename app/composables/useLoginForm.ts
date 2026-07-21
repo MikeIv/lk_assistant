@@ -6,7 +6,7 @@ import { loginFormSchema, type LoginFormValues } from '#shared/utils/loginSchema
 const EMPTY_FORM_VALUES: LoginFormValues = {
   email: '',
   password: '',
-  remember: false,
+  remember: true,
 }
 
 export function useLoginForm(initialValues: LoginFormValues = EMPTY_FORM_VALUES) {
@@ -17,7 +17,6 @@ export function useLoginForm(initialValues: LoginFormValues = EMPTY_FORM_VALUES)
 
   const [email, emailAttrs] = form.defineField('email')
   const [password, passwordAttrs] = form.defineField('password')
-  const [remember, rememberAttrs] = form.defineField('remember')
 
   return {
     ...form,
@@ -25,7 +24,5 @@ export function useLoginForm(initialValues: LoginFormValues = EMPTY_FORM_VALUES)
     emailAttrs,
     password,
     passwordAttrs,
-    remember,
-    rememberAttrs,
   }
 }
