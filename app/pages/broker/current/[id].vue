@@ -3,6 +3,8 @@ import type { TenantCase } from '#shared/types/tenantCases'
 import { tenantCaseApplicantsToFormLoad } from '#shared/utils/tenantCasesNormalize'
 import type { TenantCaseCardTab } from '~/components/broker/current/CaseTabs.vue'
 
+const CASES_LIST_PATH = '/broker/current'
+
 const route = useRoute()
 const caseId = computed(() => Number(route.params.id))
 
@@ -17,8 +19,10 @@ const generalError = ref<string | null>(null)
 const isSubmitting = ref(false)
 const isDeleting = ref(false)
 const isDeleteConfirmOpen = ref(false)
+const isLeaveConfirmOpen = ref(false)
 const isCancelling = ref(false)
 const activeTab = ref<TenantCaseCardTab>('room')
+const pristinePayloadJson = ref<string | null>(null)
 
 const applicantsTabRef = ref<{
   resetCollapseForTabEnter: () => void
@@ -40,6 +44,18 @@ const {
 
 const isBusy = computed(() => isSubmitting.value || isDeleting.value || isCancelling.value)
 
+const hasUnsavedChanges = computed(() => {
+  if (pristinePayloadJson.value == null || !tenantCase.value) {
+    return false
+  }
+
+  return JSON.stringify(toPayload()) !== pristinePayloadJson.value
+})
+
+function rememberPristinePayload() {
+  pristinePayloadJson.value = JSON.stringify(toPayload())
+}
+
 function applyCaseToForm(item: TenantCase) {
   tenantCase.value = item
   loadTenantCaseForm(
@@ -49,6 +65,7 @@ function applyCaseToForm(item: TenantCase) {
     },
     tenantCaseApplicantsToFormLoad(item.applicants),
   )
+  rememberPristinePayload()
 }
 
 async function loadCase() {
@@ -170,7 +187,7 @@ async function handleDeleteConfirm() {
     const result = await deleteTenantCase(tenantCase.value.id)
 
     if (result.ok) {
-      await navigateTo('/broker/current')
+      await goToCasesList()
       return
     }
 
@@ -179,6 +196,24 @@ async function handleDeleteConfirm() {
   } finally {
     isDeleting.value = false
   }
+}
+
+function goToCasesList() {
+  return navigateTo(CASES_LIST_PATH)
+}
+
+function onBackLinkClick() {
+  if (hasUnsavedChanges.value) {
+    isLeaveConfirmOpen.value = true
+    return
+  }
+
+  void goToCasesList()
+}
+
+function confirmLeaveWithoutSave() {
+  isLeaveConfirmOpen.value = false
+  void goToCasesList()
 }
 
 useHead(
@@ -193,14 +228,20 @@ useHead(
 <template>
   <section :class="$style.root">
     <div :class="$style.topBar">
-      <NuxtLink to="/broker/current" :class="$style.backLink">← К списку дел</NuxtLink>
+      <a
+        :href="CASES_LIST_PATH"
+        :class="$style.backLink"
+        @click.prevent="onBackLinkClick"
+      >
+        ← К списку дел
+      </a>
     </div>
 
     <div v-if="isLoading" :class="$style.state">Загрузка карточки дела…</div>
 
     <div v-else-if="loadError" :class="$style.stateError">
       {{ loadError }}
-      <NuxtLink to="/broker/current" :class="$style.backLink">Вернуться к списку</NuxtLink>
+      <NuxtLink :to="CASES_LIST_PATH" :class="$style.backLink">Вернуться к списку</NuxtLink>
     </div>
 
     <form v-else-if="tenantCase" :class="$style.form" @submit.prevent="onSubmit">
@@ -267,37 +308,26 @@ useHead(
       </div>
     </form>
 
-    <Teleport to="body">
-      <div
-        v-if="isDeleteConfirmOpen"
-        :class="$style.overlay"
-        @mousedown.self="isDeleteConfirmOpen = false"
-      >
-        <div :class="$style.confirmDialog" role="dialog" aria-modal="true">
-          <h4 :class="$style.confirmTitle">Удалить дело?</h4>
-          <p :class="$style.confirmText">Действие нельзя отменить.</p>
-          <div :class="$style.confirmActions">
-            <UiButton
-              type="button"
-              size="sm"
-              variant="warning"
-              label="Удалить"
-              :loading="isDeleting"
-              :disabled="isDeleting"
-              @click="handleDeleteConfirm"
-            />
-            <UiButton
-              type="button"
-              size="sm"
-              variant="soft"
-              label="Отменить"
-              :disabled="isDeleting"
-              @click="isDeleteConfirmOpen = false"
-            />
-          </div>
-        </div>
-      </div>
-    </Teleport>
+    <UiConfirmPopup
+      v-model="isDeleteConfirmOpen"
+      message="Вы пытаетесь удалить дело"
+      confirm-label="Удалить"
+      cancel-label="Не удалять"
+      confirm-variant="warning"
+      button-size="sm"
+      :loading="isDeleting"
+      @confirm="handleDeleteConfirm"
+    />
+
+    <UiConfirmPopup
+      v-model="isLeaveConfirmOpen"
+      message="Вы не сохранили изменения"
+      confirm-label="Не сохранять"
+      cancel-label="Вернуться"
+      confirm-variant="warning"
+      button-size="sm"
+      @confirm="confirmLeaveWithoutSave"
+    />
   </section>
 </template>
 
@@ -326,6 +356,7 @@ useHead(
   color: var(--fs-color-primary);
   text-decoration: underline;
   text-underline-offset: rem(2);
+  cursor: pointer;
 }
 
 .form {
@@ -397,47 +428,6 @@ useHead(
 }
 
 .actionsLeft {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--fs-space-1);
-}
-
-.overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--fs-space-2);
-  background: rgb(23 23 32 / 0.45);
-}
-
-.confirmDialog {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-2);
-  width: min(100%, rem(420));
-  padding: var(--fs-space-3);
-  border-radius: rem(16);
-  background: var(--fs-color-bg);
-  box-shadow: var(--fs-shadow-cabinet-nav);
-}
-
-.confirmTitle {
-  margin: 0;
-
-  @include typo.fs-text-h4;
-}
-
-.confirmText {
-  margin: 0;
-  color: var(--fs-color-text-muted);
-
-  @include typo.fs-text-body;
-}
-
-.confirmActions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--fs-space-1);

@@ -23,6 +23,13 @@ const emit = defineEmits<{
 const applicants = defineModel<TenantCaseApplicantFormValues[]>('applicants', { required: true })
 const isExpanded = defineModel<boolean>('expanded', { required: true })
 
+const isDeleteConfirmOpen = ref(false)
+
+function confirmRemove() {
+  isDeleteConfirmOpen.value = false
+  emit('remove')
+}
+
 const applicant = computed(() => applicants.value[props.index]!)
 
 const isExisting = computed(() => applicant.value.id != null)
@@ -264,10 +271,20 @@ function toggleExpanded() {
           variant="warning"
           label="Удалить претендента"
           :disabled="disabled"
-          @click="emit('remove')"
+          @click="isDeleteConfirmOpen = true"
         />
       </div>
     </div>
+
+    <UiConfirmPopup
+      v-model="isDeleteConfirmOpen"
+      message="Вы пытаетесь удалить претендента"
+      confirm-label="Удалить"
+      cancel-label="Не удалять"
+      confirm-variant="warning"
+      button-size="sm"
+      @confirm="confirmRemove"
+    />
   </section>
 </template>
 

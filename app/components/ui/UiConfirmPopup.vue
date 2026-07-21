@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { UiButtonVariant } from '~/components/ui/UiButton.vue'
+import type { UiButtonSize, UiButtonVariant } from '~/components/ui/UiButton.vue'
 
 const open = defineModel<boolean>({ required: true })
 
@@ -11,6 +11,7 @@ const props = withDefaults(
     cancelLabel?: string
     confirmVariant?: UiButtonVariant
     cancelVariant?: UiButtonVariant
+    buttonSize?: UiButtonSize
     loading?: boolean
     closeOnOverlay?: boolean
   }>(),
@@ -20,6 +21,7 @@ const props = withDefaults(
     cancelLabel: 'Отмена',
     confirmVariant: 'accent',
     cancelVariant: 'soft',
+    buttonSize: 'chrome',
     loading: false,
     closeOnOverlay: true,
   },
@@ -89,7 +91,7 @@ watch(open, (isOpen, _prev, onCleanup) => {
         <div :class="$style.actions">
           <UiButton
             type="button"
-            size="chrome"
+            :size="buttonSize"
             :variant="confirmVariant"
             :label="confirmLabel"
             :loading="loading"
@@ -97,7 +99,7 @@ watch(open, (isOpen, _prev, onCleanup) => {
           />
           <UiButton
             type="button"
-            size="chrome"
+            :size="buttonSize"
             :variant="cancelVariant"
             :label="cancelLabel"
             :disabled="loading"
