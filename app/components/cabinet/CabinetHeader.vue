@@ -82,7 +82,7 @@ async function confirmLogout() {
 
     <UiConfirmPopup
       v-model="isLogoutConfirmOpen"
-      message="Вы собираетесь закончить сессию"
+      message="Вы уверены, что хотите выйти?"
       confirm-label="Выйти"
       cancel-label="Остаться"
       confirm-variant="auth"

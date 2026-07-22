@@ -310,7 +310,7 @@ useHead(
 
     <UiConfirmPopup
       v-model="isDeleteConfirmOpen"
-      message="Вы пытаетесь удалить дело"
+      message="Удалить дело?"
       confirm-label="Удалить"
       cancel-label="Не удалять"
       confirm-variant="warning"
