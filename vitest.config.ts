@@ -27,12 +27,12 @@ export default defineConfig({
         'server/utils/**/*.ts',
       ],
       exclude: ['**/*.d.ts'],
-      // After shared/utils unit suite (2026-07-28): ~37% overall; utils ~90%.
+      // After domain composable nuxt suite (2026-07-28): ~75% overall; composables ~73–75%.
       thresholds: {
-        lines: 35,
-        statements: 35,
-        functions: 35,
-        branches: 38,
+        lines: 70,
+        statements: 70,
+        functions: 70,
+        branches: 55,
       },
     },
     projects: [

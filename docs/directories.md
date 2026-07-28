@@ -157,5 +157,4 @@ flowchart LR
 | Table / name validation | `directoriesTable.contract.test.ts`, `directoriesNameValidation.contract.test.ts`               |
 | Query (server-page)     | `directoryQuery.contract.test.ts`                                                               |
 | Field validation        | `premisesValidation.test.ts`, `legalEntitiesValidation.test.ts`, `applicantsValidation.test.ts` |
-
-Nuxt-тестов composables справочников пока нет.
+| Domain composables      | `test/nuxt/directories.contract.test.ts`, `directoryForms.contract.test.ts`                     |

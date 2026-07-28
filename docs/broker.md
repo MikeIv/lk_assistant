@@ -151,10 +151,10 @@ flowchart TB
 
 См. [testing.md](./testing.md).
 
-| Область         | Файлы                                           |
-| --------------- | ----------------------------------------------- |
-| Календарь utils | `test/unit/shared/utils/calendarEvents.test.ts` |
-| Задачи utils    | `test/unit/shared/utils/tasks.test.ts`          |
-| Дела utils      | `test/unit/shared/utils/tenantCases.test.ts`    |
-
-Nuxt-тестов страниц и composables брокера пока нет.
+| Область         | Файлы                                                           |
+| --------------- | --------------------------------------------------------------- |
+| Календарь utils | `test/unit/shared/utils/calendarEvents.test.ts`                 |
+| Задачи utils    | `test/unit/shared/utils/tasks.test.ts`                          |
+| Дела utils      | `test/unit/shared/utils/tenantCases.test.ts`                    |
+| Дела nuxt       | `test/nuxt/useTenantCases.test.ts`, `useTenantCaseForm.test.ts` |
+| Nav             | `test/nuxt/cabinetNav.test.ts`                                  |
