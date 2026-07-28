@@ -39,3 +39,7 @@ AGENTS.md
 
 # Планирование — локальная директория сессии
 .planning/
+
+# Tests / coverage
+coverage/
+reports/

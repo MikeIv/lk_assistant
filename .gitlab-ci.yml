@@ -1,28 +1,67 @@
 stages:
+  - test
   - build
   - deploy
 
-.build_frontend:
-  stage: build
+.pnpm_setup:
   image: node:22-alpine
   variables:
     HUSKY: '0'
-    NODE_ENV: production
-    NUXT_PUBLIC_API_BASE: https://olimpapi.portalrent.ru/api
   before_script:
     # pnpm 11.1.1 (packageManager) требует Node >= 22.13; на Node 20 падает с node:sqlite
     - npm install -g pnpm@11.1.1
     - pnpm install --frozen-lockfile
+  tags:
+    - docker
+
+.test_frontend:
+  extends: .pnpm_setup
+  stage: test
+  script:
+    - pnpm lint:all
+    - pnpm typecheck
+    - pnpm test:cov
+  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
+  artifacts:
+    when: always
+    paths:
+      - coverage/cobertura-coverage.xml
+      - coverage/coverage-summary.json
+      - reports/junit.xml
+    reports:
+      junit: reports/junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+    expire_in: 1 week
+
+test frontend develop:
+  extends: .test_frontend
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'develop'
+
+test frontend production:
+  extends: .test_frontend
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'main'
+
+.build_frontend:
+  extends: .pnpm_setup
+  stage: build
+  variables:
+    HUSKY: '0'
+    NODE_ENV: production
+    NUXT_PUBLIC_API_BASE: https://olimpapi.portalrent.ru/api
   script:
     - pnpm run build
   artifacts:
     paths:
       - .output
-  tags:
-    - docker
 
 build frontend develop:
   extends: .build_frontend
+  needs:
+    - test frontend develop
   environment:
     name: develop
     url: https://lk-assistant-main.portalrent.ru
@@ -31,6 +70,8 @@ build frontend develop:
 
 build frontend production:
   extends: .build_frontend
+  needs:
+    - test frontend production
   environment:
     name: production
     url: https://brokerolimp.portalrent.ru

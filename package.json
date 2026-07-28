@@ -19,6 +19,7 @@
     "typecheck": "nuxt prepare && nuxi typecheck",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:cov": "vitest run --coverage",
     "verify": "pnpm lint:all && pnpm typecheck && pnpm test"
   },
   "dependencies": {
@@ -44,6 +45,7 @@
     "@nuxt/eslint": "^1.16.0",
     "@nuxt/test-utils": "^4.0.3",
     "@types/node": "^26.0.0",
+    "@vitest/coverage-v8": "^4.1.10",
     "@vue/test-utils": "^2.4.11",
     "eslint": "^10.5.0",
     "eslint-config-prettier": "^10.1.8",

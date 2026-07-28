@@ -31,8 +31,11 @@ pnpm test                 # unit + nuxt
 pnpm test -- --project unit
 pnpm test -- --project nuxt
 pnpm test:watch
+pnpm test:cov             # + coverage (v8) → coverage/
 pnpm verify               # lint:all + typecheck + test
 ```
+
+CI (`develop` / `main`): `lint:all` + `typecheck` + `test:cov` → затем `build`. Отчёты: JUnit, Cobertura.
 
 ---
 
@@ -59,7 +62,19 @@ Flows auth: [auth.md](./auth.md).
 
 `.vue` в общий % порога не включают: UI меняется чаще логики.
 
-Порог в CI — после `@vitest/coverage-v8` и замера baseline. Сейчас — `pnpm test` / `pnpm verify`.
+### Baseline и пороги CI
+
+Замер (auth-only, 2026-07-28) по `include` в `vitest.config.ts`
+(`shared/utils`, `app/composables`, `app/middleware`, `server/utils`):
+
+| Метрика    | Baseline | Порог |
+| ---------- | -------- | ----- |
+| Lines      | 9.11%    | 8%    |
+| Statements | 9.14%    | 8%    |
+| Functions  | 7.46%    | 7%    |
+| Branches   | 7.89%    | 7%    |
+
+Пороги поднимают после добавления тестов. Auth-файлы уже ~85–100% lines.
 
 ---
 

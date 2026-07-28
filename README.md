@@ -79,6 +79,7 @@ pnpm approve-builds --all
 | `pnpm typecheck`     | проверка типов (`nuxi typecheck`)                           |
 | `pnpm test`          | Vitest: unit + nuxt                                         |
 | `pnpm test:watch`    | Vitest в watch-режиме                                       |
+| `pnpm test:cov`      | Vitest + coverage (v8), отчёт в `coverage/`                 |
 | `pnpm verify`        | `lint:all` + `typecheck` + `test`                           |
 
 Перед коммитом: **`pnpm lint:all`** (или **`pnpm verify`** при правках типов / API / тестов).
@@ -87,7 +88,7 @@ pnpm approve-builds --all
 
 ## Деплой (GitLab CI)
 
-Конфигурация: [`.gitlab-ci.yml`](.gitlab-ci.yml). Runner: build (`docker`) → deploy (`shell`, `grand232`).
+Конфигурация: [`.gitlab-ci.yml`](.gitlab-ci.yml). Runner: test → build (`docker`) → deploy (`shell`, `grand232`).
 
 | Ветка     | Окружение  | URL                                                                                |
 | --------- | ---------- | ---------------------------------------------------------------------------------- |
