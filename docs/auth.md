@@ -177,19 +177,13 @@ ACL по ролям **нет** — только «гость / сессия».
 
 ## Тесты
 
-```bash
-pnpm test                 # unit + nuxt
-pnpm test -- --project unit
-pnpm test -- --project nuxt
-```
+Стратегия и команды — [testing.md](./testing.md). Auth-покрытие:
 
-| Область     | Файлы                                                                                              |
-| ----------- | -------------------------------------------------------------------------------------------------- |
-| Unit utils  | `test/unit/jwtPayload.test.ts`, `cabinetRoleFromJwt`, `loginSchema`, `loginErrors`, `authCrossTab` |
-| Composables | `test/nuxt/useAuth.test.ts`, `useAuthToken.test.ts`, `useApi.test.ts`                              |
-| Helpers     | `test/helpers/jwt.ts`, `authApi.ts`, `test/nuxt/resetAuthClientState.ts`                           |
-
-Конфиг: `vitest.config.ts`.
+| Область                  | Файлы                                                                                              |
+| ------------------------ | -------------------------------------------------------------------------------------------------- |
+| Unit utils               | `test/unit/jwtPayload.test.ts`, `cabinetRoleFromJwt`, `loginSchema`, `loginErrors`, `authCrossTab` |
+| Composables / middleware | `test/nuxt/useAuth.test.ts`, `useAuthToken`, `useApi`, `useCabinetRole`, `authMiddleware`          |
+| Helpers                  | `test/helpers/jwt.ts`, `authApi.ts`, `test/nuxt/resetAuthClientState.ts`                           |
 
 ---
 

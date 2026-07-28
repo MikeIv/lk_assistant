@@ -77,9 +77,11 @@ pnpm approve-builds --all
 | `pnpm stylelint:fix` | Stylelint с автоисправлением                                |
 | `pnpm lint:all`      | ESLint + Prettier (check) + Stylelint                       |
 | `pnpm typecheck`     | проверка типов (`nuxi typecheck`)                           |
-| `pnpm verify`        | `lint:all` + `typecheck`                                    |
+| `pnpm test`          | Vitest: unit + nuxt                                         |
+| `pnpm test:watch`    | Vitest в watch-режиме                                       |
+| `pnpm verify`        | `lint:all` + `typecheck` + `test`                           |
 
-Перед коммитом: **`pnpm lint:all`** (или **`pnpm verify`** при правках типов / API).
+Перед коммитом: **`pnpm lint:all`** (или **`pnpm verify`** при правках типов / API / тестов).
 
 Сообщения коммитов — **строго на английском**, формат [Conventional Commits](https://www.conventionalcommits.org/): `feat: add tenant case filters`, `fix: directory table pagination`.
 
@@ -135,6 +137,16 @@ shared/constants, shared/types, shared/utils
 - **`NUXT_PUBLIC_CONTRACT_ID`** — временный заголовок отчётов до auth
 
 ## Документация
+
+Описание модулей и архитектуры: **[docs/](docs/README.md)**.
+
+| Документ                                     | Содержание                            |
+| -------------------------------------------- | ------------------------------------- |
+| [docs/architecture.md](docs/architecture.md) | Слои SPA, HTTP, mock-режим, навигация |
+| [docs/auth.md](docs/auth.md)                 | JWT-сессия, refresh, middleware       |
+| [docs/testing.md](docs/testing.md)           | Vitest, стратегия покрытия            |
+
+Внешнее:
 
 - [Nuxt 4](https://nuxt.com/docs/4.x/getting-started/introduction)
 - [Деплой Nuxt](https://nuxt.com/docs/getting-started/deployment)
