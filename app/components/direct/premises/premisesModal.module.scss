@@ -131,25 +131,8 @@
   margin-top: var(--fs-space-1);
 }
 
-.deleteConfirm {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-1);
-  padding: var(--fs-space-2);
-  border-radius: rem(12);
-  background-color: var(--fs-color-ui-button-warning-surface);
-}
-
-.deleteConfirmText {
-  margin: 0;
-  font-size: rem(13);
-  color: var(--fs-color-text);
-}
-
-.deleteConfirmActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--fs-space-1);
+.deleteAction {
+  margin-left: auto;
 }
 
 @keyframes premises-field-error-blink {

@@ -38,6 +38,7 @@ watch(
 )
 
 function close() {
+  isDeleteConfirmOpen.value = false
   open.value = false
 }
 
@@ -131,31 +132,6 @@ const isBusy = computed(() => isSubmitting.value || isDeleting.value)
           <p v-if="errors.name" :class="$style.fieldError">{{ errors.name }}</p>
         </label>
 
-        <div v-if="isDeleteConfirmOpen" :class="$style.deleteConfirm">
-          <p :class="$style.deleteConfirmText">
-            Удалить статус «{{ negotiationStatus.name }}»?
-          </p>
-          <div :class="$style.deleteConfirmActions">
-            <UiButton
-              type="button"
-              size="sm"
-              variant="warning"
-              label="Удалить"
-              :loading="isDeleting"
-              :disabled="isBusy"
-              @click="handleDeleteConfirm"
-            />
-            <UiButton
-              type="button"
-              size="sm"
-              variant="soft"
-              label="Отмена"
-              :disabled="isBusy"
-              @click="isDeleteConfirmOpen = false"
-            />
-          </div>
-        </div>
-
         <p v-if="generalError" :class="$style.generalError">{{ generalError }}</p>
 
         <div :class="$style.actions">
@@ -176,11 +152,11 @@ const isBusy = computed(() => isSubmitting.value || isDeleting.value)
             @click="close"
           />
           <UiButton
-            v-if="!isDeleteConfirmOpen"
             type="button"
             size="sm"
             variant="warning"
             label="Удалить"
+            :class="$style.deleteAction"
             :disabled="isBusy"
             @click="isDeleteConfirmOpen = true"
           />
@@ -188,6 +164,18 @@ const isBusy = computed(() => isSubmitting.value || isDeleting.value)
       </form>
     </div>
   </Teleport>
+
+  <UiConfirmPopup
+    v-if="open && negotiationStatus"
+    v-model="isDeleteConfirmOpen"
+    :message="`Удалить статус «${negotiationStatus.name}»?`"
+    confirm-label="Удалить"
+    cancel-label="Не удалять"
+    confirm-variant="warning"
+    button-size="sm"
+    :loading="isDeleting"
+    @confirm="handleDeleteConfirm"
+  />
 </template>
 
 <style module lang="scss">
@@ -292,27 +280,6 @@ const isBusy = computed(() => isSubmitting.value || isDeleting.value)
   color: var(--fs-color-error);
 }
 
-.deleteConfirm {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fs-space-1);
-  padding: var(--fs-space-2);
-  border-radius: rem(12);
-  background-color: var(--fs-color-ui-button-warning-surface);
-}
-
-.deleteConfirmText {
-  margin: 0;
-  font-size: rem(13);
-  color: var(--fs-color-text);
-}
-
-.deleteConfirmActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--fs-space-1);
-}
-
 .generalError {
   margin: 0;
   font-size: rem(13);
@@ -324,6 +291,10 @@ const isBusy = computed(() => isSubmitting.value || isDeleting.value)
   flex-wrap: wrap;
   gap: var(--fs-space-1);
   margin-top: var(--fs-space-1);
+}
+
+.deleteAction {
+  margin-left: auto;
 }
 
 @keyframes negotiation-statuses-field-error-blink {

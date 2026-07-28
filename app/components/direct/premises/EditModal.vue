@@ -66,6 +66,7 @@ watch(
 )
 
 function close() {
+  isDeleteConfirmOpen.value = false
   open.value = false
 }
 
@@ -249,29 +250,6 @@ const isBusy = computed(() => isSubmitting.value || isDeleting.value)
           </label>
         </fieldset>
 
-        <div v-if="isDeleteConfirmOpen" :class="$style.deleteConfirm">
-          <p :class="$style.deleteConfirmText">Удалить помещение «{{ premise.name }}»?</p>
-          <div :class="$style.deleteConfirmActions">
-            <UiButton
-              type="button"
-              size="sm"
-              variant="warning"
-              label="Удалить"
-              :loading="isDeleting"
-              :disabled="isBusy"
-              @click="handleDeleteConfirm"
-            />
-            <UiButton
-              type="button"
-              size="sm"
-              variant="soft"
-              label="Отмена"
-              :disabled="isBusy"
-              @click="isDeleteConfirmOpen = false"
-            />
-          </div>
-        </div>
-
         <p v-if="generalError" :class="$style.generalError">{{ generalError }}</p>
 
         <div :class="$style.actions">
@@ -292,11 +270,11 @@ const isBusy = computed(() => isSubmitting.value || isDeleting.value)
             @click="close"
           />
           <UiButton
-            v-if="!isDeleteConfirmOpen"
             type="button"
             size="sm"
             variant="warning"
             label="Удалить"
+            :class="$style.deleteAction"
             :disabled="isBusy"
             @click="isDeleteConfirmOpen = true"
           />
@@ -304,6 +282,18 @@ const isBusy = computed(() => isSubmitting.value || isDeleting.value)
       </form>
     </div>
   </Teleport>
+
+  <UiConfirmPopup
+    v-if="open && premise"
+    v-model="isDeleteConfirmOpen"
+    :message="`Удалить помещение «${premise.name}»?`"
+    confirm-label="Удалить"
+    cancel-label="Не удалять"
+    confirm-variant="warning"
+    button-size="sm"
+    :loading="isDeleting"
+    @confirm="handleDeleteConfirm"
+  />
 </template>
 
 <style module lang="scss" src="./premisesModal.module.scss"></style>
