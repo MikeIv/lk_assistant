@@ -47,7 +47,8 @@ CI (`develop` / `main`): `lint:all` + `typecheck` + `test:cov` → затем `b
 | Auth nuxt                    | `test/nuxt/useAuth`, `useAuthToken`, `useApi`, `useApiConfig`, `useCabinetRole`, `authMiddleware`                                   |
 | Domain unit (`shared/utils`) | `test/unit/shared/utils/*` — контракты справочников (`*Table`/`*Validation`/`*Query`), reports, calendar, tasks, tenantCases, phone |
 | Domain nuxt                  | `directories.contract`, `directoryForms.contract`, `useTenantCases`, `useTenantCaseForm`, `cabinetNav`, `reportsApiHeaders`         |
-| Helpers                      | `test/helpers/jwt.ts`, `authApi.ts`, `domainApiMock.ts`, `runComposable.ts`, `test/nuxt/resetAuthClientState.ts`                    |
+| Components (nuxt + VTU)      | `UiSelect`, `UiCombobox`, `UiPhoneInput`, `UiDateInput`, `UiMultiSelect`, `ReportsTablePagination`, `categoriesTable.contract`      |
+| Helpers                      | `test/helpers/jwt.ts`, `authApi.ts`, `domainApiMock.ts`, `runComposable.ts`, `mountUi.ts`, `test/nuxt/resetAuthClientState.ts`      |
 
 Flows auth: [auth.md](./auth.md).
 
@@ -86,9 +87,10 @@ Flows auth: [auth.md](./auth.md).
 
 1. Чистая функция (`shared/utils`) → `test/unit/…`, без моков Nuxt.
 2. Composable / middleware → `test/nuxt/…` (эталон: `useApi.test.ts` — `mockNuxtImport`, stub `$fetch`; домен — `directories.contract.test.ts` + `runComposable` / `domainApiMock`).
-3. Шесть справочников — общий контракт (`describe.each`), не шесть копий одного spec.
-4. Новые файлы зеркалят путь исходника: `test/unit/shared/utils/premisesTable.test.ts`. Auth-тесты не переносить ради структуры.
-5. Фикстуры — `test/fixtures/` (по мере появления); хелперы — `test/helpers/` (`runComposable`, `domainApiMock`).
+3. Компонент с логикой → `test/nuxt/…` через `mountSuspended` / `mountUi` (`@vue/test-utils`); stub `UIcon` + `Teleport` (happy-dom).
+4. Шесть справочников — общий контракт (`describe.each`), не шесть копий одного spec. Таблица UI — один `*Table.vue` как контракт эмитов.
+5. Новые файлы зеркалят путь исходника: `test/unit/shared/utils/premisesTable.test.ts`. Auth-тесты не переносить ради структуры.
+6. Фикстуры — `test/fixtures/` (по мере появления); хелперы — `test/helpers/` (`runComposable`, `domainApiMock`, `mountUi`).
 
 Новая бизнес-логика (API, auth, domain) — unit или smoke. Крупный модуль — тест или явное обоснование пропуска.
 

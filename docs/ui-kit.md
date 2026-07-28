@@ -120,9 +120,10 @@ flowchart LR
 
 ## Тесты
 
-См. [testing.md](./testing.md). Отдельного набора на все `Ui*` нет; точечные тесты контролов (например `UiSelect`, phone/date) — по мере роста покрытия.
+См. [testing.md](./testing.md). Не гоняем все `Ui*` — только контролы с логикой (`mountSuspended` + `@vue/test-utils`, хелпер `test/helpers/mountUi.ts`).
 
-| Область     | Файлы                                     |
-| ----------- | ----------------------------------------- |
-| Unit UI Kit | пока нет                                  |
-| Косвенно    | формы и таблицы разделов используют `Ui*` |
+| Область            | Файлы                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| Select / Combobox  | `test/nuxt/UiSelect.test.ts`, `UiCombobox.test.ts`, `UiMultiSelect.test.ts`          |
+| Phone / Date       | `test/nuxt/UiPhoneInput.test.ts`, `UiDateInput.test.ts`                              |
+| Косвенно (таблицы) | `categoriesTable.contract`, `ReportsTablePagination` — эмиты toolbar/sort/pagination |

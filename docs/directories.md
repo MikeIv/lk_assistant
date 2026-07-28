@@ -158,3 +158,4 @@ flowchart LR
 | Query (server-page)     | `directoryQuery.contract.test.ts`                                                               |
 | Field validation        | `premisesValidation.test.ts`, `legalEntitiesValidation.test.ts`, `applicantsValidation.test.ts` |
 | Domain composables      | `test/nuxt/directories.contract.test.ts`, `directoryForms.contract.test.ts`                     |
+| Table UI (контракт)     | `test/nuxt/categoriesTable.contract.test.ts` (+ `ReportsTablePagination.test.ts`)               |
