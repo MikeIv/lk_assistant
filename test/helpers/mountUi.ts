@@ -29,18 +29,21 @@ export async function mountUi<C>(
 ): Promise<VueWrapper<ComponentPublicInstance>> {
   const { global: globalOptions, ...rest } = options
 
-  return mountSuspended(component as Component, {
-    ...rest,
-    global: {
-      ...globalOptions,
-      stubs: {
-        teleport: teleportStub,
-        Teleport: teleportStub,
-        UIcon: uIconStub,
-        ...(globalOptions?.stubs as Record<string, unknown> | undefined),
+  return mountSuspended(
+    component as Component,
+    {
+      ...rest,
+      global: {
+        ...globalOptions,
+        stubs: {
+          teleport: teleportStub,
+          Teleport: teleportStub,
+          UIcon: uIconStub,
+          ...(globalOptions?.stubs as Record<string, unknown> | undefined),
+        },
       },
-    },
-  })
+    } as never,
+  )
 }
 
 /** Опции listbox (с учётом stub Teleport — ищем от wrapper или document). */

@@ -34,10 +34,16 @@ vi.mock('~/composables/useApiConfig', () => ({
 
 type MutationResult =
   | { ok: true }
-  | { ok: false; fieldErrors: Record<string, unknown>; generalError: string | null }
+  | {
+      ok: false
+      fieldErrors: Record<string, string | null | undefined>
+      generalError: string | null
+    }
+
+type DirectoryItem = { id?: number; [key: string]: unknown }
 
 type DirectoryHarness = {
-  items: { value: Array<Record<string, unknown>> }
+  items: { value: DirectoryItem[] }
   pagination: {
     value: { currentPage: number; lastPage: number; perPage: number; total: number }
   }
@@ -70,18 +76,22 @@ type DirectoryContract = {
   updatePayload: unknown
   apiListResponse: unknown
   validationErrors: Record<string, string[]>
-  labelOf: (item: Record<string, unknown>) => string
+  labelOf: (item: DirectoryItem) => string
   setup: () => DirectoryHarness
 }
 
+function asHarness(value: object): DirectoryHarness {
+  return value as unknown as DirectoryHarness
+}
+
 function wrapNameOnly(methods: {
-  create: (p: { name: string }) => Promise<MutationResult>
-  update: (id: number, p: { name: string }) => Promise<MutationResult>
+  create: (p: { name: string }) => Promise<unknown>
+  update: (id: number, p: { name: string }) => Promise<unknown>
   delete: (id: number) => Promise<{ ok: true } | { ok: false; generalError: string }>
-}): Pick<DirectoryHarness, 'create' | 'update' | 'delete'> {
+}) {
   return {
-    create: (payload) => methods.create(payload as { name: string }),
-    update: (id, payload) => methods.update(id, payload as { name: string }),
+    create: (payload: unknown) => methods.create(payload as { name: string }),
+    update: (id: number, payload: unknown) => methods.update(id, payload as { name: string }),
     delete: methods.delete,
   }
 }
@@ -109,8 +119,8 @@ const contracts: DirectoryContract[] = [
     labelOf: (item) => String(item.name),
     setup: () => {
       const c = useCategories()
-      return {
-        items: c.items as DirectoryHarness['items'],
+      return asHarness({
+        items: c.items,
         pagination: c.pagination,
         searchQuery: c.searchQuery,
         sortKey: c.sortKey,
@@ -119,14 +129,14 @@ const contracts: DirectoryContract[] = [
         error: c.error,
         setPage: c.setPage,
         setPerPage: c.setPerPage,
-        toggleSort: c.toggleSort as DirectoryHarness['toggleSort'],
+        toggleSort: c.toggleSort,
         refresh: c.refresh,
         ...wrapNameOnly({
           create: c.createCategory,
           update: c.updateCategory,
           delete: c.deleteCategory,
         }),
-      }
+      })
     },
   },
   {
@@ -151,8 +161,8 @@ const contracts: DirectoryContract[] = [
     labelOf: (item) => String(item.name),
     setup: () => {
       const c = useRoomTypes()
-      return {
-        items: c.items as DirectoryHarness['items'],
+      return asHarness({
+        items: c.items,
         pagination: c.pagination,
         searchQuery: c.searchQuery,
         sortKey: c.sortKey,
@@ -161,14 +171,14 @@ const contracts: DirectoryContract[] = [
         error: c.error,
         setPage: c.setPage,
         setPerPage: c.setPerPage,
-        toggleSort: c.toggleSort as DirectoryHarness['toggleSort'],
+        toggleSort: c.toggleSort,
         refresh: c.refresh,
         ...wrapNameOnly({
           create: c.createRoomType,
           update: c.updateRoomType,
           delete: c.deleteRoomType,
         }),
-      }
+      })
     },
   },
   {
@@ -204,8 +214,8 @@ const contracts: DirectoryContract[] = [
     labelOf: (item) => String(item.name ?? item.status),
     setup: () => {
       const c = useNegotiationStatuses()
-      return {
-        items: c.items as DirectoryHarness['items'],
+      return asHarness({
+        items: c.items,
         pagination: c.pagination,
         searchQuery: c.searchQuery,
         sortKey: c.sortKey,
@@ -214,14 +224,14 @@ const contracts: DirectoryContract[] = [
         error: c.error,
         setPage: c.setPage,
         setPerPage: c.setPerPage,
-        toggleSort: c.toggleSort as DirectoryHarness['toggleSort'],
+        toggleSort: c.toggleSort,
         refresh: c.refresh,
         ...wrapNameOnly({
           create: c.createNegotiationStatus,
           update: c.updateNegotiationStatus,
           delete: c.deleteNegotiationStatus,
         }),
-      }
+      })
     },
   },
   {
@@ -276,8 +286,8 @@ const contracts: DirectoryContract[] = [
     labelOf: (item) => String(item.name),
     setup: () => {
       const c = usePremises()
-      return {
-        items: c.items as DirectoryHarness['items'],
+      return asHarness({
+        items: c.items,
         pagination: c.pagination,
         searchQuery: c.searchQuery,
         sortKey: c.sortKey,
@@ -286,12 +296,12 @@ const contracts: DirectoryContract[] = [
         error: c.error,
         setPage: c.setPage,
         setPerPage: c.setPerPage,
-        toggleSort: c.toggleSort as DirectoryHarness['toggleSort'],
+        toggleSort: c.toggleSort,
         refresh: c.refresh,
-        create: (payload) => c.createPremise(payload as never),
-        update: (id, payload) => c.updatePremise(id, payload as never),
+        create: (payload: unknown) => c.createPremise(payload as never),
+        update: (id: number, payload: unknown) => c.updatePremise(id, payload as never),
         delete: c.deletePremise,
-      }
+      })
     },
   },
   {
@@ -330,8 +340,8 @@ const contracts: DirectoryContract[] = [
     labelOf: (item) => String(item.legal_entity),
     setup: () => {
       const c = useLgEntities()
-      return {
-        items: c.items as DirectoryHarness['items'],
+      return asHarness({
+        items: c.items,
         pagination: c.pagination,
         searchQuery: c.searchQuery,
         sortKey: c.sortKey,
@@ -340,12 +350,12 @@ const contracts: DirectoryContract[] = [
         error: c.error,
         setPage: c.setPage,
         setPerPage: c.setPerPage,
-        toggleSort: c.toggleSort as DirectoryHarness['toggleSort'],
+        toggleSort: c.toggleSort,
         refresh: c.refresh,
-        create: (payload) => c.createLegalEntity(payload as never),
-        update: (id, payload) => c.updateLegalEntity(id, payload as never),
+        create: (payload: unknown) => c.createLegalEntity(payload as never),
+        update: (id: number, payload: unknown) => c.updateLegalEntity(id, payload as never),
         delete: c.deleteLegalEntity,
-      }
+      })
     },
   },
   {
@@ -398,8 +408,8 @@ const contracts: DirectoryContract[] = [
     labelOf: (item) => String(item.title),
     setup: () => {
       const c = useApplicants()
-      return {
-        items: c.items as DirectoryHarness['items'],
+      return asHarness({
+        items: c.items,
         pagination: c.pagination,
         searchQuery: c.searchQuery,
         sortKey: c.sortKey,
@@ -408,12 +418,12 @@ const contracts: DirectoryContract[] = [
         error: c.error,
         setPage: c.setPage,
         setPerPage: c.setPerPage,
-        toggleSort: c.toggleSort as DirectoryHarness['toggleSort'],
+        toggleSort: c.toggleSort,
         refresh: c.refresh,
-        create: (payload) => c.createApplicant(payload as never),
-        update: (id, payload) => c.updateApplicant(id, payload as never),
+        create: (payload: unknown) => c.createApplicant(payload as never),
+        update: (id: number, payload: unknown) => c.updateApplicant(id, payload as never),
         delete: c.deleteApplicant,
-      }
+      })
     },
   },
 ]
@@ -514,7 +524,7 @@ describe.each(contracts)('directory composable: $name', (contract) => {
   it('api: loads list, maps 422 to fieldErrors, sets load error text', async () => {
     mockMode.value = false
     apiMock.mockImplementation(async (request: string) => {
-      const path = String(request).split('?')[0]
+      const path = String(request).split('?')[0] ?? ''
       if (path === contract.listPath || path.startsWith(`${contract.listPath}?`)) {
         return contract.apiListResponse
       }
@@ -564,7 +574,7 @@ describe.each(contracts)('directory composable: $name', (contract) => {
   it('api: create/update/delete call expected endpoints', async () => {
     mockMode.value = false
     apiMock.mockImplementation(async (request: string, options?: { method?: string }) => {
-      const path = String(request).split('?')[0]
+      const path = String(request).split('?')[0] ?? ''
       const method = options?.method ?? 'GET'
 
       if (method === 'GET' && (path === contract.listPath || path.startsWith(contract.listPath))) {
