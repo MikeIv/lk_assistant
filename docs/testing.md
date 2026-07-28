@@ -39,13 +39,14 @@ CI (`develop` / `main`): `lint:all` + `typecheck` + `test:cov` → затем `b
 
 ---
 
-## Что покрыто сейчас (auth)
+## Что покрыто сейчас
 
-| Область                  | Файлы                                                                                              |
-| ------------------------ | -------------------------------------------------------------------------------------------------- |
-| Unit utils               | `test/unit/jwtPayload.test.ts`, `cabinetRoleFromJwt`, `loginSchema`, `loginErrors`, `authCrossTab` |
-| Composables / middleware | `test/nuxt/useAuth.test.ts`, `useAuthToken`, `useApi`, `useCabinetRole`, `authMiddleware`          |
-| Helpers                  | `test/helpers/jwt.ts`, `authApi.ts`, `test/nuxt/resetAuthClientState.ts`                           |
+| Область                      | Файлы                                                                                                                               |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Auth unit                    | `test/unit/jwtPayload`, `cabinetRoleFromJwt`, `loginSchema`, `loginErrors`, `authCrossTab`                                          |
+| Auth nuxt                    | `test/nuxt/useAuth`, `useAuthToken`, `useApi`, `useCabinetRole`, `authMiddleware`                                                   |
+| Domain unit (`shared/utils`) | `test/unit/shared/utils/*` — контракты справочников (`*Table`/`*Validation`/`*Query`), reports, calendar, tasks, tenantCases, phone |
+| Helpers                      | `test/helpers/jwt.ts`, `authApi.ts`, `test/nuxt/resetAuthClientState.ts`                                                            |
 
 Flows auth: [auth.md](./auth.md).
 
@@ -64,17 +65,19 @@ Flows auth: [auth.md](./auth.md).
 
 ### Baseline и пороги CI
 
-Замер (auth-only, 2026-07-28) по `include` в `vitest.config.ts`
+Замер по `include` в `vitest.config.ts`
 (`shared/utils`, `app/composables`, `app/middleware`, `server/utils`):
 
-| Метрика    | Baseline | Порог |
-| ---------- | -------- | ----- |
-| Lines      | 9.11%    | 8%    |
-| Statements | 9.14%    | 8%    |
-| Functions  | 7.46%    | 7%    |
-| Branches   | 7.89%    | 7%    |
+| Метрика    | Было (auth) | Сейчас | Порог CI |
+| ---------- | ----------- | ------ | -------- |
+| Lines      | 9.11%       | 37.06% | 35%      |
+| Statements | 9.14%       | 37.2%  | 35%      |
+| Functions  | 7.46%       | 38%    | 35%      |
+| Branches   | 7.89%       | 40.73% | 38%      |
 
-Пороги поднимают после добавления тестов. Auth-файлы уже ~85–100% lines.
+`shared/utils` ≈ 90% lines/stmts. `reportsApiHeaders` зависит от `useRuntimeConfig` — покрывается вместе с nuxt-тестами composables.
+
+Пороги поднимают после добавления тестов.
 
 ---
 

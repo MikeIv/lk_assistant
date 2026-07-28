@@ -27,12 +27,12 @@ export default defineConfig({
         'server/utils/**/*.ts',
       ],
       exclude: ['**/*.d.ts'],
-      // Baseline auth-only 2026-07-28: ~9% lines/stmts, ~8% branches, ~7% funcs. Ratchet up later.
+      // After shared/utils unit suite (2026-07-28): ~37% overall; utils ~90%.
       thresholds: {
-        lines: 8,
-        statements: 8,
-        functions: 7,
-        branches: 7,
+        lines: 35,
+        statements: 35,
+        functions: 35,
+        branches: 38,
       },
     },
     projects: [
