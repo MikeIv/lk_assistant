@@ -11,7 +11,7 @@
 | Текущие дела | таблица + карточка дела, полный CRUD     | **подключено к API** (или mock без `NUXT_PUBLIC_API_BASE`)                  |
 
 OpenAPI (дела): [Swagger](https://olimpapi.portalrent.ru/docs/broker#/) · [JSON](https://olimpapi.portalrent.ru/docs/broker.json)
-См. также: [architecture.md](./architecture.md), [directories.md](./directories.md) (справочники, которые подставляются в формы дел).
+См. также: [architecture.md](./architecture.md), [directories/](./directories/) (справочники, которые подставляются в формы дел).
 
 ---
 
