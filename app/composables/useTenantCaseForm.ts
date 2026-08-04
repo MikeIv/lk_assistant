@@ -23,18 +23,18 @@ import {
   validateTenantCaseFormValuesFieldPaths,
 } from '#shared/utils/tenantCasesValidation'
 
-const FORM_FIELD_KEYS = ['room_id', 'responsible_name'] as const satisfies ReadonlyArray<
-  keyof Pick<TenantCaseCreateFieldErrors, 'room_id' | 'responsible_name'>
+const FORM_FIELD_KEYS = ['room_id', 'responsible'] as const satisfies ReadonlyArray<
+  keyof Pick<TenantCaseCreateFieldErrors, 'room_id' | 'responsible'>
 >
 
 export interface TenantCaseFormInitialValues {
   room_id: string
-  responsible_name: string
+  responsible: string
 }
 
 const EMPTY_FORM_VALUES: TenantCaseFormInitialValues = {
   room_id: '',
-  responsible_name: '',
+  responsible: '',
 }
 
 function createEmptyNegotiation(): TenantCaseApplicantFormValues['negotiations'][number] {
@@ -131,13 +131,14 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
   })
 
   const [roomId] = form.defineField('room_id')
-  const [responsibleName] = form.defineField('responsible_name')
+  const [responsible] = form.defineField('responsible')
 
   const applicants = ref<TenantCaseApplicantFormValues[]>([createEmptyApplicant()])
   const applicantsError = ref<string | null>(null)
   const showValidationErrors = ref(false)
 
   const roomIdModel = createStringFieldModel(roomId)
+  const responsibleModel = createStringFieldModel(responsible)
 
   function syncApplicantsToForm() {
     form.setFieldValue('applicants', [...applicants.value], false)
@@ -186,6 +187,7 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
   /** Flat errors for create UI (applicants[0]); card UI uses `getFieldError`. */
   const formErrors = computed(() => ({
     room_id: resolveVisibleFieldError('room_id'),
+    responsible: resolveVisibleFieldError('responsible'),
     tenant_applicant_id: resolveVisibleFieldError('applicants.0.tenant_applicant_id'),
     negotiation_status_id: resolveVisibleFieldError('applicants.0.negotiation_status_id'),
     first_contact_date: resolveVisibleFieldError('applicants.0.first_contact_date'),
@@ -201,7 +203,7 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
     negotiation_date: 'applicants[0].negotiations[0].date',
     negotiation_info: 'applicants[0].negotiations[0].info',
   } as const satisfies Record<
-    Exclude<keyof TenantCaseCreateFieldErrors, 'room_id' | 'responsible_name' | 'applicants'>,
+    Exclude<keyof TenantCaseCreateFieldErrors, 'room_id' | 'responsible' | 'applicants'>,
     `applicants[${number}].${string}`
   >
 
@@ -362,7 +364,7 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
   function toPayload(): TenantCaseCreatePayload {
     return {
       room_id: Number(roomId.value),
-      responsible_name: responsibleName.value?.trim() ? responsibleName.value.trim() : null,
+      responsible: Number(responsible.value),
       applicants: applicants.value.map((applicant) =>
         normalizeTenantCaseApplicantPayload({
           id: applicant.id ?? null,
@@ -418,6 +420,7 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
     toPayload,
     toStorePayload,
     roomId: roomIdModel,
+    responsible: responsibleModel,
     applicants,
   }
 }

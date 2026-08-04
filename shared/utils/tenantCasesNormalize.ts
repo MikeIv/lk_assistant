@@ -140,6 +140,7 @@ export function normalizeTenantCase(item: TenantCaseApiResource): TenantCase {
     room_id: item.room_id,
     room,
     current_tenant: item.current_tenant,
+    responsible_id: item.responsible_id ?? null,
     responsible: item.responsible ?? null,
     applicants,
     table_rows: tableRows,
@@ -150,7 +151,7 @@ export function normalizeTenantCase(item: TenantCaseApiResource): TenantCase {
 export function tenantCaseToCreatePayload(tenantCase: TenantCase): TenantCaseCreatePayload {
   return {
     room_id: tenantCase.room_id,
-    responsible_name: tenantCase.responsible,
+    responsible: tenantCase.responsible_id ?? 0,
     applicants: tenantCase.applicants.map((applicant) => ({
       id: applicant.id,
       tenant_applicant_id: applicant.tenant_applicant_id,

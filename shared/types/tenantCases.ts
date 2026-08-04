@@ -90,6 +90,9 @@ export interface TenantCase {
   room_id: number
   room: TenantCaseRoom | null
   current_tenant: string
+  /** ID ответственного брокера (`responsible_id` из API). */
+  responsible_id: number | null
+  /** Display ФИ без отчества (`responsible` из API). */
   responsible: string | null
   applicants: TenantCaseApplicant[]
   table_rows: TenantCaseTableRow[]
@@ -115,10 +118,24 @@ export interface TenantCaseApiResource {
   room_id: number
   room?: TenantCaseRoom | null
   current_tenant: string
+  responsible_id?: number | null
   responsible: string | null
   applicants?: TenantCaseApplicantApiResource[]
   table_rows?: TenantCaseTableRow[]
   kp?: TenantCaseKp | null
+}
+
+/** Элемент `GET /v1/broker/tenant-cases/responsibles`. */
+export interface TenantCaseResponsibleApiResource {
+  id: number
+  /** ФИ без отчества, например `Петров Иван`. */
+  responsible: string
+}
+
+export interface TenantCaseResponsiblesApiResponse {
+  success: boolean
+  message: string
+  payload: TenantCaseResponsibleApiResource[]
 }
 
 export interface TenantCasesListApiResponse {
@@ -151,7 +168,8 @@ export interface TenantCaseApplicantPayload {
 
 export interface TenantCaseCreatePayload {
   room_id: number
-  responsible_name: string | null
+  /** ID ответственного брокера из `GET …/responsibles`. */
+  responsible: number
   applicants: TenantCaseApplicantPayload[]
 }
 
@@ -161,7 +179,7 @@ export type TenantCaseUpdatePayload = TenantCaseCreatePayload
 /** POST /v1/broker/tenant-cases — плоское тело создания (не applicants[]). */
 export interface TenantCaseStorePayload {
   room_id: number
-  responsible_name: string | null
+  responsible: number
   tenant_applicant_id: number
   first_contact_date: string
   negotiation_date: string
@@ -176,7 +194,7 @@ export interface TenantCaseMutationApiResponse {
 
 export interface TenantCaseCreateFieldErrors {
   room_id: string | null
-  responsible_name: string | null
+  responsible: string | null
   tenant_applicant_id: string | null
   first_contact_date: string | null
   negotiation_date: string | null

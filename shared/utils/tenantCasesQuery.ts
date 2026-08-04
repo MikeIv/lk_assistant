@@ -6,15 +6,18 @@ interface BuildTenantCasesQueryParams {
   search: string
   sortKey: TenantCaseSortKey
   sortDirection: TenantCaseSortDirection
+  /** JWT `sub` — бэк фильтрует список по роли (брокер / руководитель). */
+  userId?: string | null
 }
 
-/** Query для `brokerTenantCase.index` (search, sort, direction, per_page, page). */
+/** Query для `brokerTenantCase.index` (search, sort, direction, per_page, page, user_id). */
 export function buildTenantCasesQueryParams({
   page,
   perPage,
   search,
   sortKey,
   sortDirection,
+  userId,
 }: BuildTenantCasesQueryParams): string {
   const params = new URLSearchParams({
     page: String(page),
@@ -27,6 +30,11 @@ export function buildTenantCasesQueryParams({
 
   if (trimmedSearch) {
     params.set('search', trimmedSearch)
+  }
+
+  const trimmedUserId = userId?.trim()
+  if (trimmedUserId) {
+    params.set('user_id', trimmedUserId)
   }
 
   return params.toString()

@@ -44,6 +44,7 @@ export const API_PATHS = {
     tenantCases: {
       list: '/v1/broker/tenant-cases',
       detail: (id: number | string) => `/v1/broker/tenant-cases/${id}`,
+      responsibles: '/v1/broker/tenant-cases/responsibles',
     },
   },
   news: {

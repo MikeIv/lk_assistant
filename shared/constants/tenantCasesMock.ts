@@ -1,4 +1,4 @@
-import type { TenantCaseApplicantStatus } from '#shared/types/tenantCases'
+import type { TenantCase, TenantCaseApplicantStatus } from '#shared/types/tenantCases'
 import { NEGOTIATION_STATUSES_MOCK_ITEMS } from '#shared/constants/negotiationStatusesMock'
 import { APPLICANTS_MOCK_ITEMS } from '#shared/constants/applicantsMock'
 import { PREMISES_MOCK_ITEMS } from '#shared/constants/premisesMock'
@@ -72,7 +72,8 @@ function buildMockTenantCase(index: number): TenantCase {
     buildApplicant(index, id, applicantIndex),
   )
 
-  const responsible = RESPONSIBLES[index % RESPONSIBLES.length] ?? null
+  const responsibleLabel = RESPONSIBLES[index % RESPONSIBLES.length] ?? null
+  const responsibleId = responsibleLabel ? index + 1 : null
   const currentTenant = CURRENT_TENANTS[index % CURRENT_TENANTS.length] ?? 'Арендатор'
 
   const tenantCase: TenantCase = {
@@ -80,13 +81,20 @@ function buildMockTenantCase(index: number): TenantCase {
     room_id: premise.id,
     room,
     current_tenant: currentTenant,
-    responsible,
+    responsible_id: responsibleId,
+    responsible: responsibleLabel,
     applicants,
     table_rows: [],
     kp: { rows: [] },
   }
 
-  tenantCase.table_rows = buildTenantCaseTableRows(id, room, currentTenant, responsible, applicants)
+  tenantCase.table_rows = buildTenantCaseTableRows(
+    id,
+    room,
+    currentTenant,
+    responsibleLabel,
+    applicants,
+  )
 
   return tenantCase
 }

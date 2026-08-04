@@ -17,6 +17,7 @@ import { PREMISE_REQUIRED_ROOM_TYPE_MESSAGE, premiseFormSchema } from '#shared/u
 import { ROOM_TYPE_REQUIRED_NAME_MESSAGE, roomTypeFormSchema } from '#shared/utils/roomTypesSchema'
 import {
   isTenantCaseApplicantStatus,
+  TENANT_CASE_REQUIRED_RESPONSIBLE_MESSAGE,
   TENANT_CASE_REQUIRED_ROOM_MESSAGE,
   tenantCaseFormSchema,
 } from '#shared/utils/tenantCasesSchema'
@@ -67,12 +68,15 @@ describe('directories *Schema smoke', () => {
 
     const result = tenantCaseFormSchema.safeParse({
       room_id: '',
-      responsible_name: '',
+      responsible: '',
       applicants: [],
     })
     expect(result.success).toBe(false)
     expect(result.error?.issues.some((i) => i.message === TENANT_CASE_REQUIRED_ROOM_MESSAGE)).toBe(
       true,
     )
+    expect(
+      result.error?.issues.some((i) => i.message === TENANT_CASE_REQUIRED_RESPONSIBLE_MESSAGE),
+    ).toBe(true)
   })
 })

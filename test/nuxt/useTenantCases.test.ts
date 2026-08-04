@@ -35,7 +35,7 @@ const unmounts: Array<() => void> = []
 function storePayload() {
   return {
     room_id: PREMISES_MOCK_ITEMS[0]!.id,
-    responsible_name: 'Test Broker',
+    responsible: 42,
     tenant_applicant_id: APPLICANTS_MOCK_ITEMS[0]!.id,
     first_contact_date: '2026-07-01',
     negotiation_date: '2026-07-02',
@@ -46,7 +46,7 @@ function storePayload() {
 function updatePayload() {
   return {
     room_id: PREMISES_MOCK_ITEMS[1]!.id,
-    responsible_name: 'Test Broker Updated',
+    responsible: 43,
     applicants: [
       {
         id: null,
@@ -92,13 +92,13 @@ describe('useTenantCases', () => {
     expect(created).toEqual({ ok: true })
     expect(cases.pagination.value.total).toBe(initialTotal + 1)
 
-    const createdItem = cases.items.value.find((item) => item.responsible === 'Test Broker')
+    const createdItem = cases.items.value.find((item) => item.responsible_id === 42)
     expect(createdItem).toBeTruthy()
     expect(createdItem!.id).toBeGreaterThan(TENANT_CASES_MOCK_ITEMS.length)
 
     const updated = await cases.updateTenantCase(createdItem!.id, updatePayload())
     expect(updated).toEqual({ ok: true })
-    expect(cases.items.value.some((item) => item.responsible === 'Test Broker Updated')).toBe(true)
+    expect(cases.items.value.some((item) => item.responsible_id === 43)).toBe(true)
 
     const deleted = await cases.deleteTenantCase(createdItem!.id)
     expect(deleted).toEqual({ ok: true })
@@ -148,6 +148,7 @@ describe('useTenantCases', () => {
                 room_id: 1,
                 room: { id: '1', category: 'Торговое', floor: '1', name: 'A-1', area: 10 },
                 current_tenant: 'API Tenant',
+                responsible_id: 3,
                 responsible: 'API Broker',
                 applicants: [],
                 kp: { rows: [] },
@@ -209,6 +210,7 @@ describe('useTenantCases', () => {
             room_id: 1,
             room: { id: '1', category: '', floor: '1', name: 'X', area: 1 },
             current_tenant: 'T',
+            responsible_id: 2,
             responsible: 'R',
             applicants: [],
             kp: { rows: [] },

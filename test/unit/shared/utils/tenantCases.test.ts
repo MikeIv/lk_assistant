@@ -22,6 +22,7 @@ import {
   sortTenantCases,
   toTenantCasesApiPagination,
 } from '#shared/utils/tenantCasesTable'
+import { buildTenantCasesQueryParams } from '#shared/utils/tenantCasesQuery'
 import {
   buildTenantCaseStorePayload,
   emptyTenantCaseCreateFieldErrors,
@@ -39,6 +40,7 @@ function makeCase(overrides: Partial<TenantCase> = {}): TenantCase {
     room_id: 1,
     room: { id: 1, category: 'Cat', floor: '2', name: '101', area: 12.5 },
     current_tenant: 'Current',
+    responsible_id: 9,
     responsible: 'Ivan',
     applicants: [
       {
@@ -132,6 +134,7 @@ describe('tenantCasesNormalize', () => {
       room_id: 1,
       room: { id: 1, category: 'C', floor: '1', name: '101', area: 10 },
       current_tenant: 'Cur',
+      responsible_id: 9,
       responsible: null,
       applicants: [
         {
@@ -154,10 +157,12 @@ describe('tenantCasesNormalize', () => {
     const normalized = normalizeTenantCase(resource)
     expect(normalized.applicants[0]?.status).toBe('переговоры')
     expect(normalized.applicants[0]?.contacts).toBe('a, b')
+    expect(normalized.responsible_id).toBe(9)
     expect(normalized.table_rows).toHaveLength(1)
 
     const payload = tenantCaseToCreatePayload(normalized)
     expect(payload.room_id).toBe(1)
+    expect(payload.responsible).toBe(9)
     expect(tenantCaseApplicantsToFormLoad(normalized.applicants)[0]?.tenant_applicant).toBe('App')
 
     expect(
@@ -208,7 +213,7 @@ describe('tenantCasesValidation', () => {
   it('normalizes create/store payloads and maps 422 errors', () => {
     const create = normalizeTenantCaseCreatePayload({
       room_id: 1,
-      responsible_name: '  Ivan  ',
+      responsible: 9,
       applicants: [
         {
           tenant_applicant_id: 5,
@@ -219,10 +224,11 @@ describe('tenantCasesValidation', () => {
         },
       ],
     })
-    expect(create.responsible_name).toBe('Ivan')
+    expect(create.responsible).toBe(9)
 
     const store = buildTenantCaseStorePayload(create)
     expect(store.tenant_applicant_id).toBe(5)
+    expect(store.responsible).toBe(9)
     expect(store.first_contact_date).toContain('T')
     expect(normalizeTenantCaseStorePayload(store).negotiation_info).toBe('Call')
     expect(storePayloadToCreatePayload(store).applicants).toHaveLength(1)
@@ -231,11 +237,13 @@ describe('tenantCasesValidation', () => {
       parseTenantCaseCreateFieldErrors({
         errors: {
           room_id: ['bad room'],
+          responsible: ['bad responsible'],
           'applicants.0.tenant_applicant_id': ['bad applicant'],
         },
       }),
     ).toMatchObject({
       room_id: 'bad room',
+      responsible: 'bad responsible',
       applicants: 'bad applicant',
     })
     expect(parseTenantCaseCreateFieldErrors({})).toEqual(emptyTenantCaseCreateFieldErrors())
@@ -244,14 +252,15 @@ describe('tenantCasesValidation', () => {
   it('validates payload and detects field errors', () => {
     const invalid = validateTenantCaseFormPayload({
       room_id: 0,
-      responsible_name: null,
+      responsible: 0,
       applicants: [],
     })
     expect(hasTenantCaseCreateFieldErrors(invalid)).toBe(true)
+    expect(invalid.responsible).toBe('Выберите ответственного')
 
     const valid = validateTenantCaseFormPayload({
       room_id: 1,
-      responsible_name: 'Ivan',
+      responsible: 9,
       applicants: [
         {
           tenant_applicant_id: 5,
@@ -263,5 +272,29 @@ describe('tenantCasesValidation', () => {
       ],
     })
     expect(hasTenantCaseCreateFieldErrors(valid)).toBe(false)
+  })
+})
+
+describe('tenantCasesQuery', () => {
+  it('includes user_id when provided and omits when blank', () => {
+    const withUser = buildTenantCasesQueryParams({
+      page: 1,
+      perPage: 15,
+      search: '',
+      sortKey: 'number',
+      sortDirection: 'asc',
+      userId: ' 42 ',
+    })
+    expect(new URLSearchParams(withUser).get('user_id')).toBe('42')
+
+    const withoutUser = buildTenantCasesQueryParams({
+      page: 1,
+      perPage: 15,
+      search: '',
+      sortKey: 'number',
+      sortDirection: 'asc',
+      userId: '   ',
+    })
+    expect(new URLSearchParams(withoutUser).has('user_id')).toBe(false)
   })
 })

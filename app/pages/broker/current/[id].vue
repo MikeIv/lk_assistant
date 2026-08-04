@@ -61,7 +61,7 @@ function applyCaseToForm(item: TenantCase) {
   loadTenantCaseForm(
     {
       room_id: String(item.room_id),
-      responsible_name: item.responsible ?? '',
+      responsible: item.responsible_id != null ? String(item.responsible_id) : '',
     },
     tenantCaseApplicantsToFormLoad(item.applicants),
   )

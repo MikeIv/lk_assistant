@@ -5,6 +5,8 @@ import { TENANT_CASE_APPLICANT_STATUS_OPTIONS } from '#shared/utils/tenantCasesT
 
 export const TENANT_CASE_REQUIRED_ROOM_MESSAGE = 'Выберите помещение'
 
+export const TENANT_CASE_REQUIRED_RESPONSIBLE_MESSAGE = 'Выберите ответственного'
+
 export const TENANT_CASE_REQUIRED_APPLICANT_MESSAGE = 'Выберите претендента'
 
 export const TENANT_CASE_REQUIRED_STATUS_MESSAGE = 'Выберите статус переговоров'
@@ -12,8 +14,6 @@ export const TENANT_CASE_REQUIRED_STATUS_MESSAGE = 'Выберите стату�
 export const TENANT_CASE_REQUIRED_NEGOTIATION_INFO_MESSAGE = 'Введите информацию о переговорах'
 
 export const TENANT_CASE_REQUIRED_FIRST_CONTACT_MESSAGE = 'Укажите дату первого контакта'
-
-export const TENANT_CASE_MAX_RESPONSIBLE_LENGTH = 255
 
 const tenantCaseNegotiationSchema = z.object({
   date: z.string().trim().min(1),
@@ -38,13 +38,8 @@ export const tenantCaseApplicantFormSchema = z.object({
 
 export const tenantCaseFormSchema = z.object({
   room_id: z.string().trim().min(1, TENANT_CASE_REQUIRED_ROOM_MESSAGE),
-  responsible_name: z
-    .string()
-    .trim()
-    .max(
-      TENANT_CASE_MAX_RESPONSIBLE_LENGTH,
-      `Не более ${TENANT_CASE_MAX_RESPONSIBLE_LENGTH} символов`,
-    ),
+  /** ID ответственного (строка для UiSelect). */
+  responsible: z.string().trim().min(1, TENANT_CASE_REQUIRED_RESPONSIBLE_MESSAGE),
   applicants: z.array(tenantCaseApplicantFormSchema).min(1, 'Добавьте хотя бы одного претендента'),
 })
 

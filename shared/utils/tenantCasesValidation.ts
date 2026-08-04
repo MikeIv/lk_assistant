@@ -20,7 +20,7 @@ export function normalizeTenantCaseCreatePayload(
 ): TenantCaseCreatePayload {
   return {
     room_id: payload.room_id,
-    responsible_name: payload.responsible_name?.trim() ? payload.responsible_name.trim() : null,
+    responsible: payload.responsible,
     applicants: payload.applicants.map(normalizeTenantCaseApplicantPayload),
   }
 }
@@ -33,7 +33,7 @@ export function buildTenantCaseStorePayload(
 
   return {
     room_id: payload.room_id,
-    responsible_name: payload.responsible_name?.trim() ? payload.responsible_name.trim() : null,
+    responsible: payload.responsible,
     tenant_applicant_id: applicant?.tenant_applicant_id ?? 0,
     first_contact_date: toTenantCaseApiDateTime(applicant?.first_contact_date ?? ''),
     negotiation_date: toTenantCaseApiDateTime(negotiation?.date ?? ''),
@@ -46,7 +46,7 @@ export function normalizeTenantCaseStorePayload(
 ): TenantCaseStorePayload {
   return {
     room_id: payload.room_id,
-    responsible_name: payload.responsible_name?.trim() ? payload.responsible_name.trim() : null,
+    responsible: payload.responsible,
     tenant_applicant_id: payload.tenant_applicant_id,
     first_contact_date: toTenantCaseApiDateTime(payload.first_contact_date),
     negotiation_date: toTenantCaseApiDateTime(payload.negotiation_date),
@@ -59,7 +59,7 @@ export function storePayloadToCreatePayload(
 ): TenantCaseCreatePayload {
   return {
     room_id: payload.room_id,
-    responsible_name: payload.responsible_name,
+    responsible: payload.responsible,
     applicants: [
       {
         tenant_applicant_id: payload.tenant_applicant_id,
@@ -80,7 +80,7 @@ export function storePayloadToCreatePayload(
 export function emptyTenantCaseCreateFieldErrors(): TenantCaseCreateFieldErrors {
   return {
     room_id: null,
-    responsible_name: null,
+    responsible: null,
     tenant_applicant_id: null,
     first_contact_date: null,
     negotiation_date: null,
@@ -115,7 +115,7 @@ export function parseTenantCaseCreateFieldErrors(data: unknown): TenantCaseCreat
 
   return {
     room_id: firstFieldError(errors, 'room_id'),
-    responsible_name: firstFieldError(errors, 'responsible_name'),
+    responsible: firstFieldError(errors, 'responsible'),
     tenant_applicant_id: firstFieldError(errors, 'tenant_applicant_id'),
     first_contact_date: firstFieldError(errors, 'first_contact_date'),
     negotiation_date: firstFieldError(errors, 'negotiation_date'),
@@ -133,7 +133,7 @@ export function hasTenantCaseCreateFieldErrors(fieldErrors: TenantCaseCreateFiel
 function buildTenantCaseFormSchemaInput(payload: TenantCaseCreatePayload) {
   return {
     room_id: String(payload.room_id),
-    responsible_name: payload.responsible_name ?? '',
+    responsible: payload.responsible > 0 ? String(payload.responsible) : '',
     applicants: payload.applicants.map((applicant) => ({
       id: applicant.id ?? null,
       tenant_applicant_id:
@@ -216,8 +216,8 @@ export function validateTenantCaseFormPayload(
       fieldErrors.room_id = issue.message
     }
 
-    if (field === 'responsible_name' && !fieldErrors.responsible_name) {
-      fieldErrors.responsible_name = issue.message
+    if (field === 'responsible' && !fieldErrors.responsible) {
+      fieldErrors.responsible = issue.message
     }
 
     if (field === 'applicants') {

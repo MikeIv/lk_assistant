@@ -59,7 +59,7 @@ describe('useTenantCaseForm', () => {
   it('loadTenantCaseForm / reset / toPayload / toStorePayload', async () => {
     const form = mountForm()
 
-    form.loadTenantCaseForm({ room_id: '12', responsible_name: 'Иван' }, [
+    form.loadTenantCaseForm({ room_id: '12', responsible: '7' }, [
       {
         id: 100,
         tenant_applicant_id: 3,
@@ -75,13 +75,14 @@ describe('useTenantCaseForm', () => {
     await nextTick()
 
     expect(form.roomId.value).toBe('12')
+    expect(form.responsible.value).toBe('7')
     expect(form.applicants.value).toHaveLength(1)
     expect(form.applicants.value[0]!.tenant_applicant_id).toBe('3')
 
     const payload = form.toPayload()
     expect(payload).toMatchObject({
       room_id: 12,
-      responsible_name: 'Иван',
+      responsible: 7,
       applicants: [
         expect.objectContaining({
           tenant_applicant_id: 3,
@@ -93,12 +94,14 @@ describe('useTenantCaseForm', () => {
     const store = form.toStorePayload()
     expect(store).toMatchObject({
       room_id: 12,
+      responsible: 7,
       tenant_applicant_id: 3,
       negotiation_info: 'Звонок',
     })
 
     form.resetTenantCaseForm()
     expect(form.roomId.value).toBe('')
+    expect(form.responsible.value).toBe('')
     expect(form.applicants.value).toHaveLength(1)
     expect(form.applicantsError.value).toBeNull()
   })
@@ -108,7 +111,7 @@ describe('useTenantCaseForm', () => {
 
     form.applyServerFieldErrors({
       room_id: 'Нет помещения',
-      responsible_name: null,
+      responsible: null,
       tenant_applicant_id: 'Нет претендента',
       first_contact_date: null,
       negotiation_date: null,

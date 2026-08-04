@@ -75,13 +75,16 @@ flowchart TB
 
 ### Текущие дела
 
-| Операция | Метод и путь                          | Тело / query                                       |
-| -------- | ------------------------------------- | -------------------------------------------------- |
-| List     | `GET /v1/broker/tenant-cases`         | `page`, `per_page`, `sort`, `direction`, `search?` |
-| Show     | `GET /v1/broker/tenant-cases/{id}`    | —                                                  |
-| Create   | `POST /v1/broker/tenant-cases`        | тело формы                                         |
-| Update   | `PUT /v1/broker/tenant-cases/{id}`    | тело формы                                         |
-| Delete   | `DELETE /v1/broker/tenant-cases/{id}` | —                                                  |
+| Операция | Метод и путь                               | Тело / query                                                  |
+| -------- | ------------------------------------------ | ------------------------------------------------------------- |
+| List     | `GET /v1/broker/tenant-cases`              | `page`, `per_page`, `sort`, `direction`, `search?`, `user_id` |
+| Show     | `GET /v1/broker/tenant-cases/{id}`         | —                                                             |
+| Create   | `POST /v1/broker/tenant-cases`             | `room_id`, `responsible` (ID), претендент, переговоры         |
+| Update   | `PUT /v1/broker/tenant-cases/{id}`         | `room_id`, `responsible` (ID), `applicants[]`                 |
+| Delete   | `DELETE /v1/broker/tenant-cases/{id}`      | —                                                             |
+| Free     | `GET /v1/broker/tenant-cases/responsibles` | `room_id`, опц. `tenant_case_id` (edit)                       |
+
+`user_id` (JWT `sub`): брокер — только дела, где он ответственный; руководитель брокеров — все.
 
 Опции формы дела (в API-режиме):
 
@@ -90,6 +93,7 @@ flowchart TB
 | Помещения           | `GET /v1/broker/dict/rooms`                      |
 | Претенденты         | `GET /v1/broker/tenant-applicants?per_page=1000` |
 | Статусы переговоров | `GET /v1/broker/dict/negotiation-statuses`       |
+| Ответственные       | `GET /v1/broker/tenant-cases/responsibles`       |
 
 Пустой `apiBase` → mock CRUD дел из `TENANT_CASES_MOCK_ITEMS`.
 
