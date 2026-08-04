@@ -168,17 +168,20 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
   width: rem(20);
   height: rem(20);
+  overflow: hidden;
   color: var(--fs-figma-stroke-gray);
   font-size: rem(10);
   line-height: 0;
   transition: color 0.16s ease;
 
-  :global(svg) {
+  :global(svg),
+  :global(.iconify) {
     display: block;
     width: rem(10);
-    height: rem(5);
+    height: rem(10);
     flex-shrink: 0;
   }
 }

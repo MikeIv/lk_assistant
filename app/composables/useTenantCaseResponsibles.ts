@@ -3,29 +3,18 @@ import type {
   TenantCaseResponsibleApiResource,
   TenantCaseResponsiblesApiResponse,
 } from '#shared/types/tenantCases'
+import { listPayloadRows, type ListPayloadShape } from '#shared/utils/listPayloadRows'
 import { buildTenantCaseResponsiblesQueryParams } from '#shared/utils/tenantCasesQuery'
 import { useApiConfig } from '~/composables/useApiConfig'
 
 function normalizeResponsiblesPayload(payload: unknown): TenantCaseResponsibleApiResource[] {
-  if (Array.isArray(payload)) {
-    return payload.filter(
-      (item): item is TenantCaseResponsibleApiResource =>
-        Boolean(item) &&
-        typeof item === 'object' &&
-        typeof (item as TenantCaseResponsibleApiResource).id === 'number' &&
-        typeof (item as TenantCaseResponsibleApiResource).responsible === 'string',
-    )
-  }
-
-  if (
-    payload &&
-    typeof payload === 'object' &&
-    Array.isArray((payload as { data?: unknown }).data)
-  ) {
-    return normalizeResponsiblesPayload((payload as { data: unknown }).data)
-  }
-
-  return []
+  return listPayloadRows(payload as ListPayloadShape<TenantCaseResponsibleApiResource>).filter(
+    (item): item is TenantCaseResponsibleApiResource =>
+      Boolean(item) &&
+      typeof item === 'object' &&
+      typeof item.id === 'number' &&
+      typeof item.responsible === 'string',
+  )
 }
 
 function isValidRoomId(roomId: string): boolean {

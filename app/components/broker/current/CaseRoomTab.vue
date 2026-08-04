@@ -91,12 +91,12 @@ async function onResponsibleOpen() {
             :options="responsibleOptions"
             placeholder="Выберите ответственного"
             searchable
+            :empty-label="isResponsiblesLoading ? 'Загрузка…' : 'Ничего не найдено'"
             :disabled="disabled"
             @open="onResponsibleOpen"
           />
         </div>
         <p v-if="error" :class="$style.fieldError">{{ error }}</p>
-        <p v-else-if="isResponsiblesLoading" :class="$style.hint">Загрузка ответственных…</p>
       </BrokerCurrentCaseTableRow>
     </div>
   </article>
@@ -151,13 +151,6 @@ async function onResponsibleOpen() {
   margin: rem(6) 0 0;
   font-size: rem(12);
   color: var(--fs-color-error);
-  text-align: left;
-}
-
-.hint {
-  margin: rem(6) 0 0;
-  font-size: rem(12);
-  color: var(--fs-color-text-muted);
   text-align: left;
 }
 

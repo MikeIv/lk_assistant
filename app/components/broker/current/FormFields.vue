@@ -258,12 +258,12 @@ function guardDateValue(currentValue: string, event: Event) {
           :options="responsibleOptions"
           placeholder="Выберите ответственного"
           searchable
+          :empty-label="isResponsiblesLoading ? 'Загрузка…' : 'Ничего не найдено'"
           :disabled="disabled || !isResponsibleEnabled"
           @open="onResponsibleOpen"
         />
       </div>
       <p v-if="errors.responsible" :class="$style.fieldError">{{ errors.responsible }}</p>
-      <p v-else-if="isResponsiblesLoading" :class="$style.hint">Загрузка ответственных…</p>
     </label>
   </div>
 </template>
@@ -309,12 +309,6 @@ function guardDateValue(currentValue: string, event: Event) {
   margin: 0;
   font-size: rem(12);
   color: var(--fs-color-error);
-}
-
-.hint {
-  margin: 0;
-  font-size: rem(12);
-  color: var(--fs-color-text-muted);
 }
 
 .dateRow {

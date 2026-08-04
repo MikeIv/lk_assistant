@@ -9,6 +9,8 @@ const props = withDefaults(
     disabled?: boolean
     searchable?: boolean
     invalid?: boolean
+    /** Текст, когда список пуст (searchable). */
+    emptyLabel?: string
   }>(),
   {
     modelValue: null,
@@ -16,6 +18,7 @@ const props = withDefaults(
     disabled: false,
     searchable: false,
     invalid: false,
+    emptyLabel: 'Ничего не найдено',
   },
 )
 
@@ -218,7 +221,7 @@ watch(isOpen, (opened) => {
           {{ option.label }}
         </li>
         <li v-if="searchable && !visibleOptions.length" :class="$style.emptyOption">
-          Ничего не найдено
+          {{ emptyLabel }}
         </li>
       </ul>
     </Teleport>
@@ -279,6 +282,26 @@ watch(isOpen, (opened) => {
   @include field.ui-dropdown-chevron-open;
 }
 
+.toggle {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: rem(20);
+  height: rem(20);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background: transparent;
+  cursor: default;
+  font: inherit;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
 .dropdown {
   @include field.ui-dropdown-panel;
   position: fixed;
@@ -304,25 +327,6 @@ watch(isOpen, (opened) => {
 
 .searchInputFilled {
   color: var(--fs-figma-achromatic-black);
-}
-
-.toggle {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: rem(20);
-  height: rem(20);
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: default;
-  font: inherit;
-
-  &:disabled {
-    cursor: not-allowed;
-  }
 }
 
 .emptyOption {
