@@ -140,12 +140,12 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
   const roomIdModel = computed({
     get: () => roomId.value ?? '',
     set: (value: string) => {
-      const previous = roomId.value ?? ''
-      roomId.value = value
-
-      if (value !== previous) {
-        responsible.value = ''
+      if (value === (roomId.value ?? '')) {
+        return
       }
+
+      roomId.value = value
+      responsible.value = ''
     },
   })
   const responsibleModel = createStringFieldModel(responsible)

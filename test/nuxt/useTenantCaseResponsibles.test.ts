@@ -50,6 +50,15 @@ describe('useTenantCaseResponsibles', () => {
     expect(apiMock).not.toHaveBeenCalled()
   })
 
+  it('skips API for invalid room id', async () => {
+    mockMode.value = false
+    const responsibles = mountResponsibles()
+    const items = await responsibles.fetchResponsibles({ roomId: 0 })
+
+    expect(items).toEqual([])
+    expect(apiMock).not.toHaveBeenCalled()
+  })
+
   it('api: fetches responsibles with room_id and tenant_case_id', async () => {
     mockMode.value = false
     apiMock.mockResolvedValueOnce({

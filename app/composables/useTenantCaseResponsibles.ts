@@ -28,6 +28,11 @@ function normalizeResponsiblesPayload(payload: unknown): TenantCaseResponsibleAp
   return []
 }
 
+function isValidRoomId(roomId: string): boolean {
+  const numericId = Number(roomId)
+  return Number.isFinite(numericId) && numericId > 0
+}
+
 /**
  * Свободные ответственные для помещения.
  * API-only: в mock возвращает пустой список (UI волны 3).
@@ -39,6 +44,7 @@ export function useTenantCaseResponsibles() {
   const items = ref<TenantCaseResponsibleApiResource[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
+  let fetchSeq = 0
 
   async function fetchResponsibles(params: {
     roomId: number | string
@@ -46,21 +52,18 @@ export function useTenantCaseResponsibles() {
   }): Promise<TenantCaseResponsibleApiResource[]> {
     const roomId = String(params.roomId).trim()
 
-    if (!roomId) {
+    if (!isValidRoomId(roomId) || isMockMode.value) {
+      fetchSeq += 1
       items.value = []
       error.value = null
       return []
     }
 
+    const seq = ++fetchSeq
     isLoading.value = true
     error.value = null
 
     try {
-      if (isMockMode.value) {
-        items.value = []
-        return []
-      }
-
       const query = buildTenantCaseResponsiblesQueryParams({
         roomId,
         tenantCaseId: params.tenantCaseId,
@@ -69,20 +72,33 @@ export function useTenantCaseResponsibles() {
         `${API_PATHS.broker.tenantCases.responsibles}?${query}`,
       )
       const nextItems = normalizeResponsiblesPayload(response.payload)
+
+      if (seq !== fetchSeq) {
+        return nextItems
+      }
+
       items.value = nextItems
       return nextItems
     } catch {
+      if (seq !== fetchSeq) {
+        return []
+      }
+
       error.value = 'Не удалось загрузить список ответственных'
       items.value = []
       return []
     } finally {
-      isLoading.value = false
+      if (seq === fetchSeq) {
+        isLoading.value = false
+      }
     }
   }
 
   function clearResponsibles() {
+    fetchSeq += 1
     items.value = []
     error.value = null
+    isLoading.value = false
   }
 
   return {
