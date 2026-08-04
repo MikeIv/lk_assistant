@@ -43,6 +43,7 @@ import {
   validateTenantCaseFormPayload,
 } from '#shared/utils/tenantCasesValidation'
 import { useApiConfig } from '~/composables/useApiConfig'
+import { useCabinetRole } from '~/composables/useCabinetRole'
 import type { FetchError } from 'ofetch'
 
 const SEARCH_DEBOUNCE_MS = 300
@@ -111,6 +112,7 @@ function buildMockTenantCaseFromPayload(id: number, payload: TenantCaseCreatePay
 export function useTenantCases() {
   const api = useApi()
   const { isMockMode } = useApiConfig()
+  const { userId } = useCabinetRole()
 
   const apiResponse = ref<TenantCasesListApiResponse | null>(null)
   const error = ref<string | null>(null)
@@ -208,6 +210,7 @@ export function useTenantCases() {
         search: searchQuery.value,
         sortKey: sortKey.value,
         sortDirection: sortDirection.value,
+        userId: userId.value,
       })
 
       apiResponse.value = await api<TenantCasesListApiResponse>(

@@ -10,6 +10,12 @@ interface BuildTenantCasesQueryParams {
   userId?: string | null
 }
 
+interface BuildTenantCaseResponsiblesQueryParams {
+  roomId: number | string
+  /** Чтобы текущий ответственный не выпадал из списка при edit. */
+  tenantCaseId?: number | string | null
+}
+
 /** Query для `brokerTenantCase.index` (search, sort, direction, per_page, page, user_id). */
 export function buildTenantCasesQueryParams({
   page,
@@ -35,6 +41,22 @@ export function buildTenantCasesQueryParams({
   const trimmedUserId = userId?.trim()
   if (trimmedUserId) {
     params.set('user_id', trimmedUserId)
+  }
+
+  return params.toString()
+}
+
+/** Query для `GET /v1/broker/tenant-cases/responsibles`. */
+export function buildTenantCaseResponsiblesQueryParams({
+  roomId,
+  tenantCaseId,
+}: BuildTenantCaseResponsiblesQueryParams): string {
+  const params = new URLSearchParams({
+    room_id: String(roomId),
+  })
+
+  if (tenantCaseId !== undefined && tenantCaseId !== null && String(tenantCaseId).trim()) {
+    params.set('tenant_case_id', String(tenantCaseId))
   }
 
   return params.toString()

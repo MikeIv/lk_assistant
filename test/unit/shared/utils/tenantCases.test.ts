@@ -22,7 +22,10 @@ import {
   sortTenantCases,
   toTenantCasesApiPagination,
 } from '#shared/utils/tenantCasesTable'
-import { buildTenantCasesQueryParams } from '#shared/utils/tenantCasesQuery'
+import {
+  buildTenantCasesQueryParams,
+  buildTenantCaseResponsiblesQueryParams,
+} from '#shared/utils/tenantCasesQuery'
 import {
   buildTenantCaseStorePayload,
   emptyTenantCaseCreateFieldErrors,
@@ -297,5 +300,17 @@ describe('tenantCasesQuery', () => {
       userId: '   ',
     })
     expect(new URLSearchParams(withoutUser).has('user_id')).toBe(false)
+  })
+
+  it('builds responsibles query with room_id and optional tenant_case_id', () => {
+    expect(
+      new URLSearchParams(buildTenantCaseResponsiblesQueryParams({ roomId: 5 })).toString(),
+    ).toBe('room_id=5')
+
+    const withCase = new URLSearchParams(
+      buildTenantCaseResponsiblesQueryParams({ roomId: 5, tenantCaseId: 12 }),
+    )
+    expect(withCase.get('room_id')).toBe('5')
+    expect(withCase.get('tenant_case_id')).toBe('12')
   })
 })

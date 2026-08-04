@@ -53,7 +53,7 @@ describe('useCabinetRole', () => {
       remember: true,
     })
 
-    const { role, roleLabel, fullName } = useCabinetRole()
+    const { role, roleLabel, fullName, userId } = useCabinetRole()
     expect(role.value).toBe('admin')
 
     clearTokens()
@@ -62,6 +62,18 @@ describe('useCabinetRole', () => {
     expect(role.value).toBe('user')
     expect(roleLabel.value).toBeNull()
     expect(fullName.value).toBeNull()
+    expect(userId.value).toBeNull()
+  })
+
+  it('exposes JWT sub as userId', () => {
+    const { persistTokens } = useAuthToken()
+    persistTokens({
+      accessToken: makeAccessToken({ sub: '99', role_id: 1, role: 'Брокер' }),
+      remember: false,
+    })
+
+    const { userId } = useCabinetRole()
+    expect(userId.value).toBe('99')
   })
 
   it('recomputes role when access token changes', async () => {

@@ -6,6 +6,7 @@ import { useAuthToken } from '~/composables/useAuthToken'
 const ROLE_STATE_KEY = 'cabinet-role'
 const ROLE_LABEL_STATE_KEY = 'cabinet-role-label'
 const FULL_NAME_STATE_KEY = 'cabinet-full-name'
+const USER_ID_STATE_KEY = 'cabinet-user-id'
 
 let stopRoleWatch: ReturnType<typeof watch> | null = null
 
@@ -16,7 +17,7 @@ export function resetCabinetRoleWatchForTests() {
 }
 
 /**
- * Роль ЛК из access JWT (`role_id` / `role`).
+ * Роль ЛК из access JWT (`role_id` / `role` / `sub`).
  * Default fail-closed: `'user'`. Сброс при logout / отсутствии токена.
  */
 export function useCabinetRole() {
@@ -25,6 +26,7 @@ export function useCabinetRole() {
   const role = useState<CabinetRole>(ROLE_STATE_KEY, () => 'user')
   const roleLabel = useState<string | null>(ROLE_LABEL_STATE_KEY, () => null)
   const fullName = useState<string | null>(FULL_NAME_STATE_KEY, () => null)
+  const userId = useState<string | null>(USER_ID_STATE_KEY, () => null)
 
   function syncFromAccessToken() {
     hydrateFromStorage()
@@ -34,6 +36,7 @@ export function useCabinetRole() {
       role.value = 'user'
       roleLabel.value = null
       fullName.value = null
+      userId.value = null
       return
     }
 
@@ -41,6 +44,7 @@ export function useCabinetRole() {
     role.value = identity.role
     roleLabel.value = identity.roleLabel
     fullName.value = identity.fullName
+    userId.value = identity.sub
   }
 
   syncFromAccessToken()
@@ -57,6 +61,8 @@ export function useCabinetRole() {
     role: readonly(role),
     roleLabel: readonly(roleLabel),
     fullName: readonly(fullName),
+    /** JWT `sub` — для `user_id` в list дел. */
+    userId: readonly(userId),
     isAdmin,
   }
 }

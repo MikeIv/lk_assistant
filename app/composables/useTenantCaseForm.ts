@@ -137,7 +137,17 @@ export function useTenantCaseForm(initialValues: TenantCaseFormInitialValues = E
   const applicantsError = ref<string | null>(null)
   const showValidationErrors = ref(false)
 
-  const roomIdModel = createStringFieldModel(roomId)
+  const roomIdModel = computed({
+    get: () => roomId.value ?? '',
+    set: (value: string) => {
+      const previous = roomId.value ?? ''
+      roomId.value = value
+
+      if (value !== previous) {
+        responsible.value = ''
+      }
+    },
+  })
   const responsibleModel = createStringFieldModel(responsible)
 
   function syncApplicantsToForm() {

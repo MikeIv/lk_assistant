@@ -5,8 +5,11 @@ import { TENANT_CASES_MOCK_ITEMS } from '#shared/constants/tenantCasesMock'
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { computed, nextTick } from 'vue'
+import { makeAccessToken } from '../helpers/jwt'
 import { networkError, validationError } from '../helpers/domainApiMock'
 import { runComposable } from '../helpers/runComposable'
+import { resetAuthClientState } from './resetAuthClientState'
+import { useAuthToken } from '~/composables/useAuthToken'
 import { useTenantCases } from '~/composables/useTenantCases'
 
 const { apiMock, mockMode } = vi.hoisted(() => ({
@@ -64,6 +67,7 @@ describe('useTenantCases', () => {
   beforeEach(() => {
     apiMock.mockReset()
     mockMode.value = true
+    resetAuthClientState()
     for (const key of MOCK_STATE_KEYS) {
       clearNuxtState(key)
     }
@@ -131,13 +135,20 @@ describe('useTenantCases', () => {
     expect(cases.pagination.value.currentPage).toBe(1)
   })
 
-  it('api: loads list, maps 422, sets load error', async () => {
+  it('api: loads list with user_id from JWT, maps 422, sets load error', async () => {
     mockMode.value = false
+    const { persistTokens } = useAuthToken()
+    persistTokens({
+      accessToken: makeAccessToken({ sub: '77' }),
+      remember: false,
+    })
+
     apiMock.mockImplementation(async (request: string, options?: { method?: string }) => {
-      const path = String(request).split('?')[0]
+      const [path, query = ''] = String(request).split('?')
       const method = options?.method ?? 'GET'
 
       if (method === 'GET' && path === API_PATHS.broker.tenantCases.list) {
+        expect(new URLSearchParams(query).get('user_id')).toBe('77')
         return {
           success: true,
           message: 'ok',

@@ -106,6 +106,18 @@ describe('useTenantCaseForm', () => {
     expect(form.applicantsError.value).toBeNull()
   })
 
+  it('clears responsible when room changes via model, keeps it on load', async () => {
+    const form = mountForm()
+
+    form.loadTenantCaseForm({ room_id: '12', responsible: '7' }, [])
+    await nextTick()
+    expect(form.responsible.value).toBe('7')
+
+    form.roomId.value = '15'
+    await nextTick()
+    expect(form.responsible.value).toBe('')
+  })
+
   it('applyServerFieldErrors maps room and nested applicant paths', async () => {
     const form = mountForm()
 

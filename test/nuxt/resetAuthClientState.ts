@@ -13,6 +13,7 @@ export function resetAuthClientState(
     'cabinet-role',
     'cabinet-role-label',
     'cabinet-full-name',
+    'cabinet-user-id',
   ])
   localStorage.clear()
   sessionStorage.clear()
