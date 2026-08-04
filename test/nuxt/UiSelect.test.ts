@@ -23,6 +23,16 @@ describe('UiSelect', () => {
     expect(labels).toEqual(['Альфа', 'Бета Групп', 'Гамма'])
   })
 
+  it('emits open when the dropdown opens', async () => {
+    const wrapper = await mountUi(UiSelect, {
+      props: { options, modelValue: null },
+    })
+
+    await wrapper.get('button[aria-expanded]').trigger('click')
+
+    expect(wrapper.emitted('open')?.length).toBe(1)
+  })
+
   it('emits outputValue on select and closes the list', async () => {
     const wrapper = await mountUi(UiSelect, {
       props: { options, modelValue: null },

@@ -39,6 +39,7 @@ const {
   addNegotiation,
   removeNegotiation,
   toPayload,
+  responsible,
   applicants: formApplicants,
 } = useTenantCaseForm()
 
@@ -113,6 +114,15 @@ async function focusApplicantsValidation() {
   applicantsTabRef.value?.expandApplicantsWithErrors(getFieldError)
 }
 
+async function focusValidationErrors() {
+  if (getFieldError('responsible') || getFieldError('room_id')) {
+    activeTab.value = 'room'
+    return
+  }
+
+  await focusApplicantsValidation()
+}
+
 const onSubmit = handleSubmit(async () => {
   if (!tenantCase.value) {
     return
@@ -140,12 +150,12 @@ const onSubmit = handleSubmit(async () => {
 
     applyMutationFieldErrors(result.fieldErrors, payload)
     generalError.value = result.generalError
-    await focusApplicantsValidation()
+    await focusValidationErrors()
   } finally {
     isSubmitting.value = false
   }
 }, {
-  onInvalid: focusApplicantsValidation,
+  onInvalid: focusValidationErrors,
 })
 
 async function handleCancel() {
@@ -256,7 +266,16 @@ useHead(
           Загрузка справочников…
         </div>
 
-        <BrokerCurrentCaseRoomTab v-else-if="activeTab === 'room'" :room="tenantCase.room" />
+        <BrokerCurrentCaseRoomTab
+          v-else-if="activeTab === 'room'"
+          v-model:responsible="responsible"
+          :room="tenantCase.room"
+          :room-id="tenantCase.room_id"
+          :case-id="tenantCase.id"
+          :responsible-label="tenantCase.responsible"
+          :disabled="isBusy"
+          :error="getFieldError('responsible')"
+        />
 
         <BrokerCurrentCaseApplicantsTab
           v-else-if="activeTab === 'applicants'"

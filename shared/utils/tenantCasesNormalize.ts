@@ -7,9 +7,11 @@ import type {
   TenantCaseCreatePayload,
   TenantCaseKp,
   TenantCaseNegotiation,
+  TenantCaseResponsibleApiResource,
   TenantCaseRoom,
   TenantCaseTableRow,
 } from '#shared/types/tenantCases'
+import type { UiSelectOption } from '#shared/types/tenantData'
 import { normalizeNegotiationStatus } from '#shared/utils/negotiationStatusesNormalize'
 import { isTenantCaseApplicantStatus } from '#shared/utils/tenantCasesSchema'
 
@@ -241,6 +243,16 @@ export function formatTenantCaseArea(value: number | null): string {
   }
 
   return String(value).replace('.', ',')
+}
+
+export function mapTenantCaseResponsiblesToSelectOptions(
+  items: TenantCaseResponsibleApiResource[],
+): UiSelectOption[] {
+  return items.map((item) => ({
+    value: String(item.id),
+    label: item.responsible,
+    outputValue: String(item.id),
+  }))
 }
 
 export function toTenantCaseApiDateTime(dateValue: string): string {

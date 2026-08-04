@@ -21,6 +21,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   'update:modelValue': [value: string | null]
+  open: []
 }>()
 
 const { wrapperRef, panelRef, panelStyle, isOpen, open, toggle, closeAfterSelection } = useUiDropdown()
@@ -124,9 +125,12 @@ function onSearchableInput(event: Event) {
 }
 
 watch(isOpen, (opened) => {
-  if (!opened) {
-    searchQuery.value = ''
+  if (opened) {
+    emit('open')
+    return
   }
+
+  searchQuery.value = ''
 })
 </script>
 

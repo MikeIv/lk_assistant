@@ -5,6 +5,7 @@ import {
   flattenTenantCasesForTable,
   formatTenantCaseArea,
   getTenantCaseTodayDateInputValue,
+  mapTenantCaseResponsiblesToSelectOptions,
   normalizeTenantCase,
   normalizeTenantCaseApplicantPayload,
   normalizeTenantCaseKp,
@@ -166,6 +167,10 @@ describe('tenantCasesNormalize', () => {
     const payload = tenantCaseToCreatePayload(normalized)
     expect(payload.room_id).toBe(1)
     expect(payload.responsible).toBe(9)
+    expect(
+      mapTenantCaseResponsiblesToSelectOptions([{ id: 3, responsible: 'Петров Иван' }]),
+    ).toEqual([{ value: '3', label: 'Петров Иван', outputValue: '3' }])
+
     expect(tenantCaseApplicantsToFormLoad(normalized.applicants)[0]?.tenant_applicant).toBe('App')
 
     expect(

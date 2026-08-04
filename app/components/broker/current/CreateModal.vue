@@ -19,6 +19,7 @@ const {
   applyServerFieldErrors,
   toStorePayload,
   roomId,
+  responsible,
   applicants: formApplicants,
 } = useTenantCaseForm()
 
@@ -76,6 +77,7 @@ const onSubmit = handleSubmit(async () => {
         <BrokerCurrentFormFields
           v-else
           v-model:room-id="roomId"
+          v-model:responsible="responsible"
           v-model:applicants="formApplicants"
           :rooms="rooms"
           :directory-applicants="applicants"

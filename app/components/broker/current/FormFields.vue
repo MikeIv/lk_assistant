@@ -4,6 +4,7 @@ import type { NegotiationStatus } from '#shared/types/negotiationStatuses'
 import type { Premise } from '#shared/types/premises'
 import type { UiSelectOption } from '#shared/types/tenantData'
 import { mapNegotiationStatusesToSelectOptions } from '#shared/utils/negotiationStatusesNormalize'
+import { mapTenantCaseResponsiblesToSelectOptions } from '#shared/utils/tenantCasesNormalize'
 
 const props = defineProps<{
   rooms: Premise[]
@@ -12,6 +13,7 @@ const props = defineProps<{
   disabled?: boolean
   errors: {
     room_id?: string
+    responsible?: string
     tenant_applicant_id?: string
     negotiation_status_id?: string
     first_contact_date?: string
@@ -29,7 +31,17 @@ type ApplicantFormRow = {
 }
 
 const roomId = defineModel<string>('roomId', { required: true })
+const responsible = defineModel<string>('responsible', { required: true })
 const applicants = defineModel<ApplicantFormRow[]>('applicants', { required: true })
+
+const {
+  items: responsibleItems,
+  isLoading: isResponsiblesLoading,
+  fetchResponsibles,
+  clearResponsibles,
+} = useTenantCaseResponsibles()
+
+const isResponsibleEnabled = computed(() => Boolean(roomId.value.trim()))
 
 function patchFirstApplicant(patch: Partial<ApplicantFormRow>) {
   const [first, ...rest] = applicants.value
@@ -96,6 +108,22 @@ const applicantOptions = computed<UiSelectOption[]>(() =>
 const statusOptions = computed<UiSelectOption[]>(() =>
   mapNegotiationStatusesToSelectOptions(props.negotiationStatuses),
 )
+
+const responsibleOptions = computed(() =>
+  mapTenantCaseResponsiblesToSelectOptions(responsibleItems.value),
+)
+
+watch(roomId, () => {
+  clearResponsibles()
+})
+
+async function onResponsibleOpen() {
+  if (!isResponsibleEnabled.value || props.disabled) {
+    return
+  }
+
+  await fetchResponsibles({ roomId: roomId.value })
+}
 
 function guardDateValue(currentValue: string, event: Event) {
   const input = event.target as HTMLInputElement
@@ -218,6 +246,25 @@ function guardDateValue(currentValue: string, event: Event) {
         </div>
       </div>
     </div>
+
+    <label :class="$style.field">
+      <span :class="$style.label">
+        Ответственный
+        <span :class="$style.required">*</span>
+      </span>
+      <div :class="[$style.inputWrap, errors.responsible && $style.inputWrapError]">
+        <UiSelect
+          v-model="responsible"
+          :options="responsibleOptions"
+          placeholder="Выберите ответственного"
+          searchable
+          :disabled="disabled || !isResponsibleEnabled"
+          @open="onResponsibleOpen"
+        />
+      </div>
+      <p v-if="errors.responsible" :class="$style.fieldError">{{ errors.responsible }}</p>
+      <p v-else-if="isResponsiblesLoading" :class="$style.hint">Загрузка ответственных…</p>
+    </label>
   </div>
 </template>
 
@@ -262,6 +309,12 @@ function guardDateValue(currentValue: string, event: Event) {
   margin: 0;
   font-size: rem(12);
   color: var(--fs-color-error);
+}
+
+.hint {
+  margin: 0;
+  font-size: rem(12);
+  color: var(--fs-color-text-muted);
 }
 
 .dateRow {
