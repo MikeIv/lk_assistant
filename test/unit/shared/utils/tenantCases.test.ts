@@ -256,6 +256,7 @@ describe('tenantCasesValidation', () => {
       applicants: [],
     })
     expect(hasTenantCaseCreateFieldErrors(invalid)).toBe(true)
+    expect(invalid.room_id).toBe('Выберите помещение')
     expect(invalid.responsible).toBe('Выберите ответственного')
 
     const valid = validateTenantCaseFormPayload({

@@ -132,7 +132,7 @@ export function hasTenantCaseCreateFieldErrors(fieldErrors: TenantCaseCreateFiel
 
 function buildTenantCaseFormSchemaInput(payload: TenantCaseCreatePayload) {
   return {
-    room_id: String(payload.room_id),
+    room_id: payload.room_id > 0 ? String(payload.room_id) : '',
     responsible: payload.responsible > 0 ? String(payload.responsible) : '',
     applicants: payload.applicants.map((applicant) => ({
       id: applicant.id ?? null,

@@ -60,9 +60,7 @@ async function confirmLogout() {
     </div>
 
     <div :class="$style.actions">
-      <span
-        :class="[$style.roleTag, isAdmin && $style.roleTagActive]"
-      >
+      <span :class="$style.roleTag">
         {{ roleTagText }}
       </span>
 
@@ -261,7 +259,7 @@ async function confirmLogout() {
   gap: var(--fs-space-2);
 }
 
-/* Figma Desktop/Tags (node 24:267): Default / Active */
+/* Figma Desktop/Tags (node 24:267): Active — единый стиль для любой роли */
 .roleTag {
   display: inline-flex;
   align-items: center;
@@ -270,8 +268,8 @@ async function confirmLogout() {
   height: rem(24);
   padding: 0 rem(12) rem(2);
   border-radius: rem(189);
-  color: var(--fs-figma-achromatic-black);
-  background: var(--fs-color-cabinet-tag-neutral);
+  color: var(--fs-figma-achromatic-white);
+  background: var(--fs-figma-achromatic-black);
   backdrop-filter: blur(20px);
   white-space: nowrap;
 
@@ -279,11 +277,6 @@ async function confirmLogout() {
   font-size: rem(13);
   font-weight: 500;
   line-height: 1.4;
-}
-
-.roleTagActive {
-  color: var(--fs-figma-achromatic-white);
-  background: var(--fs-figma-achromatic-black);
 }
 
 @media (max-width: #{bp.$tablet - 1px}) {
