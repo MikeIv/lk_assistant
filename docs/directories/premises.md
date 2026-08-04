@@ -18,7 +18,7 @@
 
 Полный CRUD: список, поиск, сортировка, создание, правка; удаление — из карточки с подтверждением.
 
-Данные: **API** (если задан `NUXT_PUBLIC_API_BASE`) или **локальный mock**. Пагинация на клиенте.
+Данные: **API** (если задан `NUXT_PUBLIC_API_BASE`) или **локальный mock**. Пагинация на сервере (в mock — на клиенте).
 
 ### Какие данные хранит
 
@@ -39,12 +39,12 @@
 
 ## Для разработки (кратко)
 
-| Что           | Где                                                                          |
-| ------------- | ---------------------------------------------------------------------------- |
-| Composable    | `usePremises`, `usePremiseForm`                                              |
-| UI            | `app/components/direct/premises/` (`Sec`, `Table`, модалки)                  |
-| Shared        | `premisesNormalize`, `premisesSchema`, `premisesTable`, `premisesValidation` |
-| Mock          | `shared/constants/premisesMock.ts`                                           |
-| API           | `/v1/broker/dict/rooms`, detail `/v1/broker/dict/rooms/{id}`                 |
-| Пагинация     | client-side                                                                  |
-| Опции в делах | `useTenantCaseFormOptions`                                                   |
+| Что           | Где                                                                                           |
+| ------------- | --------------------------------------------------------------------------------------------- |
+| Composable    | `usePremises`, `usePremiseForm`                                                               |
+| UI            | `app/components/direct/premises/` (`Sec`, `Table`, модалки)                                   |
+| Shared        | `premisesNormalize`, `premisesSchema`, `premisesTable`, `premisesQuery`, `premisesValidation` |
+| Mock          | `shared/constants/premisesMock.ts`                                                            |
+| API           | `/v1/broker/dict/rooms`, detail `/v1/broker/dict/rooms/{id}`                                  |
+| Пагинация     | server-side: `page`, `per_page`, `sort`, `direction`, `search`                                |
+| Опции в делах | `useTenantCaseFormOptions`                                                                    |

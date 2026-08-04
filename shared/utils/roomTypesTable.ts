@@ -4,6 +4,7 @@ import type {
   RoomTypeSortDirection,
   RoomTypeSortKey,
 } from '#shared/types/roomTypes'
+import { toDirectoryApiPagination } from '#shared/utils/directoryApiPagination'
 
 export function matchesRoomTypeSearch(item: RoomType, query: string): boolean {
   const normalized = query.trim().toLowerCase()
@@ -74,6 +75,16 @@ export function buildRoomTypesPagination(
     rangeFrom,
     rangeTo,
   }
+}
+
+/** Пагинация из payload `brokerRoomType.index` (без пересчёта last_page на клиенте). */
+export function toRoomTypesApiPagination(payload: {
+  current_page: number
+  last_page: number
+  per_page: number
+  total: number
+}): RoomTypesPagination {
+  return toDirectoryApiPagination(payload)
 }
 
 export function paginateRoomTypes(

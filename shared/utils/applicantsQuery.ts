@@ -1,4 +1,5 @@
 import type { ApplicantSortDirection, ApplicantSortKey } from '#shared/types/applicants'
+import { buildDirectoryListQueryParams } from '#shared/utils/directoryListQuery'
 
 interface BuildApplicantsQueryParams {
   page: number
@@ -9,25 +10,6 @@ interface BuildApplicantsQueryParams {
 }
 
 /** Query для `brokerTenantApplicant.index` (search, sort, direction, per_page, page). */
-export function buildApplicantsQueryParams({
-  page,
-  perPage,
-  search,
-  sortKey,
-  sortDirection,
-}: BuildApplicantsQueryParams): string {
-  const params = new URLSearchParams({
-    page: String(page),
-    per_page: String(perPage),
-    sort: sortKey,
-    direction: sortDirection,
-  })
-
-  const trimmedSearch = search.trim()
-
-  if (trimmedSearch) {
-    params.set('search', trimmedSearch)
-  }
-
-  return params.toString()
+export function buildApplicantsQueryParams(params: BuildApplicantsQueryParams): string {
+  return buildDirectoryListQueryParams(params)
 }

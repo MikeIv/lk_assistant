@@ -4,6 +4,7 @@ import type {
   NegotiationStatusSortDirection,
   NegotiationStatusSortKey,
 } from '#shared/types/negotiationStatuses'
+import { toDirectoryApiPagination } from '#shared/utils/directoryApiPagination'
 
 export function matchesNegotiationStatusSearch(item: NegotiationStatus, query: string): boolean {
   const normalized = query.trim().toLowerCase()
@@ -76,6 +77,16 @@ export function buildNegotiationStatusesPagination(
     rangeFrom,
     rangeTo,
   }
+}
+
+/** Пагинация из payload `brokerNegotiationStatus.index` (без пересчёта last_page на клиенте). */
+export function toNegotiationStatusesApiPagination(payload: {
+  current_page: number
+  last_page: number
+  per_page: number
+  total: number
+}): NegotiationStatusesPagination {
+  return toDirectoryApiPagination(payload)
 }
 
 export function paginateNegotiationStatuses(

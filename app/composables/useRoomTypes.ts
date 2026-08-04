@@ -8,10 +8,12 @@ import type {
   RoomTypeCreateResult,
   RoomTypeDeleteResult,
   RoomTypesListApiResponse,
+  RoomTypesPagination,
   RoomTypeSortDirection,
   RoomTypeSortKey,
 } from '#shared/types/roomTypes'
 import { normalizeRoomType } from '#shared/utils/roomTypesNormalize'
+import { buildRoomTypesQueryParams } from '#shared/utils/roomTypesQuery'
 import {
   buildRoomTypesPagination,
   matchesRoomTypeSearch,
@@ -20,6 +22,7 @@ import {
   ROOM_TYPES_DEFAULT_SORT_DIRECTION,
   ROOM_TYPES_DEFAULT_SORT_KEY,
   sortRoomTypes,
+  toRoomTypesApiPagination,
 } from '#shared/utils/roomTypesTable'
 import {
   emptyRoomTypeCreateFieldErrors,
@@ -32,30 +35,26 @@ import {
 import { useApiConfig } from '~/composables/useApiConfig'
 import type { FetchError } from 'ofetch'
 
-/** Список типов помещений: API `brokerRoomType.index` (client-side filter/sort/page) или mock. */
+const SEARCH_DEBOUNCE_MS = 300
+
+/** Список типов помещений: API `brokerRoomType.index` или mock без `NUXT_PUBLIC_API_BASE`. */
 export function useRoomTypes() {
   const api = useApi()
   const { isMockMode } = useApiConfig()
 
-  const sourceItems = ref<RoomType[]>([])
+  const apiResponse = ref<RoomTypesListApiResponse | null>(null)
   const error = ref<string | null>(null)
   const isLoading = ref(false)
   const mockExtraItems = ref<RoomType[]>([])
   const mockDeletedIds = ref<Set<number>>(new Set())
   const mockUpdatedItems = ref<Map<number, RoomType>>(new Map())
 
-  const allItems = computed<RoomType[]>(() => {
-    if (isMockMode.value) {
-      return [
-        ...ROOM_TYPES_MOCK_ITEMS.filter((item) => !mockDeletedIds.value.has(item.id)).map(
-          (item) => mockUpdatedItems.value.get(item.id) ?? item,
-        ),
-        ...mockExtraItems.value.filter((item) => !mockDeletedIds.value.has(item.id)),
-      ]
-    }
-
-    return sourceItems.value
-  })
+  const mockSourceItems = computed<RoomType[]>(() => [
+    ...ROOM_TYPES_MOCK_ITEMS.filter((item) => !mockDeletedIds.value.has(item.id)).map(
+      (item) => mockUpdatedItems.value.get(item.id) ?? item,
+    ),
+    ...mockExtraItems.value.filter((item) => !mockDeletedIds.value.has(item.id)),
+  ])
 
   const searchQuery = ref('')
   const sortKey = ref<RoomTypeSortKey>(ROOM_TYPES_DEFAULT_SORT_KEY)
@@ -63,22 +62,50 @@ export function useRoomTypes() {
   const perPage = ref(ROOM_TYPES_DEFAULT_PER_PAGE)
   const currentPage = ref(1)
 
-  const filteredItems = computed<RoomType[]>(() => {
+  const mockSortedItems = computed<RoomType[]>(() => {
+    if (!isMockMode.value) {
+      return []
+    }
+
     const query = searchQuery.value.trim()
     const filtered = query
-      ? allItems.value.filter((item) => matchesRoomTypeSearch(item, query))
-      : allItems.value
+      ? mockSourceItems.value.filter((item) => matchesRoomTypeSearch(item, query))
+      : mockSourceItems.value
 
     return sortRoomTypes(filtered, sortKey.value, sortDirection.value)
   })
 
-  const pagination = computed(() =>
-    buildRoomTypesPagination(filteredItems.value.length, currentPage.value, perPage.value),
+  const mockPagination = computed<RoomTypesPagination>(() =>
+    isMockMode.value
+      ? buildRoomTypesPagination(mockSortedItems.value.length, currentPage.value, perPage.value)
+      : buildRoomTypesPagination(0, 1, perPage.value),
   )
 
-  const items = computed<RoomType[]>(() =>
-    paginateRoomTypes(filteredItems.value, pagination.value.currentPage, pagination.value.perPage),
+  const mockItems = computed<RoomType[]>(() =>
+    isMockMode.value
+      ? paginateRoomTypes(mockSortedItems.value, currentPage.value, perPage.value)
+      : [],
   )
+
+  const apiPagination = computed<RoomTypesPagination>(() => {
+    const payload = apiResponse.value?.payload
+
+    return payload
+      ? toRoomTypesApiPagination(payload)
+      : buildRoomTypesPagination(0, 1, perPage.value)
+  })
+
+  const pagination = computed<RoomTypesPagination>(() =>
+    isMockMode.value ? mockPagination.value : apiPagination.value,
+  )
+
+  const items = computed<RoomType[]>(() => {
+    if (isMockMode.value) {
+      return mockItems.value
+    }
+
+    return (apiResponse.value?.payload.data ?? []).map(normalizeRoomType)
+  })
 
   watch(
     () => pagination.value.lastPage,
@@ -89,7 +116,7 @@ export function useRoomTypes() {
     },
   )
 
-  async function fetchItems(options?: { silent?: boolean }) {
+  async function fetchItems(page = currentPage.value, options?: { silent?: boolean }) {
     if (!options?.silent) {
       isLoading.value = true
     }
@@ -100,11 +127,21 @@ export function useRoomTypes() {
         return
       }
 
-      const response = await api<RoomTypesListApiResponse>(API_PATHS.broker.roomTypes.list)
-      sourceItems.value = response.payload.items.map(normalizeRoomType)
+      const query = buildRoomTypesQueryParams({
+        page,
+        perPage: perPage.value,
+        search: searchQuery.value,
+        sortKey: sortKey.value,
+        sortDirection: sortDirection.value,
+      })
+
+      apiResponse.value = await api<RoomTypesListApiResponse>(
+        `${API_PATHS.broker.roomTypes.list}?${query}`,
+      )
+      currentPage.value = apiResponse.value.payload.current_page
     } catch {
       error.value = 'Не удалось загрузить список типов помещений'
-      sourceItems.value = []
+      apiResponse.value = null
     } finally {
       if (!options?.silent) {
         isLoading.value = false
@@ -112,13 +149,21 @@ export function useRoomTypes() {
     }
   }
 
+  function fetchApiPage(page: number) {
+    if (!isMockMode.value) {
+      void fetchItems(page)
+    }
+  }
+
   function setPage(page: number) {
     currentPage.value = Math.max(1, Math.min(page, pagination.value.lastPage))
+    fetchApiPage(currentPage.value)
   }
 
   function setPerPage(value: number) {
     perPage.value = value
     currentPage.value = 1
+    fetchApiPage(1)
   }
 
   function toggleSort(key: RoomTypeSortKey) {
@@ -130,14 +175,28 @@ export function useRoomTypes() {
     }
 
     currentPage.value = 1
+    fetchApiPage(1)
   }
+
+  let searchDebounceTimer: ReturnType<typeof setTimeout> | undefined
 
   watch(searchQuery, () => {
     currentPage.value = 1
+
+    if (isMockMode.value) {
+      return
+    }
+
+    clearTimeout(searchDebounceTimer)
+    searchDebounceTimer = setTimeout(() => fetchApiPage(1), SEARCH_DEBOUNCE_MS)
   })
 
   onMounted(() => {
     void fetchItems()
+  })
+
+  onUnmounted(() => {
+    clearTimeout(searchDebounceTimer)
   })
 
   function validationFailure(fieldErrors: RoomTypeCreateFieldErrors): RoomTypeCreateResult {
@@ -175,7 +234,10 @@ export function useRoomTypes() {
 
     try {
       if (isMockMode.value) {
-        const duplicateErrors = findRoomTypeDuplicateErrors(allItems.value, normalizedPayload)
+        const duplicateErrors = findRoomTypeDuplicateErrors(
+          mockSourceItems.value,
+          normalizedPayload,
+        )
 
         if (hasRoomTypeCreateFieldErrors(duplicateErrors)) {
           return validationFailure(duplicateErrors)
@@ -194,7 +256,7 @@ export function useRoomTypes() {
         body: normalizedPayload,
       })
 
-      await fetchItems({ silent: true })
+      await fetchItems(currentPage.value, { silent: true })
 
       return { ok: true }
     } catch (cause) {
@@ -215,7 +277,11 @@ export function useRoomTypes() {
 
     try {
       if (isMockMode.value) {
-        const duplicateErrors = findRoomTypeDuplicateErrors(allItems.value, normalizedPayload, id)
+        const duplicateErrors = findRoomTypeDuplicateErrors(
+          mockSourceItems.value,
+          normalizedPayload,
+          id,
+        )
 
         if (hasRoomTypeCreateFieldErrors(duplicateErrors)) {
           return validationFailure(duplicateErrors)
@@ -241,7 +307,7 @@ export function useRoomTypes() {
         body: normalizedPayload,
       })
 
-      await fetchItems({ silent: true })
+      await fetchItems(currentPage.value, { silent: true })
 
       return { ok: true }
     } catch (cause) {
@@ -263,7 +329,7 @@ export function useRoomTypes() {
         method: 'DELETE',
       })
 
-      await fetchItems({ silent: true })
+      await fetchItems(currentPage.value, { silent: true })
 
       return { ok: true }
     } catch {

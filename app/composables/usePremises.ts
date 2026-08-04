@@ -9,13 +9,13 @@ import type {
   PremiseDeleteResult,
   PremiseMutationApiResponse,
   PremisesListApiResponse,
+  PremisesPagination,
   PremiseSortDirection,
   PremiseSortKey,
 } from '#shared/types/premises'
 import type { RoomType, RoomTypesListApiResponse } from '#shared/types/roomTypes'
 import { normalizePremise } from '#shared/utils/premisesNormalize'
-import { listPayloadRows } from '#shared/utils/listPayloadRows'
-import { normalizeRoomType } from '#shared/utils/roomTypesNormalize'
+import { buildPremisesQueryParams } from '#shared/utils/premisesQuery'
 import {
   buildPremisesPagination,
   matchesPremiseSearch,
@@ -24,6 +24,7 @@ import {
   PREMISES_DEFAULT_SORT_DIRECTION,
   PREMISES_DEFAULT_SORT_KEY,
   sortPremises,
+  toPremisesApiPagination,
 } from '#shared/utils/premisesTable'
 import {
   emptyPremiseCreateFieldErrors,
@@ -32,15 +33,20 @@ import {
   parsePremiseCreateFieldErrors,
   validatePremiseFormPayload,
 } from '#shared/utils/premisesValidation'
+import { normalizeRoomType } from '#shared/utils/roomTypesNormalize'
+import { buildRoomTypesQueryParams } from '#shared/utils/roomTypesQuery'
 import { useApiConfig } from '~/composables/useApiConfig'
 import type { FetchError } from 'ofetch'
+
+const SEARCH_DEBOUNCE_MS = 300
+const ROOM_TYPES_OPTIONS_PER_PAGE = 1000
 
 /** Список помещений: API `brokerRoom.index` или mock без `NUXT_PUBLIC_API_BASE`. */
 export function usePremises() {
   const api = useApi()
   const { isMockMode } = useApiConfig()
 
-  const apiSourceItems = ref<Premise[]>([])
+  const apiResponse = ref<PremisesListApiResponse | null>(null)
   const roomTypes = ref<RoomType[]>([])
   const error = ref<string | null>(null)
   const isLoading = ref(false)
@@ -55,32 +61,54 @@ export function usePremises() {
     ...mockExtraItems.value.filter((item) => !mockDeletedIds.value.has(item.id)),
   ])
 
-  const sourceItems = computed<Premise[]>(() =>
-    isMockMode.value ? mockSourceItems.value : apiSourceItems.value,
-  )
-
   const searchQuery = ref('')
   const sortKey = ref<PremiseSortKey>(PREMISES_DEFAULT_SORT_KEY)
   const sortDirection = ref<PremiseSortDirection>(PREMISES_DEFAULT_SORT_DIRECTION)
   const perPage = ref(PREMISES_DEFAULT_PER_PAGE)
   const currentPage = ref(1)
 
-  const filteredItems = computed<Premise[]>(() => {
+  const mockSortedItems = computed<Premise[]>(() => {
+    if (!isMockMode.value) {
+      return []
+    }
+
     const query = searchQuery.value.trim()
     const filtered = query
-      ? sourceItems.value.filter((item) => matchesPremiseSearch(item, query))
-      : sourceItems.value
+      ? mockSourceItems.value.filter((item) => matchesPremiseSearch(item, query))
+      : mockSourceItems.value
 
     return sortPremises(filtered, sortKey.value, sortDirection.value)
   })
 
-  const pagination = computed(() =>
-    buildPremisesPagination(filteredItems.value.length, currentPage.value, perPage.value),
+  const mockPagination = computed<PremisesPagination>(() =>
+    isMockMode.value
+      ? buildPremisesPagination(mockSortedItems.value.length, currentPage.value, perPage.value)
+      : buildPremisesPagination(0, 1, perPage.value),
   )
 
-  const items = computed<Premise[]>(() =>
-    paginatePremises(filteredItems.value, pagination.value.currentPage, pagination.value.perPage),
+  const mockItems = computed<Premise[]>(() =>
+    isMockMode.value
+      ? paginatePremises(mockSortedItems.value, currentPage.value, perPage.value)
+      : [],
   )
+
+  const apiPagination = computed<PremisesPagination>(() => {
+    const payload = apiResponse.value?.payload
+
+    return payload ? toPremisesApiPagination(payload) : buildPremisesPagination(0, 1, perPage.value)
+  })
+
+  const pagination = computed<PremisesPagination>(() =>
+    isMockMode.value ? mockPagination.value : apiPagination.value,
+  )
+
+  const items = computed<Premise[]>(() => {
+    if (isMockMode.value) {
+      return mockItems.value
+    }
+
+    return (apiResponse.value?.payload.data ?? []).map(normalizePremise)
+  })
 
   watch(
     () => pagination.value.lastPage,
@@ -120,14 +148,22 @@ export function usePremises() {
         return
       }
 
-      const response = await api<RoomTypesListApiResponse>(API_PATHS.broker.roomTypes.list)
-      roomTypes.value = (response.payload.items ?? []).map(normalizeRoomType)
+      const response = await api<RoomTypesListApiResponse>(
+        `${API_PATHS.broker.roomTypes.list}?${buildRoomTypesQueryParams({
+          page: 1,
+          perPage: ROOM_TYPES_OPTIONS_PER_PAGE,
+          search: '',
+          sortKey: 'id',
+          sortDirection: 'asc',
+        })}`,
+      )
+      roomTypes.value = (response.payload.data ?? []).map(normalizeRoomType)
     } catch {
       roomTypes.value = []
     }
   }
 
-  async function fetchItems(options?: { silent?: boolean }) {
+  async function fetchItems(page = currentPage.value, options?: { silent?: boolean }) {
     if (!options?.silent) {
       isLoading.value = true
     }
@@ -138,11 +174,21 @@ export function usePremises() {
         return
       }
 
-      const response = await api<PremisesListApiResponse>(API_PATHS.broker.rooms.list)
-      apiSourceItems.value = listPayloadRows(response.payload).map(normalizePremise)
+      const query = buildPremisesQueryParams({
+        page,
+        perPage: perPage.value,
+        search: searchQuery.value,
+        sortKey: sortKey.value,
+        sortDirection: sortDirection.value,
+      })
+
+      apiResponse.value = await api<PremisesListApiResponse>(
+        `${API_PATHS.broker.rooms.list}?${query}`,
+      )
+      currentPage.value = apiResponse.value.payload.current_page
     } catch {
       error.value = 'Не удалось загрузить список помещений'
-      apiSourceItems.value = []
+      apiResponse.value = null
     } finally {
       if (!options?.silent) {
         isLoading.value = false
@@ -150,22 +196,34 @@ export function usePremises() {
     }
   }
 
+  function fetchApiPage(page: number) {
+    if (!isMockMode.value) {
+      void fetchItems(page)
+    }
+  }
+
   async function refresh() {
+    if (isMockMode.value) {
+      return
+    }
+
     isLoading.value = true
     error.value = null
 
-    await Promise.all([fetchItems({ silent: true }), fetchRoomTypes()])
+    await Promise.all([fetchItems(currentPage.value, { silent: true }), fetchRoomTypes()])
 
     isLoading.value = false
   }
 
   function setPage(page: number) {
     currentPage.value = Math.max(1, Math.min(page, pagination.value.lastPage))
+    fetchApiPage(currentPage.value)
   }
 
   function setPerPage(value: number) {
     perPage.value = value
     currentPage.value = 1
+    fetchApiPage(1)
   }
 
   function toggleSort(key: PremiseSortKey) {
@@ -177,19 +235,21 @@ export function usePremises() {
     }
 
     currentPage.value = 1
+    fetchApiPage(1)
   }
+
+  let searchDebounceTimer: ReturnType<typeof setTimeout> | undefined
 
   watch(searchQuery, () => {
     currentPage.value = 1
-  })
 
-  async function reloadAfterMutation() {
     if (isMockMode.value) {
       return
     }
 
-    await fetchItems({ silent: true })
-  }
+    clearTimeout(searchDebounceTimer)
+    searchDebounceTimer = setTimeout(() => fetchApiPage(1), SEARCH_DEBOUNCE_MS)
+  })
 
   function validationFailure(fieldErrors: PremiseCreateFieldErrors): PremiseCreateResult {
     return { ok: false, fieldErrors, generalError: null }
@@ -236,7 +296,7 @@ export function usePremises() {
         body: normalizedPayload,
       })
 
-      await reloadAfterMutation()
+      await fetchItems(currentPage.value, { silent: true })
 
       return { ok: true }
     } catch (cause) {
@@ -274,7 +334,7 @@ export function usePremises() {
         body: normalizedPayload,
       })
 
-      await reloadAfterMutation()
+      await fetchItems(currentPage.value, { silent: true })
 
       return { ok: true }
     } catch (cause) {
@@ -296,7 +356,7 @@ export function usePremises() {
         method: 'DELETE',
       })
 
-      await reloadAfterMutation()
+      await fetchItems(currentPage.value, { silent: true })
 
       return { ok: true }
     } catch {
@@ -308,7 +368,12 @@ export function usePremises() {
   }
 
   onMounted(() => {
-    void refresh()
+    void fetchRoomTypes()
+    void fetchItems()
+  })
+
+  onUnmounted(() => {
+    clearTimeout(searchDebounceTimer)
   })
 
   return {

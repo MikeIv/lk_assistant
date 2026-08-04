@@ -27,7 +27,11 @@ export interface CategoriesListApiResponse {
   success: boolean
   message: string
   payload: {
-    items: CategoryApiResource[]
+    data: CategoryApiResource[]
+    current_page: number
+    per_page: number
+    total: number
+    last_page: number
   }
 }
 

@@ -1,25 +1,28 @@
 import { API_PATHS } from '#shared/constants/api'
 import { CATEGORIES_MOCK_ITEMS } from '#shared/constants/categoriesMock'
 import type {
+  CategoriesListApiResponse,
+  CategoriesPagination,
   Category,
   CategoryCreateApiResponse,
   CategoryCreateFieldErrors,
   CategoryCreatePayload,
   CategoryCreateResult,
   CategoryDeleteResult,
-  CategoriesListApiResponse,
   CategorySortDirection,
   CategorySortKey,
 } from '#shared/types/categories'
 import { normalizeCategory } from '#shared/utils/categoriesNormalize'
+import { buildCategoriesQueryParams } from '#shared/utils/categoriesQuery'
 import {
   buildCategoriesPagination,
-  matchesCategorySearch,
-  paginateCategories,
   CATEGORIES_DEFAULT_PER_PAGE,
   CATEGORIES_DEFAULT_SORT_DIRECTION,
   CATEGORIES_DEFAULT_SORT_KEY,
+  matchesCategorySearch,
+  paginateCategories,
   sortCategories,
+  toCategoriesApiPagination,
 } from '#shared/utils/categoriesTable'
 import {
   emptyCategoryCreateFieldErrors,
@@ -32,30 +35,26 @@ import {
 import { useApiConfig } from '~/composables/useApiConfig'
 import type { FetchError } from 'ofetch'
 
-/** Список категорий: API `brokerCategory.index` (client-side filter/sort/page) или mock. */
+const SEARCH_DEBOUNCE_MS = 300
+
+/** Список категорий: API `brokerCategory.index` или mock без `NUXT_PUBLIC_API_BASE`. */
 export function useCategories() {
   const api = useApi()
   const { isMockMode } = useApiConfig()
 
-  const sourceItems = ref<Category[]>([])
+  const apiResponse = ref<CategoriesListApiResponse | null>(null)
   const error = ref<string | null>(null)
   const isLoading = ref(false)
   const mockExtraItems = ref<Category[]>([])
   const mockDeletedIds = ref<Set<number>>(new Set())
   const mockUpdatedItems = ref<Map<number, Category>>(new Map())
 
-  const allItems = computed<Category[]>(() => {
-    if (isMockMode.value) {
-      return [
-        ...CATEGORIES_MOCK_ITEMS.filter((item) => !mockDeletedIds.value.has(item.id)).map(
-          (item) => mockUpdatedItems.value.get(item.id) ?? item,
-        ),
-        ...mockExtraItems.value.filter((item) => !mockDeletedIds.value.has(item.id)),
-      ]
-    }
-
-    return sourceItems.value
-  })
+  const mockSourceItems = computed<Category[]>(() => [
+    ...CATEGORIES_MOCK_ITEMS.filter((item) => !mockDeletedIds.value.has(item.id)).map(
+      (item) => mockUpdatedItems.value.get(item.id) ?? item,
+    ),
+    ...mockExtraItems.value.filter((item) => !mockDeletedIds.value.has(item.id)),
+  ])
 
   const searchQuery = ref('')
   const sortKey = ref<CategorySortKey>(CATEGORIES_DEFAULT_SORT_KEY)
@@ -63,22 +62,50 @@ export function useCategories() {
   const perPage = ref(CATEGORIES_DEFAULT_PER_PAGE)
   const currentPage = ref(1)
 
-  const filteredItems = computed<Category[]>(() => {
+  const mockSortedItems = computed<Category[]>(() => {
+    if (!isMockMode.value) {
+      return []
+    }
+
     const query = searchQuery.value.trim()
     const filtered = query
-      ? allItems.value.filter((item) => matchesCategorySearch(item, query))
-      : allItems.value
+      ? mockSourceItems.value.filter((item) => matchesCategorySearch(item, query))
+      : mockSourceItems.value
 
     return sortCategories(filtered, sortKey.value, sortDirection.value)
   })
 
-  const pagination = computed(() =>
-    buildCategoriesPagination(filteredItems.value.length, currentPage.value, perPage.value),
+  const mockPagination = computed<CategoriesPagination>(() =>
+    isMockMode.value
+      ? buildCategoriesPagination(mockSortedItems.value.length, currentPage.value, perPage.value)
+      : buildCategoriesPagination(0, 1, perPage.value),
   )
 
-  const items = computed<Category[]>(() =>
-    paginateCategories(filteredItems.value, pagination.value.currentPage, pagination.value.perPage),
+  const mockItems = computed<Category[]>(() =>
+    isMockMode.value
+      ? paginateCategories(mockSortedItems.value, currentPage.value, perPage.value)
+      : [],
   )
+
+  const apiPagination = computed<CategoriesPagination>(() => {
+    const payload = apiResponse.value?.payload
+
+    return payload
+      ? toCategoriesApiPagination(payload)
+      : buildCategoriesPagination(0, 1, perPage.value)
+  })
+
+  const pagination = computed<CategoriesPagination>(() =>
+    isMockMode.value ? mockPagination.value : apiPagination.value,
+  )
+
+  const items = computed<Category[]>(() => {
+    if (isMockMode.value) {
+      return mockItems.value
+    }
+
+    return (apiResponse.value?.payload.data ?? []).map(normalizeCategory)
+  })
 
   watch(
     () => pagination.value.lastPage,
@@ -89,7 +116,7 @@ export function useCategories() {
     },
   )
 
-  async function fetchItems(options?: { silent?: boolean }) {
+  async function fetchItems(page = currentPage.value, options?: { silent?: boolean }) {
     if (!options?.silent) {
       isLoading.value = true
     }
@@ -100,11 +127,21 @@ export function useCategories() {
         return
       }
 
-      const response = await api<CategoriesListApiResponse>(API_PATHS.broker.categories.list)
-      sourceItems.value = response.payload.items.map(normalizeCategory)
+      const query = buildCategoriesQueryParams({
+        page,
+        perPage: perPage.value,
+        search: searchQuery.value,
+        sortKey: sortKey.value,
+        sortDirection: sortDirection.value,
+      })
+
+      apiResponse.value = await api<CategoriesListApiResponse>(
+        `${API_PATHS.broker.categories.list}?${query}`,
+      )
+      currentPage.value = apiResponse.value.payload.current_page
     } catch {
       error.value = 'Не удалось загрузить список категорий'
-      sourceItems.value = []
+      apiResponse.value = null
     } finally {
       if (!options?.silent) {
         isLoading.value = false
@@ -112,13 +149,21 @@ export function useCategories() {
     }
   }
 
+  function fetchApiPage(page: number) {
+    if (!isMockMode.value) {
+      void fetchItems(page)
+    }
+  }
+
   function setPage(page: number) {
     currentPage.value = Math.max(1, Math.min(page, pagination.value.lastPage))
+    fetchApiPage(currentPage.value)
   }
 
   function setPerPage(value: number) {
     perPage.value = value
     currentPage.value = 1
+    fetchApiPage(1)
   }
 
   function toggleSort(key: CategorySortKey) {
@@ -130,14 +175,28 @@ export function useCategories() {
     }
 
     currentPage.value = 1
+    fetchApiPage(1)
   }
+
+  let searchDebounceTimer: ReturnType<typeof setTimeout> | undefined
 
   watch(searchQuery, () => {
     currentPage.value = 1
+
+    if (isMockMode.value) {
+      return
+    }
+
+    clearTimeout(searchDebounceTimer)
+    searchDebounceTimer = setTimeout(() => fetchApiPage(1), SEARCH_DEBOUNCE_MS)
   })
 
   onMounted(() => {
     void fetchItems()
+  })
+
+  onUnmounted(() => {
+    clearTimeout(searchDebounceTimer)
   })
 
   function validationFailure(fieldErrors: CategoryCreateFieldErrors): CategoryCreateResult {
@@ -175,7 +234,10 @@ export function useCategories() {
 
     try {
       if (isMockMode.value) {
-        const duplicateErrors = findCategoryDuplicateErrors(allItems.value, normalizedPayload)
+        const duplicateErrors = findCategoryDuplicateErrors(
+          mockSourceItems.value,
+          normalizedPayload,
+        )
 
         if (hasCategoryCreateFieldErrors(duplicateErrors)) {
           return validationFailure(duplicateErrors)
@@ -194,7 +256,7 @@ export function useCategories() {
         body: normalizedPayload,
       })
 
-      await fetchItems({ silent: true })
+      await fetchItems(currentPage.value, { silent: true })
 
       return { ok: true }
     } catch (cause) {
@@ -215,7 +277,11 @@ export function useCategories() {
 
     try {
       if (isMockMode.value) {
-        const duplicateErrors = findCategoryDuplicateErrors(allItems.value, normalizedPayload, id)
+        const duplicateErrors = findCategoryDuplicateErrors(
+          mockSourceItems.value,
+          normalizedPayload,
+          id,
+        )
 
         if (hasCategoryCreateFieldErrors(duplicateErrors)) {
           return validationFailure(duplicateErrors)
@@ -241,7 +307,7 @@ export function useCategories() {
         body: normalizedPayload,
       })
 
-      await fetchItems({ silent: true })
+      await fetchItems(currentPage.value, { silent: true })
 
       return { ok: true }
     } catch (cause) {
@@ -263,7 +329,7 @@ export function useCategories() {
         method: 'DELETE',
       })
 
-      await fetchItems({ silent: true })
+      await fetchItems(currentPage.value, { silent: true })
 
       return { ok: true }
     } catch {

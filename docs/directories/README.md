@@ -28,15 +28,15 @@ OpenAPI: [Swagger](https://olimpapi.portalrent.ru/docs/broker#/) · [JSON](https
 
 ## Как устроен раздел (обзор)
 
-| Что                 | Где                                                  | Как используется                      |
-| ------------------- | ---------------------------------------------------- | ------------------------------------- |
-| Меню справочников   | `useCabinetDirectoriesNav`                           | 6 видимых пунктов + 2 скрытых stub    |
-| Страница секции     | `app/pages/directories/[section].vue`                | монтирует нужный `Direct*Sec` по slug |
-| Domain composable   | `app/composables/use*.ts`                            | list / create / update / delete       |
-| Form composable     | `use*Form.ts`                                        | vee-validate + zod                    |
-| Контракт API        | `shared/utils/*Normalize`, `*Schema`                 | ответ API → модель UI                 |
-| Таблица / валидация | `*Table`, `*Validation` (+ `*Query` где server-page) | колонки, фильтр, page                 |
-| Mock                | `shared/constants/*Mock.ts`                          | при пустом `NUXT_PUBLIC_API_BASE`     |
+| Что                 | Где                                   | Как используется                      |
+| ------------------- | ------------------------------------- | ------------------------------------- |
+| Меню справочников   | `useCabinetDirectoriesNav`            | 6 видимых пунктов + 2 скрытых stub    |
+| Страница секции     | `app/pages/directories/[section].vue` | монтирует нужный `Direct*Sec` по slug |
+| Domain composable   | `app/composables/use*.ts`             | list / create / update / delete       |
+| Form composable     | `use*Form.ts`                         | vee-validate + zod                    |
+| Контракт API        | `shared/utils/*Normalize`, `*Schema`  | ответ API → модель UI                 |
+| Таблица / валидация | `*Table`, `*Validation`, `*Query`     | колонки, фильтр, page                 |
+| Mock                | `shared/constants/*Mock.ts`           | при пустом `NUXT_PUBLIC_API_BASE`     |
 
 Паттерн слоя (один на сущность):
 
@@ -65,12 +65,12 @@ flowchart LR
 
 | Сущность            | List / Create                          | Detail (id)                   | Пагинация                                                       |
 | ------------------- | -------------------------------------- | ----------------------------- | --------------------------------------------------------------- |
-| Помещения           | `/v1/broker/dict/rooms`                | `/v1/broker/dict/rooms/{id}`  | client-side                                                     |
-| Типы помещений      | `/v1/broker/dict/room-types`           | `…/room-types/{id}`           | client-side                                                     |
-| Категории           | `/v1/broker/dict/categories`           | `…/categories/{id}`           | client-side                                                     |
-| Юр. лица            | `/v1/broker/legal-entities`            | `…/legal-entities/{id}`       | server-side (`page`, `per_page`, `sort`, `direction`, `search`) |
+| Помещения           | `/v1/broker/dict/rooms`                | `/v1/broker/dict/rooms/{id}`  | server-side (`page`, `per_page`, `sort`, `direction`, `search`) |
+| Типы помещений      | `/v1/broker/dict/room-types`           | `…/room-types/{id}`           | server-side (те же query)                                       |
+| Категории           | `/v1/broker/dict/categories`           | `…/categories/{id}`           | server-side (те же query)                                       |
+| Юр. лица            | `/v1/broker/legal-entities`            | `…/legal-entities/{id}`       | server-side (те же query)                                       |
 | Претенденты         | `/v1/broker/tenant-applicants`         | `…/tenant-applicants/{id}`    | server-side (те же query)                                       |
-| Статусы переговоров | `/v1/broker/dict/negotiation-statuses` | `…/negotiation-statuses/{id}` | client-side                                                     |
+| Статусы переговоров | `/v1/broker/dict/negotiation-statuses` | `…/negotiation-statuses/{id}` | server-side (те же query)                                       |
 
 Пустой `apiBase` → **mock-режим**: без HTTP, CRUD на in-memory поверх `*Mock.ts`.
 Для brands / contracts путей в `API_PATHS` **нет**.
@@ -88,7 +88,7 @@ flowchart LR
 - Бренды и договоры не реализованы (нет API-слоя и UI CRUD).
 - Нет отдельных Nitro-роутов `server/api/*` — браузер ходит на внешний Broker API.
 - Часть справочников — «только название» (категории, типы, статусы); помещения / юрлица / претенденты — более богатые формы.
-- Юрлица и претенденты в API-режиме пагинируются на сервере; остальные — на клиенте после полной загрузки списка.
+- Все живые справочники в API-режиме пагинируются на сервере (`page`, `per_page`, `sort`, `direction`, `search`); payload списка — `data` + meta.
 
 ### Тесты раздела
 

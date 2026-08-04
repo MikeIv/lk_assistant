@@ -4,6 +4,7 @@ import type {
   PremiseSortKey,
   PremisesPagination,
 } from '#shared/types/premises'
+import { toDirectoryApiPagination } from '#shared/utils/directoryApiPagination'
 
 const SORT_KEYS = new Set<PremiseSortKey>([
   'id',
@@ -122,6 +123,16 @@ export function buildPremisesPagination(
     rangeFrom,
     rangeTo,
   }
+}
+
+/** Пагинация из payload `brokerRoom.index` (без пересчёта last_page на клиенте). */
+export function toPremisesApiPagination(payload: {
+  current_page: number
+  last_page: number
+  per_page: number
+  total: number
+}): PremisesPagination {
+  return toDirectoryApiPagination(payload)
 }
 
 export function paginatePremises(

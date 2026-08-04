@@ -18,7 +18,7 @@
 
 Полный CRUD: список, поиск, сортировка, создание, правка; удаление — из карточки с подтверждением.
 
-Данные: **API** или **mock**. Пагинация на клиенте.
+Данные: **API** или **mock**. Пагинация на сервере (в mock — на клиенте).
 
 ### Какие данные хранит
 
@@ -35,11 +35,11 @@
 
 ## Для разработки (кратко)
 
-| Что        | Где                                                                                  |
-| ---------- | ------------------------------------------------------------------------------------ |
-| Composable | `useCategories`, `useCategoryForm`                                                   |
-| UI         | `app/components/direct/categories/`                                                  |
-| Shared     | `categoriesNormalize`, `categoriesSchema`, `categoriesTable`, `categoriesValidation` |
-| Mock       | `shared/constants/categoriesMock.ts`                                                 |
-| API        | `/v1/broker/dict/categories`, detail `…/categories/{id}`                             |
-| Пагинация  | client-side                                                                          |
+| Что        | Где                                                                                                     |
+| ---------- | ------------------------------------------------------------------------------------------------------- |
+| Composable | `useCategories`, `useCategoryForm`                                                                      |
+| UI         | `app/components/direct/categories/`                                                                     |
+| Shared     | `categoriesNormalize`, `categoriesSchema`, `categoriesTable`, `categoriesQuery`, `categoriesValidation` |
+| Mock       | `shared/constants/categoriesMock.ts`                                                                    |
+| API        | `/v1/broker/dict/categories`, detail `…/categories/{id}`                                                |
+| Пагинация  | server-side: `page`, `per_page`, `sort`, `direction`, `search`                                          |

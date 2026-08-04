@@ -27,7 +27,11 @@ export interface RoomTypesListApiResponse {
   success: boolean
   message: string
   payload: {
-    items: RoomTypeApiResource[]
+    data: RoomTypeApiResource[]
+    current_page: number
+    per_page: number
+    total: number
+    last_page: number
   }
 }
 

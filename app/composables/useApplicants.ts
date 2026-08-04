@@ -36,13 +36,14 @@ import {
   validateApplicantFormPayload,
 } from '#shared/utils/applicantsValidation'
 import { normalizeCategory } from '#shared/utils/categoriesNormalize'
-import { buildLegalEntitiesQueryParams } from '#shared/utils/legalEntitiesQuery'
+import { buildCategoriesQueryParams } from '#shared/utils/categoriesQuery'
 import { normalizeLegalEntity } from '#shared/utils/legalEntitiesNormalize'
+import { buildLegalEntitiesQueryParams } from '#shared/utils/legalEntitiesQuery'
 import { useApiConfig } from '~/composables/useApiConfig'
 import type { FetchError } from 'ofetch'
 
 const SEARCH_DEBOUNCE_MS = 300
-const LEGAL_ENTITIES_OPTIONS_PER_PAGE = 1000
+const OPTIONS_PER_PAGE = 1000
 
 /** Список претендентов: API `brokerTenantApplicant.index` или mock без `NUXT_PUBLIC_API_BASE`. */
 export function useApplicants() {
@@ -162,11 +163,19 @@ export function useApplicants() {
       }
 
       const [categoriesResponse, legalEntitiesResponse] = await Promise.all([
-        api<CategoriesListApiResponse>(API_PATHS.broker.categories.list),
+        api<CategoriesListApiResponse>(
+          `${API_PATHS.broker.categories.list}?${buildCategoriesQueryParams({
+            page: 1,
+            perPage: OPTIONS_PER_PAGE,
+            search: '',
+            sortKey: 'id',
+            sortDirection: 'asc',
+          })}`,
+        ),
         api<LegalEntitiesListApiResponse>(
           `${API_PATHS.broker.legalEntities.list}?${buildLegalEntitiesQueryParams({
             page: 1,
-            perPage: LEGAL_ENTITIES_OPTIONS_PER_PAGE,
+            perPage: OPTIONS_PER_PAGE,
             search: '',
             sortKey: 'id',
             sortDirection: 'asc',
@@ -174,7 +183,7 @@ export function useApplicants() {
         ),
       ])
 
-      categories.value = (categoriesResponse.payload.items ?? []).map(normalizeCategory)
+      categories.value = (categoriesResponse.payload.data ?? []).map(normalizeCategory)
       legalEntities.value = (legalEntitiesResponse.payload.data ?? []).map(normalizeLegalEntity)
     } catch {
       categories.value = []

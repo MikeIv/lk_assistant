@@ -9,9 +9,11 @@ import type {
 } from '#shared/types/negotiationStatuses'
 import type { Premise, PremisesListApiResponse } from '#shared/types/premises'
 import { normalizeApplicant } from '#shared/utils/applicantsNormalize'
-import { listPayloadRows } from '#shared/utils/listPayloadRows'
+import { buildApplicantsQueryParams } from '#shared/utils/applicantsQuery'
 import { normalizeNegotiationStatus } from '#shared/utils/negotiationStatusesNormalize'
+import { buildNegotiationStatusesQueryParams } from '#shared/utils/negotiationStatusesQuery'
 import { normalizePremise } from '#shared/utils/premisesNormalize'
+import { buildPremisesQueryParams } from '#shared/utils/premisesQuery'
 import { useApiConfig } from '~/composables/useApiConfig'
 
 const FORM_OPTIONS_PER_PAGE = 1000
@@ -39,24 +41,42 @@ export function useTenantCaseFormOptions() {
         return
       }
 
-      const roomsQuery = new URLSearchParams({
-        available_for_tenant_case: '1',
-        per_page: String(FORM_OPTIONS_PER_PAGE),
-      })
+      const roomsQuery = new URLSearchParams(
+        buildPremisesQueryParams({
+          page: 1,
+          perPage: FORM_OPTIONS_PER_PAGE,
+          search: '',
+          sortKey: 'id',
+          sortDirection: 'asc',
+        }),
+      )
+      roomsQuery.set('available_for_tenant_case', '1')
 
       const [roomsResponse, applicantsResponse, negotiationStatusesResponse] = await Promise.all([
         api<PremisesListApiResponse>(`${API_PATHS.broker.rooms.list}?${roomsQuery}`),
         api<ApplicantsListApiResponse>(
-          `${API_PATHS.broker.tenantApplicants.list}?per_page=${FORM_OPTIONS_PER_PAGE}`,
+          `${API_PATHS.broker.tenantApplicants.list}?${buildApplicantsQueryParams({
+            page: 1,
+            perPage: FORM_OPTIONS_PER_PAGE,
+            search: '',
+            sortKey: 'id',
+            sortDirection: 'asc',
+          })}`,
         ),
         api<NegotiationStatusesListApiResponse>(
-          `${API_PATHS.broker.negotiationStatuses.list}?per_page=${FORM_OPTIONS_PER_PAGE}`,
+          `${API_PATHS.broker.negotiationStatuses.list}?${buildNegotiationStatusesQueryParams({
+            page: 1,
+            perPage: FORM_OPTIONS_PER_PAGE,
+            search: '',
+            sortKey: 'id',
+            sortDirection: 'asc',
+          })}`,
         ),
       ])
 
-      rooms.value = listPayloadRows(roomsResponse.payload).map(normalizePremise)
-      applicants.value = listPayloadRows(applicantsResponse.payload).map(normalizeApplicant)
-      negotiationStatuses.value = listPayloadRows(negotiationStatusesResponse.payload).map(
+      rooms.value = (roomsResponse.payload.data ?? []).map(normalizePremise)
+      applicants.value = (applicantsResponse.payload.data ?? []).map(normalizeApplicant)
+      negotiationStatuses.value = (negotiationStatusesResponse.payload.data ?? []).map(
         normalizeNegotiationStatus,
       )
     } catch {

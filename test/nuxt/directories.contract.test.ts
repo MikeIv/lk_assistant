@@ -113,7 +113,13 @@ const contracts: DirectoryContract[] = [
     apiListResponse: {
       success: true,
       message: 'ok',
-      payload: { items: [{ id: 1, name: 'API Category' }] },
+      payload: {
+        data: [{ id: 1, name: 'API Category' }],
+        current_page: 1,
+        per_page: 10,
+        total: 1,
+        last_page: 1,
+      },
     },
     validationErrors: { name: ['already taken'] },
     labelOf: (item) => String(item.name),
@@ -155,7 +161,13 @@ const contracts: DirectoryContract[] = [
     apiListResponse: {
       success: true,
       message: 'ok',
-      payload: { items: [{ id: 1, name: 'API RoomType' }] },
+      payload: {
+        data: [{ id: 1, name: 'API RoomType' }],
+        current_page: 1,
+        per_page: 10,
+        total: 1,
+        last_page: 1,
+      },
     },
     validationErrors: { name: ['already taken'] },
     labelOf: (item) => String(item.name),
@@ -198,7 +210,7 @@ const contracts: DirectoryContract[] = [
       success: true,
       message: 'ok',
       payload: {
-        items: [
+        data: [
           {
             id: 1,
             status: 'API Status',
@@ -208,6 +220,10 @@ const contracts: DirectoryContract[] = [
             created_at: '2026-01-01 00:00:00',
           },
         ],
+        current_page: 1,
+        per_page: 10,
+        total: 1,
+        last_page: 1,
       },
     },
     validationErrors: { name: ['already taken'] },
@@ -267,7 +283,7 @@ const contracts: DirectoryContract[] = [
       success: true,
       message: 'ok',
       payload: {
-        items: [
+        data: [
           {
             id: 1,
             name: 'API-01',
@@ -280,6 +296,10 @@ const contracts: DirectoryContract[] = [
             room_type: 'Торговое',
           },
         ],
+        current_page: 1,
+        per_page: 10,
+        total: 1,
+        last_page: 1,
       },
     },
     validationErrors: { name: ['already taken'] },
@@ -530,10 +550,30 @@ describe.each(contracts)('directory composable: $name', (contract) => {
       }
       // premises / applicants pull related dictionaries on mount
       if (path === API_PATHS.broker.roomTypes.list) {
-        return { success: true, message: 'ok', payload: { items: [{ id: 1, name: 'Type' }] } }
+        return {
+          success: true,
+          message: 'ok',
+          payload: {
+            data: [{ id: 1, name: 'Type' }],
+            current_page: 1,
+            per_page: 1000,
+            total: 1,
+            last_page: 1,
+          },
+        }
       }
       if (path === API_PATHS.broker.categories.list) {
-        return { success: true, message: 'ok', payload: { items: [{ id: 1, name: 'Cat' }] } }
+        return {
+          success: true,
+          message: 'ok',
+          payload: {
+            data: [{ id: 1, name: 'Cat' }],
+            current_page: 1,
+            per_page: 1000,
+            total: 1,
+            last_page: 1,
+          },
+        }
       }
       if (path.startsWith(API_PATHS.broker.legalEntities.list)) {
         return {
@@ -581,10 +621,30 @@ describe.each(contracts)('directory composable: $name', (contract) => {
         return contract.apiListResponse
       }
       if (path === API_PATHS.broker.roomTypes.list) {
-        return { success: true, message: 'ok', payload: { items: [{ id: 1, name: 'Type' }] } }
+        return {
+          success: true,
+          message: 'ok',
+          payload: {
+            data: [{ id: 1, name: 'Type' }],
+            current_page: 1,
+            per_page: 1000,
+            total: 1,
+            last_page: 1,
+          },
+        }
       }
       if (path === API_PATHS.broker.categories.list) {
-        return { success: true, message: 'ok', payload: { items: [{ id: 1, name: 'Cat' }] } }
+        return {
+          success: true,
+          message: 'ok',
+          payload: {
+            data: [{ id: 1, name: 'Cat' }],
+            current_page: 1,
+            per_page: 1000,
+            total: 1,
+            last_page: 1,
+          },
+        }
       }
       if (path.startsWith(API_PATHS.broker.legalEntities.list) && method === 'GET') {
         return {

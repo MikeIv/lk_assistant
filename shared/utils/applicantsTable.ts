@@ -4,6 +4,7 @@ import type {
   ApplicantSortDirection,
   ApplicantSortKey,
 } from '#shared/types/applicants'
+import { toDirectoryApiPagination } from '#shared/utils/directoryApiPagination'
 
 export function matchesApplicantSearch(item: Applicant, query: string): boolean {
   const normalized = query.trim().toLowerCase()
@@ -109,11 +110,7 @@ export function toApplicantsApiPagination(payload: {
   per_page: number
   total: number
 }): ApplicantsPagination {
-  const { total, current_page: currentPage, per_page: perPage, last_page: lastPage } = payload
-  const rangeFrom = total === 0 ? 0 : (currentPage - 1) * perPage + 1
-  const rangeTo = total === 0 ? 0 : Math.min(currentPage * perPage, total)
-
-  return { currentPage, lastPage, perPage, total, rangeFrom, rangeTo }
+  return toDirectoryApiPagination(payload)
 }
 
 export function paginateApplicants(

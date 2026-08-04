@@ -4,6 +4,7 @@ import type {
   LegalEntitySortDirection,
   LegalEntitySortKey,
 } from '#shared/types/legalEntities'
+import { toDirectoryApiPagination } from '#shared/utils/directoryApiPagination'
 
 const SORT_KEYS = new Set<LegalEntitySortKey>(['id', 'legal_entity', 'inn', 'kpp'])
 
@@ -105,11 +106,7 @@ export function toLegalEntitiesApiPagination(payload: {
   per_page: number
   total: number
 }): LegalEntitiesPagination {
-  const { total, current_page: currentPage, per_page: perPage, last_page: lastPage } = payload
-  const rangeFrom = total === 0 ? 0 : (currentPage - 1) * perPage + 1
-  const rangeTo = total === 0 ? 0 : Math.min(currentPage * perPage, total)
-
-  return { currentPage, lastPage, perPage, total, rangeFrom, rangeTo }
+  return toDirectoryApiPagination(payload)
 }
 
 export function paginateLegalEntities(

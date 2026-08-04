@@ -63,7 +63,10 @@ describe('useTenantCaseFormOptions', () => {
 
       if (path === API_PATHS.broker.rooms.list) {
         expect(params.get('available_for_tenant_case')).toBe('1')
+        expect(params.get('page')).toBe('1')
         expect(params.get('per_page')).toBe('1000')
+        expect(params.get('sort')).toBe('id')
+        expect(params.get('direction')).toBe('asc')
         return {
           success: true,
           message: 'ok',
@@ -78,12 +81,19 @@ describe('useTenantCaseFormOptions', () => {
                 room_type: 'Торговое',
               },
             ],
+            current_page: 1,
+            per_page: 1000,
+            total: 1,
+            last_page: 1,
           },
         }
       }
 
       if (path === API_PATHS.broker.tenantApplicants.list) {
+        expect(params.get('page')).toBe('1')
         expect(params.get('per_page')).toBe('1000')
+        expect(params.get('sort')).toBe('id')
+        expect(params.get('direction')).toBe('asc')
         return {
           success: true,
           message: 'ok',
@@ -97,12 +107,19 @@ describe('useTenantCaseFormOptions', () => {
                 contacts: [],
               },
             ],
+            current_page: 1,
+            per_page: 1000,
+            total: 1,
+            last_page: 1,
           },
         }
       }
 
       if (path === API_PATHS.broker.negotiationStatuses.list) {
+        expect(params.get('page')).toBe('1')
         expect(params.get('per_page')).toBe('1000')
+        expect(params.get('sort')).toBe('id')
+        expect(params.get('direction')).toBe('asc')
         return {
           success: true,
           message: 'ok',
@@ -116,6 +133,10 @@ describe('useTenantCaseFormOptions', () => {
                 created_at: '2026-01-01T00:00:00Z',
               },
             ],
+            current_page: 1,
+            per_page: 1000,
+            total: 1,
+            last_page: 1,
           },
         }
       }
@@ -151,7 +172,7 @@ describe('useTenantCaseFormOptions', () => {
     apiMock.mockResolvedValue({
       success: true,
       message: 'ok',
-      payload: { data: [] },
+      payload: { data: [], current_page: 1, per_page: 1000, total: 0, last_page: 1 },
     })
 
     const options = mountOptions()

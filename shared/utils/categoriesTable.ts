@@ -4,6 +4,7 @@ import type {
   CategorySortDirection,
   CategorySortKey,
 } from '#shared/types/categories'
+import { toDirectoryApiPagination } from '#shared/utils/directoryApiPagination'
 
 export function matchesCategorySearch(item: Category, query: string): boolean {
   const normalized = query.trim().toLowerCase()
@@ -74,6 +75,16 @@ export function buildCategoriesPagination(
     rangeFrom,
     rangeTo,
   }
+}
+
+/** Пагинация из payload `brokerCategory.index` (без пересчёта last_page на клиенте). */
+export function toCategoriesApiPagination(payload: {
+  current_page: number
+  last_page: number
+  per_page: number
+  total: number
+}): CategoriesPagination {
+  return toDirectoryApiPagination(payload)
 }
 
 export function paginateCategories(

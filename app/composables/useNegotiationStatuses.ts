@@ -8,11 +8,12 @@ import type {
   NegotiationStatusCreateResult,
   NegotiationStatusDeleteResult,
   NegotiationStatusesListApiResponse,
+  NegotiationStatusesPagination,
   NegotiationStatusSortDirection,
   NegotiationStatusSortKey,
 } from '#shared/types/negotiationStatuses'
-import { listPayloadRows } from '#shared/utils/listPayloadRows'
 import { normalizeNegotiationStatus } from '#shared/utils/negotiationStatusesNormalize'
+import { buildNegotiationStatusesQueryParams } from '#shared/utils/negotiationStatusesQuery'
 import {
   buildNegotiationStatusesPagination,
   matchesNegotiationStatusSearch,
@@ -21,6 +22,7 @@ import {
   NEGOTIATION_STATUSES_DEFAULT_SORT_KEY,
   paginateNegotiationStatuses,
   sortNegotiationStatuses,
+  toNegotiationStatusesApiPagination,
 } from '#shared/utils/negotiationStatusesTable'
 import {
   emptyNegotiationStatusCreateFieldErrors,
@@ -32,6 +34,8 @@ import {
 } from '#shared/utils/negotiationStatusesValidation'
 import { useApiConfig } from '~/composables/useApiConfig'
 import type { FetchError } from 'ofetch'
+
+const SEARCH_DEBOUNCE_MS = 300
 
 function mockTimestamp(): string {
   return new Date().toISOString().slice(0, 19).replace('T', ' ')
@@ -52,30 +56,24 @@ function nextMockId(items: NegotiationStatus[]): number {
   return items.reduce((max, item) => Math.max(max, item.id), 0) + 1
 }
 
-/** Список статусов переговоров: API `brokerNegotiationStatus.index` (client-side filter/sort/page) или mock. */
+/** Список статусов переговоров: API `brokerNegotiationStatus.index` или mock без `NUXT_PUBLIC_API_BASE`. */
 export function useNegotiationStatuses() {
   const api = useApi()
   const { isMockMode } = useApiConfig()
 
-  const sourceItems = ref<NegotiationStatus[]>([])
+  const apiResponse = ref<NegotiationStatusesListApiResponse | null>(null)
   const error = ref<string | null>(null)
   const isLoading = ref(false)
   const mockExtraItems = ref<NegotiationStatus[]>([])
   const mockDeletedIds = ref<Set<number>>(new Set())
   const mockUpdatedItems = ref<Map<number, NegotiationStatus>>(new Map())
 
-  const allItems = computed<NegotiationStatus[]>(() => {
-    if (isMockMode.value) {
-      return [
-        ...NEGOTIATION_STATUSES_MOCK_ITEMS.filter((item) => !mockDeletedIds.value.has(item.id)).map(
-          (item) => mockUpdatedItems.value.get(item.id) ?? item,
-        ),
-        ...mockExtraItems.value.filter((item) => !mockDeletedIds.value.has(item.id)),
-      ]
-    }
-
-    return sourceItems.value
-  })
+  const mockSourceItems = computed<NegotiationStatus[]>(() => [
+    ...NEGOTIATION_STATUSES_MOCK_ITEMS.filter((item) => !mockDeletedIds.value.has(item.id)).map(
+      (item) => mockUpdatedItems.value.get(item.id) ?? item,
+    ),
+    ...mockExtraItems.value.filter((item) => !mockDeletedIds.value.has(item.id)),
+  ])
 
   const searchQuery = ref('')
   const sortKey = ref<NegotiationStatusSortKey>(NEGOTIATION_STATUSES_DEFAULT_SORT_KEY)
@@ -85,30 +83,54 @@ export function useNegotiationStatuses() {
   const perPage = ref(NEGOTIATION_STATUSES_DEFAULT_PER_PAGE)
   const currentPage = ref(1)
 
-  const filteredItems = computed<NegotiationStatus[]>(() => {
+  const mockSortedItems = computed<NegotiationStatus[]>(() => {
+    if (!isMockMode.value) {
+      return []
+    }
+
     const query = searchQuery.value.trim()
     const filtered = query
-      ? allItems.value.filter((item) => matchesNegotiationStatusSearch(item, query))
-      : allItems.value
+      ? mockSourceItems.value.filter((item) => matchesNegotiationStatusSearch(item, query))
+      : mockSourceItems.value
 
     return sortNegotiationStatuses(filtered, sortKey.value, sortDirection.value)
   })
 
-  const pagination = computed(() =>
-    buildNegotiationStatusesPagination(
-      filteredItems.value.length,
-      currentPage.value,
-      perPage.value,
-    ),
+  const mockPagination = computed<NegotiationStatusesPagination>(() =>
+    isMockMode.value
+      ? buildNegotiationStatusesPagination(
+          mockSortedItems.value.length,
+          currentPage.value,
+          perPage.value,
+        )
+      : buildNegotiationStatusesPagination(0, 1, perPage.value),
   )
 
-  const items = computed<NegotiationStatus[]>(() =>
-    paginateNegotiationStatuses(
-      filteredItems.value,
-      pagination.value.currentPage,
-      pagination.value.perPage,
-    ),
+  const mockItems = computed<NegotiationStatus[]>(() =>
+    isMockMode.value
+      ? paginateNegotiationStatuses(mockSortedItems.value, currentPage.value, perPage.value)
+      : [],
   )
+
+  const apiPagination = computed<NegotiationStatusesPagination>(() => {
+    const payload = apiResponse.value?.payload
+
+    return payload
+      ? toNegotiationStatusesApiPagination(payload)
+      : buildNegotiationStatusesPagination(0, 1, perPage.value)
+  })
+
+  const pagination = computed<NegotiationStatusesPagination>(() =>
+    isMockMode.value ? mockPagination.value : apiPagination.value,
+  )
+
+  const items = computed<NegotiationStatus[]>(() => {
+    if (isMockMode.value) {
+      return mockItems.value
+    }
+
+    return (apiResponse.value?.payload.data ?? []).map(normalizeNegotiationStatus)
+  })
 
   watch(
     () => pagination.value.lastPage,
@@ -119,7 +141,7 @@ export function useNegotiationStatuses() {
     },
   )
 
-  async function fetchItems(options?: { silent?: boolean }) {
+  async function fetchItems(page = currentPage.value, options?: { silent?: boolean }) {
     if (!options?.silent) {
       isLoading.value = true
     }
@@ -130,13 +152,21 @@ export function useNegotiationStatuses() {
         return
       }
 
-      const response = await api<NegotiationStatusesListApiResponse>(
-        API_PATHS.broker.negotiationStatuses.list,
+      const query = buildNegotiationStatusesQueryParams({
+        page,
+        perPage: perPage.value,
+        search: searchQuery.value,
+        sortKey: sortKey.value,
+        sortDirection: sortDirection.value,
+      })
+
+      apiResponse.value = await api<NegotiationStatusesListApiResponse>(
+        `${API_PATHS.broker.negotiationStatuses.list}?${query}`,
       )
-      sourceItems.value = listPayloadRows(response.payload).map(normalizeNegotiationStatus)
+      currentPage.value = apiResponse.value.payload.current_page
     } catch {
       error.value = 'Не удалось загрузить список статусов переговоров'
-      sourceItems.value = []
+      apiResponse.value = null
     } finally {
       if (!options?.silent) {
         isLoading.value = false
@@ -144,13 +174,21 @@ export function useNegotiationStatuses() {
     }
   }
 
+  function fetchApiPage(page: number) {
+    if (!isMockMode.value) {
+      void fetchItems(page)
+    }
+  }
+
   function setPage(page: number) {
     currentPage.value = Math.max(1, Math.min(page, pagination.value.lastPage))
+    fetchApiPage(currentPage.value)
   }
 
   function setPerPage(value: number) {
     perPage.value = value
     currentPage.value = 1
+    fetchApiPage(1)
   }
 
   function toggleSort(key: NegotiationStatusSortKey) {
@@ -162,14 +200,28 @@ export function useNegotiationStatuses() {
     }
 
     currentPage.value = 1
+    fetchApiPage(1)
   }
+
+  let searchDebounceTimer: ReturnType<typeof setTimeout> | undefined
 
   watch(searchQuery, () => {
     currentPage.value = 1
+
+    if (isMockMode.value) {
+      return
+    }
+
+    clearTimeout(searchDebounceTimer)
+    searchDebounceTimer = setTimeout(() => fetchApiPage(1), SEARCH_DEBOUNCE_MS)
   })
 
   onMounted(() => {
     void fetchItems()
+  })
+
+  onUnmounted(() => {
+    clearTimeout(searchDebounceTimer)
   })
 
   function validationFailure(
@@ -212,7 +264,7 @@ export function useNegotiationStatuses() {
     try {
       if (isMockMode.value) {
         const duplicateErrors = findNegotiationStatusDuplicateErrors(
-          allItems.value,
+          mockSourceItems.value,
           normalizedPayload,
         )
 
@@ -220,7 +272,7 @@ export function useNegotiationStatuses() {
           return validationFailure(duplicateErrors)
         }
 
-        const nextId = nextMockId(allItems.value)
+        const nextId = nextMockId(mockSourceItems.value)
 
         mockExtraItems.value.push(buildMockNegotiationStatus(nextId, normalizedPayload.name))
 
@@ -232,7 +284,7 @@ export function useNegotiationStatuses() {
         body: normalizedPayload,
       })
 
-      await fetchItems({ silent: true })
+      await fetchItems(currentPage.value, { silent: true })
 
       return { ok: true }
     } catch (cause) {
@@ -254,7 +306,7 @@ export function useNegotiationStatuses() {
     try {
       if (isMockMode.value) {
         const duplicateErrors = findNegotiationStatusDuplicateErrors(
-          allItems.value,
+          mockSourceItems.value,
           normalizedPayload,
           id,
         )
@@ -293,7 +345,7 @@ export function useNegotiationStatuses() {
         },
       )
 
-      await fetchItems({ silent: true })
+      await fetchItems(currentPage.value, { silent: true })
 
       return { ok: true }
     } catch (cause) {
@@ -315,7 +367,7 @@ export function useNegotiationStatuses() {
         method: 'DELETE',
       })
 
-      await fetchItems({ silent: true })
+      await fetchItems(currentPage.value, { silent: true })
 
       return { ok: true }
     } catch {

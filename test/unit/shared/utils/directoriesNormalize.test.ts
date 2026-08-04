@@ -7,13 +7,11 @@ import {
   normalizeNegotiationStatus,
 } from '#shared/utils/negotiationStatusesNormalize'
 import { normalizePremise } from '#shared/utils/premisesNormalize'
-import { isPremiseSortKey } from '#shared/utils/premisesTable'
-import {
-  isLegalEntitySortKey,
-  toLegalEntitiesApiPagination,
-} from '#shared/utils/legalEntitiesTable'
-import { normalizeRoomType } from '#shared/utils/roomTypesNormalize'
 import { toApplicantsApiPagination } from '#shared/utils/applicantsTable'
+import { toDirectoryApiPagination } from '#shared/utils/directoryApiPagination'
+import { isLegalEntitySortKey } from '#shared/utils/legalEntitiesTable'
+import { isPremiseSortKey } from '#shared/utils/premisesTable'
+import { normalizeRoomType } from '#shared/utils/roomTypesNormalize'
 
 describe('directories *Normalize', () => {
   it('normalizes category/roomType/legalEntity/premise/status', () => {
@@ -79,7 +77,7 @@ describe('directories *Normalize', () => {
     expect(isLegalEntitySortKey('nope')).toBe(false)
 
     expect(
-      toApplicantsApiPagination({
+      toDirectoryApiPagination({
         current_page: 2,
         last_page: 3,
         per_page: 10,
@@ -88,7 +86,7 @@ describe('directories *Normalize', () => {
     ).toMatchObject({ currentPage: 2, rangeFrom: 11, rangeTo: 20 })
 
     expect(
-      toLegalEntitiesApiPagination({
+      toApplicantsApiPagination({
         current_page: 1,
         last_page: 1,
         per_page: 10,

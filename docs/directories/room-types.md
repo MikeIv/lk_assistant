@@ -18,7 +18,7 @@
 
 Полный CRUD: список, поиск, сортировка, создание, правка; удаление — из карточки с подтверждением.
 
-Данные: **API** или **mock**. Пагинация на клиенте.
+Данные: **API** или **mock**. Пагинация на сервере (в mock — на клиенте).
 
 ### Какие данные хранит
 
@@ -35,11 +35,11 @@
 
 ## Для разработки (кратко)
 
-| Что        | Где                                                                              |
-| ---------- | -------------------------------------------------------------------------------- |
-| Composable | `useRoomTypes`, `useRoomTypeForm`                                                |
-| UI         | `app/components/direct/room-types/`                                              |
-| Shared     | `roomTypesNormalize`, `roomTypesSchema`, `roomTypesTable`, `roomTypesValidation` |
-| Mock       | `shared/constants/roomTypesMock.ts`                                              |
-| API        | `/v1/broker/dict/room-types`, detail `…/room-types/{id}`                         |
-| Пагинация  | client-side                                                                      |
+| Что        | Где                                                                                                |
+| ---------- | -------------------------------------------------------------------------------------------------- |
+| Composable | `useRoomTypes`, `useRoomTypeForm`                                                                  |
+| UI         | `app/components/direct/room-types/`                                                                |
+| Shared     | `roomTypesNormalize`, `roomTypesSchema`, `roomTypesTable`, `roomTypesQuery`, `roomTypesValidation` |
+| Mock       | `shared/constants/roomTypesMock.ts`                                                                |
+| API        | `/v1/broker/dict/room-types`, detail `…/room-types/{id}`                                           |
+| Пагинация  | server-side: `page`, `per_page`, `sort`, `direction`, `search`                                     |

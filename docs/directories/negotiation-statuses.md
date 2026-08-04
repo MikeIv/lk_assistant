@@ -18,7 +18,7 @@
 
 Полный CRUD: список, поиск, сортировка, создание, правка; удаление — из карточки с подтверждением.
 
-Данные: **API** или **mock**. Пагинация на клиенте.
+Данные: **API** или **mock**. Пагинация на сервере (в mock — на клиенте).
 
 ### Какие данные хранит
 
@@ -35,12 +35,12 @@
 
 ## Для разработки (кратко)
 
-| Что        | Где                                                                                                                      |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Composable | `useNegotiationStatuses`, `useNegotiationStatusForm`                                                                     |
-| UI         | `app/components/direct/negotiation-statuses/`                                                                            |
-| Shared     | `negotiationStatusesNormalize`, `negotiationStatusesSchema`, `negotiationStatusesTable`, `negotiationStatusesValidation` |
-| Mock       | `shared/constants/negotiationStatusesMock.ts`                                                                            |
-| API        | `/v1/broker/dict/negotiation-statuses`, detail `…/negotiation-statuses/{id}`                                             |
-| Пагинация  | client-side                                                                                                              |
-| Опции      | `useTenantCaseFormOptions`                                                                                               |
+| Что        | Где                                                                                                                                                  |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Composable | `useNegotiationStatuses`, `useNegotiationStatusForm`                                                                                                 |
+| UI         | `app/components/direct/negotiation-statuses/`                                                                                                        |
+| Shared     | `negotiationStatusesNormalize`, `negotiationStatusesSchema`, `negotiationStatusesTable`, `negotiationStatusesQuery`, `negotiationStatusesValidation` |
+| Mock       | `shared/constants/negotiationStatusesMock.ts`                                                                                                        |
+| API        | `/v1/broker/dict/negotiation-statuses`, detail `…/negotiation-statuses/{id}`                                                                         |
+| Пагинация  | server-side: `page`, `per_page`, `sort`, `direction`, `search`                                                                                       |
+| Опции      | `useTenantCaseFormOptions`                                                                                                                           |
