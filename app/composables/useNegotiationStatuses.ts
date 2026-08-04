@@ -11,6 +11,7 @@ import type {
   NegotiationStatusSortDirection,
   NegotiationStatusSortKey,
 } from '#shared/types/negotiationStatuses'
+import { listPayloadRows } from '#shared/utils/listPayloadRows'
 import { normalizeNegotiationStatus } from '#shared/utils/negotiationStatusesNormalize'
 import {
   buildNegotiationStatusesPagination,
@@ -132,7 +133,7 @@ export function useNegotiationStatuses() {
       const response = await api<NegotiationStatusesListApiResponse>(
         API_PATHS.broker.negotiationStatuses.list,
       )
-      sourceItems.value = response.payload.items.map(normalizeNegotiationStatus)
+      sourceItems.value = listPayloadRows(response.payload).map(normalizeNegotiationStatus)
     } catch {
       error.value = 'Не удалось загрузить список статусов переговоров'
       sourceItems.value = []

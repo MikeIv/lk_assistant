@@ -20,7 +20,13 @@ export interface NegotiationStatusesListApiResponse {
   success: boolean
   message: string
   payload: {
-    items: NegotiationStatusApiResource[]
+    data?: NegotiationStatusApiResource[]
+    /** Legacy fallback. */
+    items?: NegotiationStatusApiResource[]
+    current_page?: number
+    per_page?: number
+    total?: number
+    last_page?: number
   }
 }
 

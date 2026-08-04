@@ -14,6 +14,7 @@ import type {
 } from '#shared/types/premises'
 import type { RoomType, RoomTypesListApiResponse } from '#shared/types/roomTypes'
 import { normalizePremise } from '#shared/utils/premisesNormalize'
+import { listPayloadRows } from '#shared/utils/listPayloadRows'
 import { normalizeRoomType } from '#shared/utils/roomTypesNormalize'
 import {
   buildPremisesPagination,
@@ -138,7 +139,7 @@ export function usePremises() {
       }
 
       const response = await api<PremisesListApiResponse>(API_PATHS.broker.rooms.list)
-      apiSourceItems.value = (response.payload.items ?? []).map(normalizePremise)
+      apiSourceItems.value = listPayloadRows(response.payload).map(normalizePremise)
     } catch {
       error.value = 'Не удалось загрузить список помещений'
       apiSourceItems.value = []

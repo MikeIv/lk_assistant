@@ -49,7 +49,13 @@ export interface PremisesListApiResponse {
   success: boolean
   message: string
   payload: {
-    items: PremiseApiResource[]
+    data?: PremiseApiResource[]
+    /** Legacy fallback. */
+    items?: PremiseApiResource[]
+    current_page?: number
+    per_page?: number
+    total?: number
+    last_page?: number
   }
 }
 

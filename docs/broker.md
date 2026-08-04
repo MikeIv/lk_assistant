@@ -88,12 +88,12 @@ flowchart TB
 
 Опции формы дела (в API-режиме):
 
-| Справочник          | Метод и путь                                     |
-| ------------------- | ------------------------------------------------ |
-| Помещения           | `GET /v1/broker/dict/rooms`                      |
-| Претенденты         | `GET /v1/broker/tenant-applicants?per_page=1000` |
-| Статусы переговоров | `GET /v1/broker/dict/negotiation-statuses`       |
-| Ответственные       | `GET /v1/broker/tenant-cases/responsibles`       |
+| Справочник          | Метод и путь                                                          |
+| ------------------- | --------------------------------------------------------------------- |
+| Помещения           | `GET /v1/broker/dict/rooms?available_for_tenant_case=1&per_page=1000` |
+| Претенденты         | `GET /v1/broker/tenant-applicants?per_page=1000`                      |
+| Статусы переговоров | `GET /v1/broker/dict/negotiation-statuses?per_page=1000`              |
+| Ответственные       | `GET /v1/broker/tenant-cases/responsibles`                            |
 
 Пустой `apiBase` → mock CRUD дел из `TENANT_CASES_MOCK_ITEMS`.
 

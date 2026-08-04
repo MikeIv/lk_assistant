@@ -9,6 +9,7 @@ import type {
 } from '#shared/types/negotiationStatuses'
 import type { Premise, PremisesListApiResponse } from '#shared/types/premises'
 import { normalizeApplicant } from '#shared/utils/applicantsNormalize'
+import { listPayloadRows } from '#shared/utils/listPayloadRows'
 import { normalizeNegotiationStatus } from '#shared/utils/negotiationStatusesNormalize'
 import { normalizePremise } from '#shared/utils/premisesNormalize'
 import { useApiConfig } from '~/composables/useApiConfig'
@@ -38,17 +39,24 @@ export function useTenantCaseFormOptions() {
         return
       }
 
+      const roomsQuery = new URLSearchParams({
+        available_for_tenant_case: '1',
+        per_page: String(FORM_OPTIONS_PER_PAGE),
+      })
+
       const [roomsResponse, applicantsResponse, negotiationStatusesResponse] = await Promise.all([
-        api<PremisesListApiResponse>(API_PATHS.broker.rooms.list),
+        api<PremisesListApiResponse>(`${API_PATHS.broker.rooms.list}?${roomsQuery}`),
         api<ApplicantsListApiResponse>(
           `${API_PATHS.broker.tenantApplicants.list}?per_page=${FORM_OPTIONS_PER_PAGE}`,
         ),
-        api<NegotiationStatusesListApiResponse>(API_PATHS.broker.negotiationStatuses.list),
+        api<NegotiationStatusesListApiResponse>(
+          `${API_PATHS.broker.negotiationStatuses.list}?per_page=${FORM_OPTIONS_PER_PAGE}`,
+        ),
       ])
 
-      rooms.value = (roomsResponse.payload.items ?? []).map(normalizePremise)
-      applicants.value = (applicantsResponse.payload.data ?? []).map(normalizeApplicant)
-      negotiationStatuses.value = (negotiationStatusesResponse.payload.items ?? []).map(
+      rooms.value = listPayloadRows(roomsResponse.payload).map(normalizePremise)
+      applicants.value = listPayloadRows(applicantsResponse.payload).map(normalizeApplicant)
+      negotiationStatuses.value = listPayloadRows(negotiationStatusesResponse.payload).map(
         normalizeNegotiationStatus,
       )
     } catch {
