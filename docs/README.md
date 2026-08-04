@@ -11,7 +11,7 @@
 | Маршруты и быстрый старт         | [README](../README.md)               |
 | Авторизация                      | [auth.md](./auth.md)                 |
 | Справочники                      | [directories/](./directories/)       |
-| Брокер (календарь, задачи, дела) | [broker.md](./broker.md)             |
+| Брокер (календарь, задачи, дела) | [broker/](./broker/)                 |
 | UI Kit                           | [ui-kit.md](./ui-kit.md)             |
 | Тесты                            | [testing.md](./testing.md)           |
 
@@ -23,7 +23,7 @@
 | [auth.md](./auth.md)                 | JWT-сессия, refresh cookie, middleware, 401                      | готово                                                                       |
 | [testing.md](./testing.md)           | Vitest-проекты, покрытие, как писать тесты                       | готово                                                                       |
 | [directories/](./directories/)       | CRUD справочников: обзор + по файлу на каждый (6 живых + 2 stub) | готово                                                                       |
-| [broker.md](./broker.md)             | Календарь, задачи, текущие дела                                  | готово                                                                       |
+| [broker/](./broker/)                 | Календарь, задачи; [текущие дела](./broker/current.md)           | готово                                                                       |
 | [ui-kit.md](./ui-kit.md)             | `Ui*`, токены, иконки                                            | готово                                                                       |
 | [\_template.md](./_template.md)      | Шаблон документа раздела                                         | шаблон                                                                       |
 | reports.md                           | Отчёты (код без страниц)                                         | отложено — нужна продуктовая развилка (оставить / вырезать / вернуть в меню) |

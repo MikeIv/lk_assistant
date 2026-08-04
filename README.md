@@ -146,7 +146,7 @@ shared/constants, shared/types, shared/utils
 | [docs/architecture.md](docs/architecture.md) | Слои SPA, HTTP, mock-режим, навигация |
 | [docs/auth.md](docs/auth.md)                 | JWT-сессия, refresh, middleware       |
 | [docs/directories/](docs/directories/)       | Справочники CRUD (обзор + по каждому) |
-| [docs/broker.md](docs/broker.md)             | Календарь, задачи, текущие дела       |
+| [docs/broker/](docs/broker/)                 | Календарь, задачи, текущие дела       |
 | [docs/ui-kit.md](docs/ui-kit.md)             | `Ui*`, токены, иконки                 |
 | [docs/testing.md](docs/testing.md)           | Vitest, стратегия покрытия            |
 

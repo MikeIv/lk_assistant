@@ -3,29 +3,15 @@ import type {
   TenantCaseResponsibleApiResource,
   TenantCaseResponsiblesApiResponse,
 } from '#shared/types/tenantCases'
-import { listPayloadRows, type ListPayloadShape } from '#shared/utils/listPayloadRows'
 import { buildTenantCaseResponsiblesQueryParams } from '#shared/utils/tenantCasesQuery'
 import { useApiConfig } from '~/composables/useApiConfig'
-
-function normalizeResponsiblesPayload(payload: unknown): TenantCaseResponsibleApiResource[] {
-  return listPayloadRows(payload as ListPayloadShape<TenantCaseResponsibleApiResource>).filter(
-    (item): item is TenantCaseResponsibleApiResource =>
-      Boolean(item) &&
-      typeof item === 'object' &&
-      typeof item.id === 'number' &&
-      typeof item.responsible === 'string',
-  )
-}
 
 function isValidRoomId(roomId: string): boolean {
   const numericId = Number(roomId)
   return Number.isFinite(numericId) && numericId > 0
 }
 
-/**
- * Свободные ответственные для помещения.
- * API-only: в mock возвращает пустой список (UI волны 3).
- */
+/** Свободные ответственные для помещения (`GET …/responsibles` → `payload.data`). Mock — пустой список. */
 export function useTenantCaseResponsibles() {
   const api = useApi()
   const { isMockMode } = useApiConfig()
@@ -60,7 +46,7 @@ export function useTenantCaseResponsibles() {
       const response = await api<TenantCaseResponsiblesApiResponse>(
         `${API_PATHS.broker.tenantCases.responsibles}?${query}`,
       )
-      const nextItems = normalizeResponsiblesPayload(response.payload)
+      const nextItems = response.payload.data
 
       if (seq !== fetchSeq) {
         return nextItems

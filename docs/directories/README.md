@@ -5,7 +5,7 @@
 Для менеджера: **6 справочников уже работают** (просмотр, поиск, создание, правка, удаление). **Бренды** и **Договоры** — заглушки («раздел в разработке»), из меню скрыты. Без бэкенда справочники крутятся на локальных mock-данных.
 
 OpenAPI: [Swagger](https://olimpapi.portalrent.ru/docs/broker#/) · [JSON](https://olimpapi.portalrent.ru/docs/broker.json)
-См. также: [architecture.md](../architecture.md), [broker.md](../broker.md), [testing.md](../testing.md).
+См. также: [architecture.md](../architecture.md), [broker/](../broker/), [testing.md](../testing.md).
 
 ---
 

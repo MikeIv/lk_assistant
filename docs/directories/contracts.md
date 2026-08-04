@@ -4,7 +4,7 @@
 
 Маршрут: `/directories/contracts` (доступен по прямой ссылке) · В меню: нет
 
-См. также: [обзор раздела](./README.md), [юр. лица](./legal-entities.md), [брокер / дела](../broker.md).
+См. также: [обзор раздела](./README.md), [юр. лица](./legal-entities.md), [текущие дела](../broker/current.md).
 
 ---
 

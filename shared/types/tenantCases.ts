@@ -135,12 +135,9 @@ export interface TenantCaseResponsibleApiResource {
 export interface TenantCaseResponsiblesApiResponse {
   success: boolean
   message: string
-  payload:
-    | TenantCaseResponsibleApiResource[]
-    | {
-        data?: TenantCaseResponsibleApiResource[]
-        items?: TenantCaseResponsibleApiResource[]
-      }
+  payload: {
+    data: TenantCaseResponsibleApiResource[]
+  }
 }
 
 export interface TenantCasesListApiResponse {

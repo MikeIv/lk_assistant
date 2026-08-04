@@ -72,7 +72,7 @@ flowchart LR
 ## API
 
 У UI Kit **нет** HTTP API.
-Связь с бэкендом — только в доменных composables разделов ([directories](./directories/), [broker](./broker.md), [auth](./auth.md)).
+Связь с бэкендом — только в доменных composables разделов ([directories](./directories/), [broker](./broker/), [auth](./auth.md)).
 
 ---
 

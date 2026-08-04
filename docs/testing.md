@@ -41,14 +41,14 @@ CI (`develop` / `main`): `lint:all` + `typecheck` + `test:cov` → затем `b
 
 ## Что покрыто сейчас
 
-| Область                      | Файлы                                                                                                                               |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Auth unit                    | `test/unit/jwtPayload`, `cabinetRoleFromJwt`, `loginSchema`, `loginErrors`, `authCrossTab`                                          |
-| Auth nuxt                    | `test/nuxt/useAuth`, `useAuthToken`, `useApi`, `useApiConfig`, `useCabinetRole`, `authMiddleware`                                   |
-| Domain unit (`shared/utils`) | `test/unit/shared/utils/*` — контракты справочников (`*Table`/`*Validation`/`*Query`), reports, calendar, tasks, tenantCases, phone |
-| Domain nuxt                  | `directories.contract`, `directoryForms.contract`, `useTenantCases`, `useTenantCaseForm`, `cabinetNav`, `reportsApiHeaders`         |
-| Components (nuxt + VTU)      | `UiSelect`, `UiCombobox`, `UiPhoneInput`, `UiDateInput`, `UiMultiSelect`, `ReportsTablePagination`, `categoriesTable.contract`      |
-| Helpers                      | `test/helpers/jwt.ts`, `authApi.ts`, `domainApiMock.ts`, `runComposable.ts`, `mountUi.ts`, `test/nuxt/resetAuthClientState.ts`      |
+| Область                      | Файлы                                                                                                                                                                                |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Auth unit                    | `test/unit/jwtPayload`, `cabinetRoleFromJwt`, `loginSchema`, `loginErrors`, `authCrossTab`                                                                                           |
+| Auth nuxt                    | `test/nuxt/useAuth`, `useAuthToken`, `useApi`, `useApiConfig`, `useCabinetRole`, `authMiddleware`                                                                                    |
+| Domain unit (`shared/utils`) | `test/unit/shared/utils/*` — контракты справочников (`*Table`/`*Validation`/`*Query`), reports, calendar, tasks, tenantCases, phone                                                  |
+| Domain nuxt                  | `directories.contract`, `directoryForms.contract`, `useTenantCases`, `useTenantCaseForm`, `useTenantCaseFormOptions`, `useTenantCaseResponsibles`, `cabinetNav`, `reportsApiHeaders` |
+| Components (nuxt + VTU)      | `UiSelect`, `UiCombobox`, `UiPhoneInput`, `UiDateInput`, `UiMultiSelect`, `ReportsTablePagination`, `categoriesTable.contract`, `brokerCurrentTable.contract`                        |
+| Helpers                      | `test/helpers/jwt.ts`, `authApi.ts`, `domainApiMock.ts`, `runComposable.ts`, `mountUi.ts`, `test/nuxt/resetAuthClientState.ts`                                                       |
 
 Flows auth: [auth.md](./auth.md).
 
@@ -109,4 +109,6 @@ Flows auth: [auth.md](./auth.md).
 
 - [architecture.md](./architecture.md) — слои и HTTP
 - [auth.md](./auth.md) — flows, покрытые тестами
+- [broker/](./broker/) — календарь, задачи, [текущие дела](./broker/current.md)
+- [directories/](./directories/) — CRUD справочников
 - [\_template.md](./_template.md) — секция «Тесты» в документах разделов

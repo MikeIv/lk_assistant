@@ -59,13 +59,13 @@ describe('useTenantCaseResponsibles', () => {
     expect(apiMock).not.toHaveBeenCalled()
   })
 
-  it('api: fetches responsibles with room_id and tenant_case_id', async () => {
+  it('api: fetches responsibles from payload.data', async () => {
     mockMode.value = false
     apiMock.mockResolvedValueOnce({
       success: true,
       message: 'OK',
       payload: {
-        items: [
+        data: [
           { id: 1, responsible: 'Петров Иван', name: 'Брокер', surname: 'Петров' },
           { id: 2, responsible: 'Сидорова Анна' },
         ],
@@ -80,20 +80,6 @@ describe('useTenantCaseResponsibles', () => {
     )
     expect(items).toHaveLength(2)
     expect(responsibles.items.value[0]?.responsible).toBe('Петров Иван')
-  })
-
-  it('api: also accepts payload as a bare array', async () => {
-    mockMode.value = false
-    apiMock.mockResolvedValueOnce({
-      success: true,
-      message: 'OK',
-      payload: [{ id: 7, responsible: 'Иванов Михаил' }],
-    })
-
-    const responsibles = mountResponsibles()
-    const items = await responsibles.fetchResponsibles({ roomId: 3 })
-
-    expect(items).toEqual([{ id: 7, responsible: 'Иванов Михаил' }])
   })
 
   it('api: sets error and clears items on failure', async () => {
